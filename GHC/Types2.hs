@@ -27,8 +27,8 @@ data Double = D# Double#
 
 data Ordering = LT | EQ | GT
 
-isTrue# :: T.Bool -> T.Bool
-isTrue# b = b
+isTrue# :: Int# -> T.Bool
+isTrue# = tagToEnum#
 
 char2char :: T.Char -> Char
 char2char = char2char

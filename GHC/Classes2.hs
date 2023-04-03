@@ -116,8 +116,8 @@ instance Eq Word where
 {-# INLINE [1] eqWord #-}
 {-# INLINE [1] neWord #-}
 eqWord, neWord :: Word -> Word -> Bool
-(W# x) `eqWord` (W# y) = isTrue# (x `eqWord#` y)
-(W# x) `neWord` (W# y) = isTrue# (x `neWord#` y)
+(W# x) `eqWord` (W# y) = (x `eqWord#` y)
+(W# x) `neWord` (W# y) = (x `neWord#` y)
 
 -- See GHC.Classes#matching_overloaded_methods_in_rules
 instance Eq Char where
@@ -128,8 +128,8 @@ instance Eq Char where
 {-# INLINE [1] eqChar #-}
 {-# INLINE [1] neChar #-}
 eqChar, neChar :: Char -> Char -> Bool
-(C# x) `eqChar` (C# y) = isTrue# (x `smtEqChar#` y)
-(C# x) `neChar` (C# y) = isTrue# (x `smtNeChar#` y)
+(C# x) `eqChar` (C# y) = (x `smtEqChar#` y)
+(C# x) `neChar` (C# y) = (x `smtNeChar#` y)
 
 instance Eq Float where
     (==) = eqFloat
@@ -137,7 +137,7 @@ instance Eq Float where
 -- See GHC.Classes#matching_overloaded_methods_in_rules
 {-# INLINE [1] eqFloat #-}
 eqFloat :: Float -> Float -> Bool
-(F# x) `eqFloat` (F# y) = isTrue# (x `smtEqFloat#` y)
+(F# x) `eqFloat` (F# y) = (x `smtEqFloat#` y)
 
 instance Eq Double where
     (==) = eqDouble
@@ -145,7 +145,7 @@ instance Eq Double where
 -- See GHC.Classes#matching_overloaded_methods_in_rules
 {-# INLINE [1] eqDouble #-}
 eqDouble :: Double -> Double -> Bool
-(D# x) `eqDouble` (D# y) = isTrue# (x $==## y)
+(D# x) `eqDouble` (D# y) = (x $==## y)
 
 instance Eq Int where
     (==) = eqInt
@@ -155,8 +155,8 @@ instance Eq Int where
 {-# INLINE [1] eqInt #-}
 {-# INLINE [1] neInt #-}
 eqInt, neInt :: Int -> Int -> Bool
-(I# x) `eqInt` (I# y) = isTrue# (x $==# y)
-(I# x) `neInt` (I# y) = isTrue# (x $/=# y)
+(I# x) `eqInt` (I# y) = (x $==# y)
+(I# x) `neInt` (I# y) = (x $/=# y)
 -- 
 -- #if WORD_SIZE_IN_BITS < 64
 -- instance Eq TyCon where
@@ -281,32 +281,32 @@ instance Ord Ordering where
 -- -- instance defines only compare, which takes two primops.  Then
 -- -- '>' uses compare, and therefore takes two primops instead of one.
 instance Ord Char where
-    (C# c1) >  (C# c2) = isTrue# (c1 `gtChar#` c2)
-    (C# c1) >= (C# c2) = isTrue# (c1 `geChar#` c2)
-    (C# c1) <= (C# c2) = isTrue# (c1 `leChar#` c2)
-    (C# c1) <  (C# c2) = isTrue# (c1 `ltChar#` c2)
+    (C# c1) >  (C# c2) = c1 `gtChar#` c2
+    (C# c1) >= (C# c2) = c1 `geChar#` c2
+    (C# c1) <= (C# c2) = c1 `leChar#` c2
+    (C# c1) <  (C# c2) = c1 `ltChar#` c2
 -- 
 instance Ord Float where
     (F# x) `compare` (F# y)
-        = if      isTrue# (x `smtLtFloat#` y) then LT
-          else if isTrue# (x `smtEqFloat#` y) then EQ
+        = if      x `smtLtFloat#` y then LT
+          else if x `smtEqFloat#` y then EQ
           else                                  GT
 -- 
-    (F# x) <  (F# y) = isTrue# (x `smtLtFloat#` y)
-    (F# x) <= (F# y) = isTrue# (x `smtLeFloat#` y)
-    (F# x) >= (F# y) = isTrue# (x `smtGeFloat#` y)
-    (F# x) >  (F# y) = isTrue# (x `smtGtFloat#` y)
+    (F# x) <  (F# y) = (x `smtLtFloat#` y)
+    (F# x) <= (F# y) = (x `smtLeFloat#` y)
+    (F# x) >= (F# y) = (x `smtGeFloat#` y)
+    (F# x) >  (F# y) = (x `smtGtFloat#` y)
 -- 
 instance Ord Double where
     (D# x) `compare` (D# y)
-        = if      isTrue# (x $<##  y) then LT
-          else if isTrue# (x $==## y) then EQ
+        = if      (x $<##  y) then LT
+          else if (x $==## y) then EQ
           else                            GT
 -- 
-    (D# x) <  (D# y) = isTrue# (x $<##  y)
-    (D# x) <= (D# y) = isTrue# (x $<=## y)
-    (D# x) >= (D# y) = isTrue# (x $>=## y)
-    (D# x) >  (D# y) = isTrue# (x $>##  y)
+    (D# x) <  (D# y) = (x $<##  y)
+    (D# x) <= (D# y) = (x $<=## y)
+    (D# x) >= (D# y) = (x $>=## y)
+    (D# x) >  (D# y) = (x $>##  y)
 -- 
 instance Ord Int where
     compare = compareInt
@@ -321,18 +321,18 @@ instance Ord Int where
 {-# INLINE [1] ltInt #-}
 {-# INLINE [1] leInt #-}
 gtInt, geInt, ltInt, leInt :: Int -> Int -> Bool
-(I# x) `gtInt` (I# y) = isTrue# (x $>#  y)
-(I# x) `geInt` (I# y) = isTrue# (x $>=# y)
-(I# x) `ltInt` (I# y) = isTrue# (x $<#  y)
-(I# x) `leInt` (I# y) = isTrue# (x $<=# y)
+(I# x) `gtInt` (I# y) = (x $>#  y)
+(I# x) `geInt` (I# y) = (x $>=# y)
+(I# x) `ltInt` (I# y) = (x $<#  y)
+(I# x) `leInt` (I# y) = (x $<=# y)
 -- 
 compareInt :: Int -> Int -> Ordering
 (I# x#) `compareInt` (I# y#) = compareInt# x# y#
 -- 
 compareInt# :: Int# -> Int# -> Ordering
 compareInt# x# y#
-    | isTrue# (x# $<#  y#) = LT
-    | isTrue# (x# $==# y#) = EQ
+    | (x# $<#  y#) = LT
+    | (x# $==# y#) = EQ
     | True                = GT
 -- 
 instance Ord Word where
@@ -348,18 +348,18 @@ instance Ord Word where
 {-# INLINE [1] ltWord #-}
 {-# INLINE [1] leWord #-}
 gtWord, geWord, ltWord, leWord :: Word -> Word -> Bool
-(W# x) `gtWord` (W# y) = isTrue# (x `gtWord#` y)
-(W# x) `geWord` (W# y) = isTrue# (x `geWord#` y)
-(W# x) `ltWord` (W# y) = isTrue# (x `ltWord#` y)
-(W# x) `leWord` (W# y) = isTrue# (x `leWord#` y)
+(W# x) `gtWord` (W# y) = (x `gtWord#` y)
+(W# x) `geWord` (W# y) = (x `geWord#` y)
+(W# x) `ltWord` (W# y) = (x `ltWord#` y)
+(W# x) `leWord` (W# y) = (x `leWord#` y)
 -- 
 compareWord :: Word -> Word -> Ordering
 (W# x#) `compareWord` (W# y#) = compareWord# x# y#
 -- 
 compareWord# :: Word# -> Word# -> Ordering
 compareWord# x# y#
-    | isTrue# (x# `ltWord#` y#) = LT
-    | isTrue# (x# `eqWord#` y#) = EQ
+    | (x# `ltWord#` y#) = LT
+    | (x# `eqWord#` y#) = EQ
     | True                      = GT
 -- 
 -- -- OK, so they're technically not part of a class...:

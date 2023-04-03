@@ -492,7 +492,7 @@ x `compareInteger` y =
 -- 
 {-# NOINLINE eqInteger# #-}
 eqInteger# :: Integer -> Integer -> Bool
-(Z# x) `eqInteger#` (Z# y) = isTrue# (x $==# y)
+(Z# x) `eqInteger#` (Z# y) = (x $==# y)
 -- eqInteger# :: Integer -> Integer -> Int#
 -- x `eqInteger#` y = case x `compareInteger` y of
 --                         EQ -> 1#
@@ -500,7 +500,7 @@ eqInteger# :: Integer -> Integer -> Bool
 -- 
 {-# NOINLINE neqInteger# #-}
 neqInteger# :: Integer -> Integer -> Bool
-(Z# x) `neqInteger#` (Z# y) = isTrue# (x $==# y)
+(Z# x) `neqInteger#` (Z# y) = (x $==# y)
 -- neqInteger# = neqInteger#
 -- neqInteger# :: Integer -> Integer -> Int#
 -- x `neqInteger#` y = case x `compareInteger` y of
@@ -510,8 +510,8 @@ neqInteger# :: Integer -> Integer -> Bool
 {-# INLINE eqInteger  #-}
 {-# INLINE neqInteger #-}
 eqInteger, neqInteger :: Integer -> Integer -> Bool
-eqInteger  a b = isTrue# (a `eqInteger#`  b)
-neqInteger a b = isTrue# (a `neqInteger#` b)
+eqInteger  a b = (a `eqInteger#`  b)
+neqInteger a b = (a `neqInteger#` b)
 -- 
 instance  Eq Integer  where
     (==) = eqInteger
@@ -556,10 +556,10 @@ geInteger# :: Integer -> Integer -> Bool
 {-# INLINE geInteger #-}
 {-# INLINE gtInteger #-}
 leInteger, gtInteger, ltInteger, geInteger :: Integer -> Integer -> Bool
-leInteger a b = isTrue# (a `leInteger#` b)
-gtInteger a b = isTrue# (a `gtInteger#` b)
-ltInteger a b = isTrue# (a `ltInteger#` b)
-geInteger a b = isTrue# (a `geInteger#` b)
+leInteger a b = (a `leInteger#` b)
+gtInteger a b = (a `gtInteger#` b)
+ltInteger a b = (a `ltInteger#` b)
+geInteger a b = (a `geInteger#` b)
 -- 
 instance Ord Integer where
     (<=) = leInteger

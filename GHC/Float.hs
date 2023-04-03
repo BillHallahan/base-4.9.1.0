@@ -1120,10 +1120,10 @@ fromIntegerFloat :: Integer -> Float
 fromIntegerFloat i = F# (floatFromInteger i)
 -- 
 gtFloat, geFloat, ltFloat, leFloat :: Float -> Float -> Bool
-gtFloat     (F# x) (F# y) = isTrue# (smtGtFloat# x y)
-geFloat     (F# x) (F# y) = isTrue# (smtGeFloat# x y)
-ltFloat     (F# x) (F# y) = isTrue# (smtLtFloat# x y)
-leFloat     (F# x) (F# y) = isTrue# (smtLeFloat# x y)
+gtFloat     (F# x) (F# y) = (smtGtFloat# x y)
+geFloat     (F# x) (F# y) = (smtGeFloat# x y)
+ltFloat     (F# x) (F# y) = (smtLtFloat# x y)
+leFloat     (F# x) (F# y) = (smtLeFloat# x y)
 -- 
 expFloat, logFloat, sqrtFloat :: Float -> Float
 -- sinFloat, cosFloat, tanFloat  :: Float -> Float
@@ -1195,10 +1195,10 @@ fromIntegerDouble i = D# (doubleFromInteger i)
 
 -- 
 gtDouble, geDouble, leDouble, ltDouble :: Double -> Double -> Bool
-gtDouble    (D# x) (D# y) = isTrue# (x $>##  y)
-geDouble    (D# x) (D# y) = isTrue# (x $>=## y)
-ltDouble    (D# x) (D# y) = isTrue# (x $<##  y)
-leDouble    (D# x) (D# y) = isTrue# (x $<=## y)
+gtDouble    (D# x) (D# y) = (x $>##  y)
+geDouble    (D# x) (D# y) = (x $>=## y)
+ltDouble    (D# x) (D# y) = (x $<##  y)
+leDouble    (D# x) (D# y) = (x $<=## y)
 -- 
 -- double2Float :: Double -> Float
 -- double2Float (D# x) = F# (double2Float# x)
