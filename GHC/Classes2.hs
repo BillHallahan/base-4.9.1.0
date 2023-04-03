@@ -128,7 +128,7 @@ instance Eq Char where
 {-# INLINE [1] eqChar #-}
 {-# INLINE [1] neChar #-}
 eqChar, neChar :: Char -> Char -> Bool
-(C# x) `eqChar` (C# y) = isTrue# (x `smtEtiqChar#` y)
+(C# x) `eqChar` (C# y) = isTrue# (x `smtEqChar#` y)
 (C# x) `neChar` (C# y) = isTrue# (x `smtNeChar#` y)
 
 instance Eq Float where
