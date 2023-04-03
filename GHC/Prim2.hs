@@ -8,6 +8,7 @@
 
 module GHC.Prim2
   ( module GHC.Prim2
+  , module GHC.PrimSMT
 --   , module GHC.Prim
   , Int#, Double#, Char#, Float#, Word#, TYPE
   , coerce
@@ -18,7 +19,9 @@ import GHC.Prim
   , coerce)
 
 import GHC.Types
-  (Bool, Char)
+  (Bool (..), Char)
+
+import GHC.PrimSMT
 
 -- import GHC.Prim hiding
 --     ((+#), (-#), (*#), negateInt#,
@@ -55,23 +58,35 @@ negateInt# = negateInt#
 
 -- Int#
 
-(==#) :: Int# -> Int# -> Bool
-(==#) = (==#)
+(==#) :: Int# -> Int# -> Int#
+x ==# y = case x $==# y of
+            True -> 1#
+            False -> 0#
 
-(/=#) :: Int# -> Int# -> Bool
-(/=#) = (/=#)
+(/=#) :: Int# -> Int# -> Int#
+x /=# y = case x $/=# y of
+            True -> 1#
+            False -> 0#
 
-(>#) :: Int# -> Int# -> Bool
-(>#) = (>#)
+(>#) :: Int# -> Int# -> Int#
+x ># y = case x $># y of
+            True -> 1#
+            False -> 0#
 
-(>=#) :: Int# -> Int# -> Bool
-(>=#) = (>=#)
+(>=#) :: Int# -> Int# -> Int#
+x >=# y = case x $>=# y of
+            True -> 1#
+            False -> 0#
 
-(<#) :: Int# -> Int# -> Bool
-(<#) = (<#)
+(<#) :: Int# -> Int# -> Int#
+x <# y = case x $<# y of
+            True -> 1#
+            False -> 0#
 
-(<=#) :: Int# -> Int# -> Bool
-(<=#) = (<=#)
+(<=#) :: Int# -> Int# -> Int#
+x <=# y = case x $<=# y of
+            True -> 1#
+            False -> 0#
 
 quotRemInt# :: Int# -> Int# -> (# Int#, Int# #)
 quotRemInt# x y = (# quotInt# x y, remInt# x y #)
@@ -96,43 +111,70 @@ remInt# = remInt#
 (/##) :: Double# -> Double# -> Double#
 (/##) = (/##)
 
-(==##) :: Double# -> Double# -> Bool
-(==##) = (==##)
+(==##) :: Double# -> Double# -> Int#
+x ==## y = case x $==## y of
+            True -> 1#
+            False -> 0#
 
-(/=##) :: Double# -> Double# -> Bool
-(/=##) = (/=##)
+(/=##) :: Double# -> Double# -> Int#
+x /=## y = case x $/=## y of
+            True -> 1#
+            False -> 0#
 
-(>##) :: Double# -> Double# -> Bool
-(>##) = (>##)
+(>##) :: Double# -> Double# -> Int#
+x >## y = case x $>## y of
+            True -> 1#
+            False -> 0#
 
-(>=##) :: Double# -> Double# -> Bool
-(>=##) = (>=##)
+(>=##) :: Double# -> Double# -> Int#
+x >=## y = case x $>=## y of
+            True -> 1#
+            False -> 0#
 
-(<##) :: Double# -> Double# -> Bool
-(<##) = (<##)
+(<##) :: Double# -> Double# -> Int#
+x <## y = case x $<## y of
+            True -> 1#
+            False -> 0#
 
-(<=##) :: Double# -> Double# -> Bool
-(<=##) = (<=##)
+(<=##) :: Double# -> Double# -> Int#
+x <=## y = case x $<=## y of
+            True -> 1#
+            False -> 0#
 
 negateDouble# :: Double# -> Double#
 negateDouble# = negateDouble#
 
 -- Float#
 
-eqFloat# :: Float# -> Float# -> Bool
-eqFloat# = eqFloat#
+eqFloat# :: Float# -> Float# -> Int#
+eqFloat# x y = case x `smtEqFloat#` y of
+            True -> 1#
+            False -> 0#
 
-gtFloat# :: Float# -> Float# -> Bool
-gtFloat# = gtFloat#
+neFloat# :: Float# -> Float# -> Int#
+neFloat# x y = case x `smtNeFloat#` y of
+            True -> 1#
+            False -> 0#
 
-geFloat# :: Float# -> Float# -> Bool
-geFloat# = geFloat#
+gtFloat# :: Float# -> Float# -> Int#
+gtFloat# x y = case x `smtGtFloat#` y of
+            True -> 1#
+            False -> 0#
 
-ltFloat# :: Float# -> Float# -> Bool
-ltFloat# = ltFloat#
+geFloat# :: Float# -> Float# -> Int#
+geFloat# x y = case x `smtGeFloat#` y of
+            True -> 1#
+            False -> 0#
 
-leFloat# :: Float# -> Float# -> Bool
-leFloat# = leFloat#
+ltFloat# :: Float# -> Float# -> Int#
+ltFloat# x y = case x `smtLtFloat#` y of
+            True -> 1#
+            False -> 0#
+
+leFloat# :: Float# -> Float# -> Int#
+leFloat# x y = case x `smtLeFloat#` y of
+            True -> 1#
+            False -> 0#
 
 negateFloat# :: Float# -> Float#
 negateFloat# = negateFloat#
@@ -190,11 +232,15 @@ divideFloat# = divideFloat#
 
 -- Char#
 
-eqChar# :: Char# -> Char# -> Bool
-eqChar# = eqChar#
+eqChar# :: Char# -> Char# -> Int#
+eqChar# x y = case x `smtEqChar#` y of
+            True -> 1#
+            False -> 0#
 
-neChar# :: Char# -> Char# -> Bool
-neChar# = neChar#
+neChar# :: Char# -> Char# -> Int#
+neChar# x y = case x `smtNeChar#` y of
+            True -> 1#
+            False -> 0#
 
 gtChar# :: Char# -> Char# -> Bool
 gtChar# = gtChar#

@@ -513,10 +513,10 @@ instance  Enum Int  where
 eftInt :: Int# -> Int# -> [Int]
 -- eftInt = eftInt
 -- -- [x1..x2]
-eftInt x0 y | (x0 ># y) = []
+eftInt x0 y | (x0 $># y) = []
             | otherwise         = go x0
                where
-                 go x = I# x : if (x ==# y)
+                 go x = I# x : if (x $==# y)
                                then []
                                else go (x +# 1#)
 -- 

@@ -492,7 +492,7 @@ x `compareInteger` y =
 -- 
 {-# NOINLINE eqInteger# #-}
 eqInteger# :: Integer -> Integer -> Bool
-(Z# x) `eqInteger#` (Z# y) = isTrue# (x ==# y)
+(Z# x) `eqInteger#` (Z# y) = isTrue# (x $==# y)
 -- eqInteger# :: Integer -> Integer -> Int#
 -- x `eqInteger#` y = case x `compareInteger` y of
 --                         EQ -> 1#
@@ -500,7 +500,7 @@ eqInteger# :: Integer -> Integer -> Bool
 -- 
 {-# NOINLINE neqInteger# #-}
 neqInteger# :: Integer -> Integer -> Bool
-(Z# x) `neqInteger#` (Z# y) = isTrue# (x ==# y)
+(Z# x) `neqInteger#` (Z# y) = isTrue# (x $==# y)
 -- neqInteger# = neqInteger#
 -- neqInteger# :: Integer -> Integer -> Int#
 -- x `neqInteger#` y = case x `compareInteger` y of
@@ -519,7 +519,7 @@ instance  Eq Integer  where
 -- 
 {-# NOINLINE ltInteger# #-}
 ltInteger# :: Integer -> Integer -> Bool
-(Z# x) `ltInteger#` (Z# y) = x <# y
+(Z# x) `ltInteger#` (Z# y) = x $<# y
 -- ltInteger# :: Integer -> Integer -> Int#
 -- x `ltInteger#` y = case x `compareInteger` y of
 --                         LT -> 1#
@@ -527,7 +527,7 @@ ltInteger# :: Integer -> Integer -> Bool
 -- 
 {-# NOINLINE gtInteger# #-}
 gtInteger# :: Integer -> Integer -> Bool
-(Z# x) `gtInteger#` (Z# y) = x ># y
+(Z# x) `gtInteger#` (Z# y) = x $># y
 -- gtInteger# :: Integer -> Integer -> Int#
 -- x `gtInteger#` y = case x `compareInteger` y of
 --                         GT -> 1#
@@ -535,7 +535,7 @@ gtInteger# :: Integer -> Integer -> Bool
 -- 
 {-# NOINLINE leInteger# #-}
 leInteger# :: Integer -> Integer -> Bool
-(Z# x) `leInteger#` (Z# y) = x <=# y
+(Z# x) `leInteger#` (Z# y) = x $<=# y
 -- leInteger# = leInteger#
 -- leInteger# :: Integer -> Integer -> Int#
 -- x `leInteger#` y = case x `compareInteger` y of
@@ -544,7 +544,7 @@ leInteger# :: Integer -> Integer -> Bool
 -- 
 {-# NOINLINE geInteger# #-}
 geInteger# :: Integer -> Integer -> Bool
-(Z# x) `geInteger#` (Z# y) = x >=# y
+(Z# x) `geInteger#` (Z# y) = x $>=# y
 -- geInteger# = geInteger#
 -- geInteger# :: Integer -> Integer -> Int#
 -- x `geInteger#` y = case x `compareInteger` y of
