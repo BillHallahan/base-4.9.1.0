@@ -39,6 +39,8 @@ import GHC.Num (Num(..))
 -- import GHC.Integer (Integer)
 import GHC.Integer2
 import GHC.Prim2
+
+import GHC.Stack.Types
 -- 
 infixl 9  !!
 infix  4 `elem`, `notElem`
@@ -48,7 +50,11 @@ infix  4 `elem`, `notElem`
 -- --------------------------------------------------------------
 -- 
 -- -- | Extract the first element of a list, which must be non-empty.
+#if MIN_VERSION_GLASGOW_HASKELL(9,4,0,0)
+head                    :: HasCallStack => [a] -> a
+#else
 head                    :: [a] -> a
+#endif
 head (x:_)              =  x
 head []                 =  badHead
 {-# NOINLINE [1] head #-}
@@ -76,13 +82,21 @@ uncons []               = Nothing
 uncons (x:xs)           = Just (x, xs)
 -- 
 -- -- | Extract the elements after the head of a list, which must be non-empty.
+#if MIN_VERSION_GLASGOW_HASKELL(9,4,0,0)
+tail                    :: HasCallStack => [a] -> [a]
+#else
 tail                    :: [a] -> [a]
+#endif
 tail (_:xs)             =  xs
 -- tail []                 =  errorEmptyList "tail"
 tail []                 = errorEmptyList (map char2char "tail")
 -- 
 -- -- | Extract the last element of a list, which must be finite and non-empty.
+#if MIN_VERSION_GLASGOW_HASKELL(9,4,0,0)
 last                    :: [a] -> a
+#else
+last                    :: HasCallStack => [a] -> a
+#endif
 -- #ifdef USE_REPORT_PRELUDE
 last [x]                =  x
 last (_:xs)             =  last xs
@@ -102,7 +116,11 @@ last []                 =  errorEmptyList (map char2char "last")
 -- 
 -- -- | Return all the elements of a list except the last one.
 -- -- The list must be non-empty.
+#if MIN_VERSION_GLASGOW_HASKELL(9,4,0,0)
+init                    :: HasCallStack => [a] -> [a]
+#else
 init                    :: [a] -> [a]
+#endif
 -- #ifdef USE_REPORT_PRELUDE
 init [x]                =  []
 init (x:xs)             =  x : init xs
@@ -276,12 +294,12 @@ scanl                   = scanlGo
                                x:xs -> scanlGo f (f q x) xs)
 -- 
 -- -- Note [scanl rewrite rules]
-{-# RULES
-"scanl"  [~1] forall f a bs . scanl f a bs =
-  build (\c n -> a `c` foldr (scanlFB f c) (constScanl n) bs a)
-"scanlList" [1] forall f (a::a) bs .
-    foldr (scanlFB f (:)) (constScanl []) bs a = tail (scanl f a bs)
- #-}
+-- {-# RULES
+-- "scanl"  [~1] forall f a bs . scanl f a bs =
+--   build (\c n -> a `c` foldr (scanlFB f c) (constScanl n) bs a)
+-- "scanlList" [1] forall f (a::a) bs .
+--     foldr (scanlFB f (:)) (constScanl []) bs a = tail (scanl f a bs)
+--  #-}
 -- 
 {-# INLINE [0] scanlFB #-}
 scanlFB :: (b -> a -> b) -> (b -> c -> c) -> a -> (b -> c) -> b -> c
@@ -314,12 +332,12 @@ scanl' = scanlGo'
                             x:xs -> scanlGo' f (f q x) xs)
 -- 
 -- -- Note [scanl rewrite rules]
-{-# RULES
-"scanl'"  [~1] forall f a bs . scanl' f a bs =
-  build (\c n -> a `c` foldr (scanlFB' f c) (flipSeqScanl' n) bs a)
-"scanlList'" [1] forall f a bs .
-    foldr (scanlFB' f (:)) (flipSeqScanl' []) bs a = tail (scanl' f a bs)
- #-}
+-- {-# RULES
+-- "scanl'"  [~1] forall f a bs . scanl' f a bs =
+--   build (\c n -> a `c` foldr (scanlFB' f c) (flipSeqScanl' n) bs a)
+-- "scanlList'" [1] forall f a bs .
+--     foldr (scanlFB' f (:)) (flipSeqScanl' []) bs a = tail (scanl' f a bs)
+--  #-}
 -- 
 {-# INLINE [0] scanlFB' #-}
 scanlFB' :: (b -> a -> b) -> (b -> c -> c) -> a -> (b -> c) -> b -> c
@@ -486,7 +504,11 @@ replicate n x           =  take n (repeat x)
 -- -- the infinite repetition of the original list.  It is the identity
 -- -- on infinite lists.
 -- 
+#if MIN_VERSION_GLASGOW_HASKELL(9,4,0,0)
+cycle                   :: HasCallStack => [a] -> [a]
+#else
 cycle                   :: [a] -> [a]
+#endif
 -- cycle []                = errorEmptyList "cycle"
 cycle []                = errorEmptyList (map char2char "cycle")
 cycle xs                = xs' where xs' = xs ++ xs'
@@ -855,7 +877,11 @@ concat = foldr (++) []
 -- -- | List index (subscript) operator, starting from 0.
 -- -- It is an instance of the more general 'Data.List.genericIndex',
 -- -- which takes an index of any integral type.
+#if MIN_VERSION_GLASGOW_HASKELL(9,4,0,0)
+(!!)                    :: HasCallStack => [a] -> Int -> a
+#else
 (!!)                    :: [a] -> Int -> a
+#endif
 -- #ifdef USE_REPORT_PRELUDE
 -- xs     !! n | n < 0 =  errorWithoutStackTrace "Prelude.!!: negative index"
 xs     !! n | n < (fromInteger zeroInteger) =  errorWithoutStackTrace (map char2char "Prelude.!!: negative index")

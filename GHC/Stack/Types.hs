@@ -51,7 +51,7 @@ module GHC.Stack.Types (
 -- -}
 -- 
 -- import GHC.Classes (Eq)
-import GHC.Classes2 (Eq)
+import GHC.Classes2 (Eq (..), (&&))
 -- import GHC.Types (Char, Int)
 import GHC.Types2 (Char, Int)
 -- 
@@ -217,4 +217,14 @@ data SrcLoc = SrcLoc
   , srcLocStartCol  :: Int
   , srcLocEndLine   :: Int
   , srcLocEndCol    :: Int
-  } deriving Eq
+  }
+
+instance Eq SrcLoc where
+  src1 == src2 =
+      srcLocPackage src1 == srcLocPackage src2
+   && srcLocModule src1 == srcLocModule src2
+   && srcLocFile src1 == srcLocFile src2
+   && srcLocStartLine src1 == srcLocStartLine src2
+   && srcLocStartCol src1 == srcLocStartCol src2
+   && srcLocEndLine src1 == srcLocEndLine src2
+   && srcLocEndCol src1 == srcLocEndCol src2
