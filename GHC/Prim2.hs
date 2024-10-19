@@ -27,6 +27,7 @@ import GHC.Types
 #else
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE TypeOperators #-}
 import GHC.Types
   (Bool (..), Char, RuntimeRep (..))
 #endif
