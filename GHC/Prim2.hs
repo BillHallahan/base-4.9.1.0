@@ -7,6 +7,9 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE UnboxedTuples #-}
 {-# OPTIONS_GHC -fno-warn-redundant-constraints #-}
+{-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE KindSignatures #-}
+
 
 module GHC.Prim2
   ( module GHC.Prim2
