@@ -7,6 +7,9 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE UnboxedTuples #-}
 {-# OPTIONS_GHC -fno-warn-redundant-constraints #-}
+{-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE TypeOperators #-}
 
 
 module GHC.Prim2
@@ -25,9 +28,6 @@ import GHC.Prim
 import GHC.Types
   (Bool (..), Char, Levity, RuntimeRep (..))
 #else
-{-# LANGUAGE PolyKinds #-}
-{-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE TypeOperators #-}
 import GHC.Types
   (Bool (..), Char, RuntimeRep (..))
 #endif
