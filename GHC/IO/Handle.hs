@@ -1,10 +1,10 @@
--- {-# LANGUAGE Trustworthy #-}
--- {-# LANGUAGE CPP
---            , NoImplicitPrelude
---            , RecordWildCards
---            , NondecreasingIndentation
---   #-}
--- {-# OPTIONS_GHC -Wno-unused-matches #-}
+{-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE CPP
+           , NoImplicitPrelude
+           , RecordWildCards
+           , NondecreasingIndentation
+  #-}
+{-# OPTIONS_GHC -Wno-unused-matches #-}
 -- 
 -- -----------------------------------------------------------------------------
 -- -- |
@@ -20,8 +20,8 @@
 -- --
 -- -----------------------------------------------------------------------------
 -- 
--- module GHC.IO.Handle (
---    Handle,
+module GHC.IO.Handle (
+   Handle,
 --    BufferMode(..),
 -- 
 --    mkFileHandle, mkDuplexHandle,
@@ -43,20 +43,24 @@
 -- 
 --    hShow,
 -- 
---    hWaitForInput, hGetChar, hGetLine, hGetContents, hPutChar, hPutStr,
+--    hWaitForInput,
+      hGetChar
+    -- , hGetLine
+    , hGetContents
+    , hPutChar, hPutStr,
 -- 
 --    hGetBuf, hGetBufNonBlocking, hPutBuf, hPutBufNonBlocking
---  ) where
+ ) where
 -- 
--- import GHC.IO
+import GHC.IO
 -- import GHC.IO.Exception
 -- import GHC.IO.Encoding
 -- import GHC.IO.Buffer
 -- import GHC.IO.BufferedIO ( BufferedIO )
 -- import GHC.IO.Device as IODevice
--- import GHC.IO.Handle.Types
+import GHC.IO.Handle.Types
 -- import GHC.IO.Handle.Internals
--- import GHC.IO.Handle.Text
+import GHC.IO.Handle.Text
 -- import qualified GHC.IO.BufferedIO as Buffered
 -- 
 -- import GHC.Base

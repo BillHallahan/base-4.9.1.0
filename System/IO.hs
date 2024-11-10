@@ -43,7 +43,7 @@ module System.IO (
 --     -- | Three handles are allocated during program initialisation,
 --     -- and are initially open.
 -- 
---     stdin, stdout, stderr,
+    stdin, stdout, stderr,
 -- 
 --     -- * Opening and closing files
 -- 
@@ -121,24 +121,24 @@ module System.IO (
 -- 
 --     hWaitForInput,
 --     hReady,
---     hGetChar,
+    hGetChar,
 --     hGetLine,
 --     hLookAhead,
---     hGetContents,
+    hGetContents,
 -- 
 --     -- ** Text output
 -- 
---     hPutChar,
---     hPutStr,
---     hPutStrLn,
+    hPutChar,
+    hPutStr,
+    hPutStrLn,
 --     hPrint,
 -- 
 --     -- ** Special cases for standard input and output
 -- 
 --     -- | These functions are also exported by the "Prelude".
 -- 
---     interact,
---     putChar,
+    interact,
+    putChar,
     putStr,
     putStrLn,
     print,
@@ -237,37 +237,35 @@ import GHC.Base
 -- import GHC.List
 import GHC.IO hiding ( bracket, onException )
 -- import GHC.IO.IOMode
--- import GHC.IO.Handle.FD
+import GHC.IO.Handle.FD
 -- import qualified GHC.IO.FD as FD
--- import GHC.IO.Handle
--- import GHC.IO.Handle.Text ( hGetBufSome, hPutStrLn )
+import GHC.IO.Handle
+import GHC.IO.Handle.Text ( {- hGetBufSome, -} hPutStr, hPutStrLn )
 -- import GHC.IO.Exception ( userError )
 -- import GHC.IO.Encoding
 import Text.Read
 import GHC.Show
 -- import GHC.MVar
 -- 
--- -- -----------------------------------------------------------------------------
--- -- Standard IO
--- 
--- -- | Write a character to the standard output device
--- -- (same as 'hPutChar' 'stdout').
--- 
--- putChar         :: Char -> IO ()
--- putChar c       =  hPutChar stdout c
+-- -----------------------------------------------------------------------------
+-- Standard IO
+
+-- | Write a character to the standard output device
+-- (same as 'hPutChar' 'stdout').
+
+putChar         :: Char -> IO ()
+putChar c       =  hPutChar stdout c
 -- 
 -- -- | Write a string to the standard output device
 -- -- (same as 'hPutStr' 'stdout').
 -- 
 putStr          :: String -> IO ()
--- putStr s        =  hPutStr stdout s
-putStr !_ = return ()
+putStr s        =  hPutStr stdout s
 -- 
 -- -- | The same as 'putStr', but adds a newline character.
 -- 
 putStrLn        :: String -> IO ()
--- putStrLn s      =  hPutStrLn stdout s
-putStrLn !_ = return ()
+putStrLn s      =  hPutStrLn stdout s
 -- 
 -- -- | The 'print' function outputs a value of any printable type to the
 -- -- standard output device.
@@ -281,8 +279,7 @@ putStrLn !_ = return ()
 -- -- > main = print ([(n, 2^n) | n <- [0..19]])
 -- 
 print           :: Show a => a -> IO ()
--- print x         =  putStrLn (show x)
-print !_ = return ()
+print x         =  putStrLn (show x)
 -- 
 -- -- | Read a character from the standard input device
 -- -- (same as 'hGetChar' 'stdin').
@@ -295,23 +292,23 @@ print !_ = return ()
 -- 
 -- getLine         :: IO String
 -- getLine         =  hGetLine stdin
--- 
--- -- | The 'getContents' operation returns all user input as a single string,
--- -- which is read lazily as it is needed
--- -- (same as 'hGetContents' 'stdin').
--- 
--- getContents     :: IO String
--- getContents     =  hGetContents stdin
--- 
--- -- | The 'interact' function takes a function of type @String->String@
--- -- as its argument.  The entire input from the standard input device is
--- -- passed to this function as its argument, and the resulting string is
--- -- output on the standard output device.
--- 
--- interact        ::  (String -> String) -> IO ()
--- interact f      =   do s <- getContents
---                        putStr (f s)
--- 
+
+-- | The 'getContents' operation returns all user input as a single string,
+-- which is read lazily as it is needed
+-- (same as 'hGetContents' 'stdin').
+
+getContents     :: IO String
+getContents     =  hGetContents stdin
+
+-- | The 'interact' function takes a function of type @String->String@
+-- as its argument.  The entire input from the standard input device is
+-- passed to this function as its argument, and the resulting string is
+-- output on the standard output device.
+
+interact        ::  (String -> String) -> IO ()
+interact f      =   do s <- getContents
+                       putStr (f s)
+
 -- -- | The 'readFile' function reads a file and
 -- -- returns the contents of the file as a string.
 -- -- The file is read lazily, on demand, as with 'getContents'.

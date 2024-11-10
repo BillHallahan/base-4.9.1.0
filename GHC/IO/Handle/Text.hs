@@ -1,14 +1,14 @@
--- {-# LANGUAGE Trustworthy #-}
--- {-# LANGUAGE CPP
---            , NoImplicitPrelude
---            , RecordWildCards
---            , BangPatterns
---            , NondecreasingIndentation
---            , MagicHash
---   #-}
--- {-# OPTIONS_GHC -Wno-name-shadowing #-}
--- {-# OPTIONS_GHC -Wno-unused-matches #-}
--- {-# OPTIONS_HADDOCK hide #-}
+{-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE CPP
+           , NoImplicitPrelude
+           , RecordWildCards
+           , BangPatterns
+           , NondecreasingIndentation
+           , MagicHash
+  #-}
+{-# OPTIONS_GHC -Wno-name-shadowing #-}
+{-# OPTIONS_GHC -Wno-unused-matches #-}
+{-# OPTIONS_HADDOCK hide #-}
 -- 
 -- -----------------------------------------------------------------------------
 -- -- |
@@ -24,20 +24,27 @@
 -- --
 -- -----------------------------------------------------------------------------
 -- 
--- module GHC.IO.Handle.Text (
---         hWaitForInput, hGetChar, hGetLine, hGetContents, hPutChar, hPutStr,
+module GHC.IO.Handle.Text (
+        -- hWaitForInput,
+        hGetChar,
+        -- , hGetLine,
+        hGetContents,
+        hPutChar,
+        hPutStr,
 --         commitBuffer',       -- hack, see below
 --         hGetBuf, hGetBufSome, hGetBufNonBlocking, hPutBuf, hPutBufNonBlocking,
---         memcpy, hPutStrLn,
---     ) where
+--         memcpy,
+        hPutStrLn
+    ) where
 -- 
--- import GHC.IO
+import GHC.IO
+import GHC.IO.Handle.FD
 -- import GHC.IO.FD
 -- import GHC.IO.Buffer
 -- import qualified GHC.IO.BufferedIO as Buffered
 -- import GHC.IO.Exception
 -- import GHC.Exception
--- import GHC.IO.Handle.Types
+import GHC.IO.Handle.Types
 -- import GHC.IO.Handle.Internals
 -- import qualified GHC.IO.Device as IODevice
 -- import qualified GHC.IO.Device as RawIO
@@ -51,11 +58,12 @@
 -- import Data.Maybe
 -- 
 -- import GHC.IORef
--- import GHC.Base
+import GHC.Base
 -- import GHC.Real
 -- import GHC.Num
 -- import GHC.Show
 -- import GHC.List
+import Unsafe.Symbolic
 -- 
 -- -- ---------------------------------------------------------------------------
 -- -- Simple input operations
@@ -128,8 +136,14 @@
 -- --
 -- --  * 'isEOFError' if the end of file has been reached.
 -- 
--- hGetChar :: Handle -> IO Char
--- hGetChar handle =
+hGetChar :: Handle -> IO Char
+hGetChar handle = do
+    pos <- g2GetPos handle
+    case pos of
+        [] -> error "hGetChar: end of file"
+        (x:xs) -> do
+            g2SetPos xs handle
+            return x
 --   wantReadableHandle_ "hGetChar" handle $ \handle_@Handle__{..} -> do
 -- 
 --   -- buffering mode makes no difference: we just read whatever is available
@@ -374,7 +388,14 @@
 -- --
 -- --  * 'isEOFError' if the end of file has been reached.
 -- 
--- hGetContents :: Handle -> IO String
+hGetContents :: Handle -> IO String
+hGetContents h = do
+    pos <- g2GetPos h
+    case pos of
+        [] -> error "hGetContents: end of file"
+        _ -> do
+            g2SetPos [] h
+            return pos
 -- hGetContents handle =
 --    wantReadableHandle "hGetContents" handle $ \handle_ -> do
 --       xs <- lazyRead handle
@@ -466,7 +487,8 @@
 -- --
 -- --  * 'isPermissionError' if another system resource limit would be exceeded.
 -- 
--- hPutChar :: Handle -> Char -> IO ()
+hPutChar :: Handle -> Char -> IO ()
+hPutChar h c = g2PutChar c h
 -- hPutChar handle c = do
 --     c `seq` return ()
 --     wantWritableHandle "hPutChar" handle $ \ handle_  -> do
@@ -527,11 +549,16 @@
 -- --
 -- --  * 'isPermissionError' if another system resource limit would be exceeded.
 -- 
--- hPutStr :: Handle -> String -> IO ()
+hPutStr :: Handle -> String -> IO ()
+hPutStr h [] = return ()
+hPutStr h (x:xs) = do
+    hPutChar h x
+    hPutStr h xs
 -- hPutStr handle str = hPutStr' handle str False
 -- 
 -- -- | The same as 'hPutStr', but adds a newline character.
--- hPutStrLn :: Handle -> String -> IO ()
+hPutStrLn :: Handle -> String -> IO ()
+hPutStrLn h s = hPutStr h (s ++ "\n")
 -- hPutStrLn handle str = hPutStr' handle str True
 --   -- An optimisation: we treat hPutStrLn specially, to avoid the
 --   -- overhead of a single putChar '\n', which is quite high now that we

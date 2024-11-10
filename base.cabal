@@ -301,6 +301,7 @@ Library
         Text.Show
         Text.Show.Functions
         Unsafe.Coerce
+        Unsafe.Symbolic
 
     other-modules:
         Control.Monad.ST.Imp

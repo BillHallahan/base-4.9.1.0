@@ -1,5 +1,5 @@
--- {-# LANGUAGE Trustworthy #-}
--- {-# LANGUAGE CPP, NoImplicitPrelude #-}
+{-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE CPP, NoImplicitPrelude #-}
 -- 
 -- -----------------------------------------------------------------------------
 -- -- |
@@ -15,25 +15,26 @@
 -- --
 -- -----------------------------------------------------------------------------
 -- 
--- module GHC.IO.Handle.FD ( 
---   stdin, stdout, stderr,
+module GHC.IO.Handle.FD ( 
+  stdin, stdout, stderr,
+  g2GetPos, g2SetPos, g2PutChar
 --   openFile, openBinaryFile, openFileBlocking,
 --   mkHandleFromFD, fdToHandle, fdToHandle',
 --   isEOF
---  ) where
+ ) where
 -- 
--- import GHC.Base
+import GHC.Base
 -- import GHC.Show
 -- import Data.Maybe
 -- import Foreign.C.Types
 -- import GHC.MVar
--- import GHC.IO
+import GHC.IO
 -- import GHC.IO.Encoding
 -- import GHC.IO.Device as IODevice
 -- import GHC.IO.Exception
 -- import GHC.IO.IOMode
 -- import GHC.IO.Handle
--- import GHC.IO.Handle.Types
+import GHC.IO.Handle.Types
 -- import GHC.IO.Handle.Internals
 -- import qualified GHC.IO.FD as FD
 -- import qualified System.Posix.Internals as Posix
@@ -47,8 +48,9 @@
 -- -- standard error channel. These handles are initially open.
 -- 
 -- -- | A handle managing input from the Haskell program's standard input channel.
--- stdin :: Handle
--- {-# NOINLINE stdin #-}
+stdin :: Handle
+{-# NOINLINE stdin #-}
+stdin = stdin
 -- stdin = unsafePerformIO $ do
 --    -- ToDo: acquire lock
 --    setBinaryMode FD.stdin
@@ -58,8 +60,9 @@
 --                 (Just stdHandleFinalizer) Nothing
 -- 
 -- -- | A handle managing output to the Haskell program's standard output channel.
--- stdout :: Handle
--- {-# NOINLINE stdout #-}
+stdout :: Handle
+{-# NOINLINE stdout #-}
+stdout = stdout
 -- stdout = unsafePerformIO $ do
 --    -- ToDo: acquire lock
 --    setBinaryMode FD.stdout
@@ -69,8 +72,35 @@
 --                 (Just stdHandleFinalizer) Nothing
 -- 
 -- -- | A handle managing output to the Haskell program's standard error channel.
--- stderr :: Handle
--- {-# NOINLINE stderr #-}
+stderr :: Handle
+{-# NOINLINE stderr #-}
+stderr = stderr
+
+g2GetPos :: Handle -> IO String
+{-# NOINLINE g2GetPos #-}
+g2GetPos h = return (g2GetPos' h)
+
+g2GetPos' :: Handle -> String
+{-# NOINLINE g2GetPos' #-}
+g2GetPos' _ = ""
+
+g2SetPos :: String -> Handle -> IO ()
+{-# NOINLINE g2SetPos #-}
+g2SetPos s h = let x = g2SetPos' s h in x `seq` return x
+
+g2SetPos' :: String -> Handle -> ()
+{-# NOINLINE g2SetPos' #-}
+g2SetPos' _ _ = ()
+
+g2PutChar :: Char -> Handle -> IO ()
+{-# NOINLINE g2PutChar #-}
+g2PutChar c h = let x = g2PutChar' c h in x `seq` return x
+
+g2PutChar' :: Char -> Handle -> ()
+{-# NOINLINE g2PutChar' #-}
+g2PutChar' _ _ = ()
+
+
 -- stderr = unsafePerformIO $ do
 --     -- ToDo: acquire lock
 --    setBinaryMode FD.stderr

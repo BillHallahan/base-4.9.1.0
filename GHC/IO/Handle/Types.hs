@@ -1,10 +1,10 @@
--- {-# LANGUAGE Trustworthy #-}
--- {-# LANGUAGE CPP
---            , NoImplicitPrelude
---            , ExistentialQuantification
---   #-}
--- {-# OPTIONS_GHC -funbox-strict-fields #-}
--- {-# OPTIONS_HADDOCK hide #-}
+{-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE CPP
+           , NoImplicitPrelude
+           , ExistentialQuantification
+  #-}
+{-# OPTIONS_GHC -funbox-strict-fields #-}
+{-# OPTIONS_HADDOCK hide #-}
 -- 
 -- -----------------------------------------------------------------------------
 -- -- |
@@ -20,8 +20,8 @@
 -- --
 -- -----------------------------------------------------------------------------
 -- 
--- module GHC.IO.Handle.Types (
---       Handle(..), Handle__(..), showHandle,
+module GHC.IO.Handle.Types (
+      Handle(..) -- , Handle__(..), showHandle,
 --       checkHandleInvariants,
 --       BufferList(..),
 --       HandleType(..),
@@ -30,7 +30,7 @@
 --       BufferCodec(..),
 --       NewlineMode(..), Newline(..), nativeNewline,
 --       universalNewlineMode, noNewlineTranslation, nativeNewlineMode
---   ) where
+  ) where
 -- 
 -- #undef DEBUG
 -- 
@@ -95,6 +95,7 @@
 -- -- equal according to '==' only to itself; no attempt
 -- -- is made to compare the internal state of different handles for equality.
 -- 
+data Handle = Handle
 -- data Handle
 --   = FileHandle                          -- A normal handle to a file
 --         FilePath                        -- the file (used for error messages
