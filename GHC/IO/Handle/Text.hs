@@ -63,7 +63,6 @@ import GHC.Base
 -- import GHC.Num
 -- import GHC.Show
 -- import GHC.List
-import Unsafe.Symbolic
 -- 
 -- -- ---------------------------------------------------------------------------
 -- -- Simple input operations
