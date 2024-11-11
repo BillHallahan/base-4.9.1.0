@@ -147,7 +147,9 @@ module Prelude (
     putStr, putStrLn, print,
 --     -- *** Input functions
 --     getChar,
---     getLine, getContents, interact,
+--     getLine, 
+       getContents,
+--     interact,
 --     -- *** Files
 --     FilePath,
 --     readFile, writeFile, appendFile, readIO, readLn,

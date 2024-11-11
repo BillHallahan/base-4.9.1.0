@@ -144,7 +144,7 @@ module System.IO (
     print,
 --     getChar,
 --     getLine,
---     getContents,
+    getContents,
 --     readIO,
 --     readLn,
 -- 
