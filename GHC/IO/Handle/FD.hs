@@ -78,7 +78,7 @@ stderr = stderr
 
 g2GetPos :: Handle -> IO String
 {-# NOINLINE g2GetPos #-}
-g2GetPos h = return (g2GetPos' h)
+g2GetPos h = h `seq` return (g2GetPos' h)
 
 g2GetPos' :: Handle -> String
 {-# NOINLINE g2GetPos' #-}
@@ -86,7 +86,7 @@ g2GetPos' _ = ""
 
 g2SetPos :: String -> Handle -> IO ()
 {-# NOINLINE g2SetPos #-}
-g2SetPos s h = let x = g2SetPos' s h in x `seq` return x
+g2SetPos s h = let x = g2SetPos' s h in h `seq` x `seq` return x
 
 g2SetPos' :: String -> Handle -> ()
 {-# NOINLINE g2SetPos' #-}
@@ -94,7 +94,7 @@ g2SetPos' _ _ = ()
 
 g2PutChar :: Char -> Handle -> IO ()
 {-# NOINLINE g2PutChar #-}
-g2PutChar c h = let x = g2PutChar' c h in x `seq` return x
+g2PutChar c h = let x = g2PutChar' c h in c `seq` h `seq` x `seq` return x
 
 g2PutChar' :: Char -> Handle -> ()
 {-# NOINLINE g2PutChar' #-}
