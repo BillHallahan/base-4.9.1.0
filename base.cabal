@@ -248,6 +248,7 @@ Library
         GHC.IOArray
         GHC.IORef
         GHC.Int
+        GHC.Ix
         GHC.List
         GHC.MVar
         GHC.Natural

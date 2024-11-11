@@ -4,7 +4,7 @@
 
 module GHC.Types2
   ( T.Char (..)
-  , Int (..)
+  , T.Int (..)
   , Word8
   , Word (..)
   , Float (..)
