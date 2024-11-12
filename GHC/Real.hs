@@ -188,37 +188,43 @@ class  (Num a) => Fractional a  where
 -- 
 -- -- | Extracting components of fractions.
 class  (Real a, Fractional a) => RealFrac a  where
---     -- | The function 'properFraction' takes a real fractional number @x@
---     -- and returns a pair @(n,f)@ such that @x = n+f@, and:
---     --
---     -- * @n@ is an integral number with the same sign as @x@; and
---     --
---     -- * @f@ is a fraction with the same type and sign as @x@,
---     --   and with absolute value less than @1@.
---     --
---     -- The default definitions of the 'ceiling', 'floor', 'truncate'
---     -- and 'round' functions are in terms of 'properFraction'.
+    -- | The function 'properFraction' takes a real fractional number @x@
+    -- and returns a pair @(n,f)@ such that @x = n+f@, and:
+    --
+    -- * @n@ is an integral number with the same sign as @x@; and
+    --
+    -- * @f@ is a fraction with the same type and sign as @x@,
+    --   and with absolute value less than @1@.
+    --
+    -- The default definitions of the 'ceiling', 'floor', 'truncate'
+    -- and 'round' functions are in terms of 'properFraction'.
     properFraction      :: (Integral b) => a -> (b,a)
---     -- | @'truncate' x@ returns the integer nearest @x@ between zero and @x@
---     truncate            :: (Integral b) => a -> b
---     -- | @'round' x@ returns the nearest integer to @x@;
---     --   the even integer if @x@ is equidistant between two integers
---     round               :: (Integral b) => a -> b
---     -- | @'ceiling' x@ returns the least integer not less than @x@
+    -- | @'truncate' x@ returns the integer nearest @x@ between zero and @x@
+    truncate            :: (Integral b) => a -> b
+    -- | @'round' x@ returns the nearest integer to @x@;
+    --   the even integer if @x@ is equidistant between two integers
+    round               :: (Integral b) => a -> b
+    -- | @'ceiling' x@ returns the least integer not less than @x@
     ceiling             :: (Integral b) => a -> b
     -- | @'floor' x@ returns the greatest integer not greater than @x@
     floor               :: (Integral b) => a -> b
--- 
---     {-# INLINE truncate #-}
---     truncate x          =  m  where (m,_) = properFraction x
--- 
---     round x             =  let (n,r) = properFraction x
---                                m     = if r < 0 then n - 1 else n + 1
---                            in case signum (abs r - 0.5) of
---                                 -1 -> n
---                                 0  -> if even n then n else m
---                                 1  -> m
---                                 _  -> errorWithoutStackTrace "round default defn: Bad value"
+
+    {-# INLINE truncate #-}
+    truncate x          =  m  where (m,_) = properFraction x
+
+    round x             =  let (n,r) = properFraction x
+                               m     = if r < fromInteger (Z# 0#) then n - fromInteger (Z# 1#) else n + fromInteger (Z# 1#)
+                               sign = signum (abs r - (fromRational (Z# 1# :% Z# 2#)))
+                           in
+                           if sign == fromInteger (Z# -1#) then n
+                                else if sign == fromInteger (Z# 0#) then (if even n then n else m)
+                                else if sign == fromInteger (Z# 1#) then m
+                                else errorWithoutStackTrace "round default defn: Bad value"
+                        --    case sign of
+                                -- -1 -> n
+                                -- 0  -> if even n then n else m
+                                -- 1  -> m
+                                -- _  -> errorWithoutStackTrace "round default defn: Bad value"
 -- 
     ceiling x           =  if r > fromInteger (Z# 0#) then n + fromInteger (Z# 1#) else n
                            where (n,r) = properFraction x
