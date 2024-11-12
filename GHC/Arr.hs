@@ -256,7 +256,7 @@ listArray (l, u) es =
 -- -- | The value at the given index in an array.
 -- {-# INLINE (!) #-}
 (!) :: Ix i => Array i e -> i -> e
-(Array l u _ aie) ! i = aie !! index (l, u) i
+(!) (Array l u _ aie) i = aie !! index (l, u) i
 -- arr@(Array l u n _) ! i = unsafeAt arr $ safeIndex (l,u) n i
 -- 
 {-# INLINE safeRangeSize #-}
