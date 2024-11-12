@@ -321,7 +321,7 @@ instance  RealFrac Float  where
 -- #if FLT_RADIX != 2
 -- #error FLT_RADIX must be 2
 -- #endif
---     properFraction (F# x#)
+    properFraction (F# x#) = (fromInteger (Z# (truncZeroFloat# x#)), F# (decPartFloat# x#))
 --       = case decodeFloat_Int# x# of
 --         (# m#, n# #) ->
 --             let m = I# m#
@@ -353,6 +353,7 @@ instance  RealFrac Float  where
 --     floor x     = case properFraction x of
 --                     (n,r) -> if r < 0.0 then n - 1 else n
 -- 
+
 instance  Floating Float  where
     pi                  =  F# 3.141592653589793238#
     exp x               =  expFloat x
@@ -538,7 +539,7 @@ instance  RealFrac Double  where
 --     {-# INLINE [1] floor #-}
 --     {-# INLINE [1] truncate #-}
 -- 
---     properFraction x
+    properFraction (D# x) = (fromInteger (Z# (truncZeroDouble# x)), D# (decPartDouble# x))
 --       = case (decodeFloat x)      of { (m,n) ->
 --         if n >= 0 then
 --             (fromInteger m * 2 ^ n, 0.0)

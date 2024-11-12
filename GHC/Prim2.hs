@@ -169,6 +169,12 @@ expDouble# = expDouble#
 logDouble# = logDouble#
 sqrtDouble# = sqrtDouble#
 
+truncZeroDouble# :: Double# -> Int#
+truncZeroDouble# = truncZeroDouble#
+
+decPartDouble# :: Double# -> Double#
+decPartDouble# = decPartDouble#
+
 -- Float#
 
 eqFloat# :: Float# -> Float# -> Int#
@@ -230,6 +236,12 @@ isFloatNaN# = isFloatNaN#
 
 isFloatInfinite# :: Float# -> Bool
 isFloatInfinite# = isFloatInfinite#
+
+truncZeroFloat# :: Float# -> Int#
+truncZeroFloat# = truncZeroFloat#
+
+decPartFloat# :: Float# -> Float#
+decPartFloat# = decPartFloat#
 
 -- expFloat# :: Float# -> Float#
 -- expFloat# = expFloat#

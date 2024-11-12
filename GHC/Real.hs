@@ -198,16 +198,16 @@ class  (Real a, Fractional a) => RealFrac a  where
 --     --
 --     -- The default definitions of the 'ceiling', 'floor', 'truncate'
 --     -- and 'round' functions are in terms of 'properFraction'.
---     properFraction      :: (Integral b) => a -> (b,a)
+    properFraction      :: (Integral b) => a -> (b,a)
 --     -- | @'truncate' x@ returns the integer nearest @x@ between zero and @x@
 --     truncate            :: (Integral b) => a -> b
 --     -- | @'round' x@ returns the nearest integer to @x@;
 --     --   the even integer if @x@ is equidistant between two integers
 --     round               :: (Integral b) => a -> b
 --     -- | @'ceiling' x@ returns the least integer not less than @x@
---     ceiling             :: (Integral b) => a -> b
---     -- | @'floor' x@ returns the greatest integer not greater than @x@
---     floor               :: (Integral b) => a -> b
+    ceiling             :: (Integral b) => a -> b
+    -- | @'floor' x@ returns the greatest integer not greater than @x@
+    floor               :: (Integral b) => a -> b
 -- 
 --     {-# INLINE truncate #-}
 --     truncate x          =  m  where (m,_) = properFraction x
@@ -220,11 +220,11 @@ class  (Real a, Fractional a) => RealFrac a  where
 --                                 1  -> m
 --                                 _  -> errorWithoutStackTrace "round default defn: Bad value"
 -- 
---     ceiling x           =  if r > 0 then n + 1 else n
---                            where (n,r) = properFraction x
--- 
---     floor x             =  if r < 0 then n - 1 else n
---                            where (n,r) = properFraction x
+    ceiling x           =  if r > fromInteger (Z# 0#) then n + fromInteger (Z# 1#) else n
+                           where (n,r) = properFraction x
+
+    floor x             =  if r < fromInteger (Z# 0#) then n - fromInteger (Z# 1#) else n
+                           where (n,r) = properFraction x
 -- 
 -- -- These 'numeric' enumerations come straight from the Report
 -- 
