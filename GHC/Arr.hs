@@ -1,5 +1,5 @@
 {-# LANGUAGE Unsafe #-}
-{-# LANGUAGE NoImplicitPrelude, MagicHash, UnboxedTuples, RoleAnnotations #-}
+{-# LANGUAGE BangPatterns, NoImplicitPrelude, MagicHash, UnboxedTuples, RoleAnnotations #-}
 {-# OPTIONS_HADDOCK hide #-}
 -- 
 -- -----------------------------------------------------------------------------
@@ -17,11 +17,13 @@
 -- -----------------------------------------------------------------------------
 -- 
 module GHC.Arr (
-        Ix(..) --, Array(..), STArray(..),
+        Ix(..), Array(..), -- STArray(..),
 -- 
 --         indexError, hopelessIndexError,
---         arrEleBottom, array, listArray,
---         (!), safeRangeSize, negRange, safeIndex, badSafeIndex,
+--         arrEleBottom, 
+        array, listArray,
+        (!)
+--         , safeRangeSize, negRange, safeIndex, badSafeIndex,
 --         bounds, numElements, numElementsSTArray, indices, elems,
 --         assocs, accumArray, adjust, (//), accum,
 --         amap, ixmap,
@@ -46,7 +48,7 @@ import GHC.Ix
 import GHC.Num
 -- import GHC.ST
 import GHC.Base
--- import GHC.List
+import GHC.List
 -- import GHC.Real( fromIntegral )
 import GHC.Show
 -- 
@@ -99,13 +101,25 @@ import GHC.Show
 -- 
 -- -- | The type of immutable non-strict (boxed) arrays
 -- -- with indices in @i@ and elements in @e@.
--- data Array i e
---    = Array            !i         -- the lower bound, l
---                       !i         -- the upper bound, u
---        {-# UNPACK #-} !Int       -- A cache of (rangeSize (l,u))
---                                  -- used to make sure an index is
---                                  -- really in range
+data Array i e
+   = Array            !i         -- the lower bound, l
+                      !i         -- the upper bound, u
+       {-# UNPACK #-} !Int       -- A cache of (rangeSize (l,u))
+                                 -- used to make sure an index is
+                                 -- really in range
+                      [e]
 --                       (Array# e) -- The actual elements
+
+g2Set :: Ix i
+      => i -- ^ Position
+      -> e
+      -> Array i e
+      -> Array i e
+g2Set p e (Array l u i es) = Array l u i (g2Set' (index (l, u) p) e es)
+
+g2Set' :: Int -> e -> [e] -> [e]
+g2Set' 0 x (_:es) = (x:es)
+g2Set' !n x (e:es) = e:g2Set' (n - 1) x es
 -- 
 -- -- | Mutable, boxed, non-strict arrays in the 'ST' monad.  The type
 -- -- arguments are as follows:
@@ -167,25 +181,28 @@ import GHC.Show
 -- -- then the array is legal, but empty.  Indexing an empty array always
 -- -- gives an array-bounds error, but 'bounds' still yields the bounds
 -- -- with which the array was constructed.
--- {-# INLINE array #-}
--- array :: Ix i
---         => (i,i)        -- ^ a pair of /bounds/, each of the index type
---                         -- of the array.  These bounds are the lowest and
---                         -- highest indices in the array, in that order.
---                         -- For example, a one-origin vector of length
---                         -- '10' has bounds '(1,10)', and a one-origin '10'
---                         -- by '10' matrix has bounds '((1,1),(10,10))'.
---         -> [(i, e)]     -- ^ a list of /associations/ of the form
---                         -- (/index/, /value/).  Typically, this list will
---                         -- be expressed as a comprehension.  An
---                         -- association '(i, x)' defines the value of
---                         -- the array at index 'i' to be 'x'.
---         -> Array i e
--- array (l,u) ies
+{-# INLINE array #-}
+array :: Ix i
+        => (i,i)        -- ^ a pair of /bounds/, each of the index type
+                        -- of the array.  These bounds are the lowest and
+                        -- highest indices in the array, in that order.
+                        -- For example, a one-origin vector of length
+                        -- '10' has bounds '(1,10)', and a one-origin '10'
+                        -- by '10' matrix has bounds '((1,1),(10,10))'.
+        -> [(i, e)]     -- ^ a list of /associations/ of the form
+                        -- (/index/, /value/).  Typically, this list will
+                        -- be expressed as a comprehension.  An
+                        -- association '(i, x)' defines the value of
+                        -- the array at index 'i' to be 'x'.
+        -> Array i e
+array (l,u) ies =
+    let n = safeRangeSize (l, u)
+        arr = Array l u n (replicate n (error "Bad index"))in
+    foldr (\(i, e) -> g2Set i e) arr ies
 --     = let n = safeRangeSize (l,u)
 --       in unsafeArray' (l,u) n
 --                       [(safeIndex (l,u) n i, e) | (i, e) <- ies]
--- 
+-- -- 
 -- {-# INLINE unsafeArray #-}
 -- unsafeArray :: Ix i => (i,i) -> [(Int, e)] -> Array i e
 -- unsafeArray b ies = unsafeArray' b (rangeSize b) ies
@@ -216,7 +233,11 @@ import GHC.Show
 -- -- | Construct an array from a pair of bounds and a list of values in
 -- -- index order.
 -- {-# INLINE listArray #-}
--- listArray :: Ix i => (i,i) -> [e] -> Array i e
+listArray :: Ix i => (i,i) -> [e] -> Array i e
+listArray (l, u) es =
+    let n = safeRangeSize (l, u) in
+    Array l u n es
+
 -- listArray (l,u) es = runST (ST $ \s1# ->
 --     case safeRangeSize (l,u)            of { n@(I# n#) ->
 --     case newArray# n# arrEleBottom s1#  of { (# s2#, marr# #) ->
@@ -234,19 +255,20 @@ import GHC.Show
 -- 
 -- -- | The value at the given index in an array.
 -- {-# INLINE (!) #-}
--- (!) :: Ix i => Array i e -> i -> e
+(!) :: Ix i => Array i e -> i -> e
+(Array l u _ aie) ! i = aie !! index (l, u) i
 -- arr@(Array l u n _) ! i = unsafeAt arr $ safeIndex (l,u) n i
 -- 
--- {-# INLINE safeRangeSize #-}
--- safeRangeSize :: Ix i => (i, i) -> Int
--- safeRangeSize (l,u) = let r = rangeSize (l, u)
---                       in if r < 0 then negRange
---                                   else r
--- 
--- -- Don't inline this error message everywhere!!
--- negRange :: Int   -- Uninformative, but Ix does not provide Show
--- negRange = errorWithoutStackTrace "Negative range size"
--- 
+{-# INLINE safeRangeSize #-}
+safeRangeSize :: Ix i => (i, i) -> Int
+safeRangeSize (l,u) = let r = rangeSize (l, u)
+                      in if r < 0 then negRange
+                                  else r
+
+-- Don't inline this error message everywhere!!
+negRange :: Int   -- Uninformative, but Ix does not provide Show
+negRange = errorWithoutStackTrace "Negative range size"
+
 -- {-# INLINE[1] safeIndex #-}
 -- -- See Note [Double bounds-checking of index values]
 -- -- Inline *after* (!) so the rules can fire

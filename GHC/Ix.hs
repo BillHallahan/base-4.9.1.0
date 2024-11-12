@@ -175,21 +175,21 @@ instance  Ix Int  where
 --     unsafeIndex (m,_) i = fromIntegral (i - m)
 --     inRange (m,n) i     = m <= i && i <= n
 -- 
--- ----------------------------------------------------------------------
--- instance  Ix Integer  where
---     {-# INLINE range #-}
---     range (m,n) = [m..n]
--- 
---     {-# INLINE unsafeIndex #-}
---     unsafeIndex (m,_n) i   = fromInteger (i - m)
--- 
---     {-# INLINE index #-}  -- See Note [Out-of-bounds error messages]
---                           -- and Note [Inlining index]
---     index b i | inRange b i =  unsafeIndex b i
---               | otherwise   =  indexError b i "Integer"
--- 
---     inRange (m,n) i     =  m <= i && i <= n
--- 
+----------------------------------------------------------------------
+instance  Ix Integer  where
+    {-# INLINE range #-}
+    range (m,n) = map (\(I# x) -> Z# x) ([fromInteger m..fromInteger n] :: [Int])
+
+    {-# INLINE unsafeIndex #-}
+    unsafeIndex (m,_n) i   = fromInteger (i - m)
+
+    {-# INLINE index #-}  -- See Note [Out-of-bounds error messages]
+                          -- and Note [Inlining index]
+    index b i | inRange b i =  unsafeIndex b i
+              | otherwise   =  indexError b i "Integer"
+
+    inRange (m,n) i     =  m <= i && i <= n
+
 ----------------------------------------------------------------------
 -- instance Ix Bool where -- as derived
 --     {-# INLINE range #-}
