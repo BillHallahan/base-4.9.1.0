@@ -1,131 +1,131 @@
--- {-# LANGUAGE DeriveDataTypeable #-}
--- {-# LANGUAGE Trustworthy #-}
--- {-# LANGUAGE StandaloneDeriving #-}
--- {-# LANGUAGE DeriveGeneric #-}
--- {-# LANGUAGE DeriveTraversable #-}
--- 
--- -----------------------------------------------------------------------------
--- -- |
--- -- Module      :  Data.Complex
--- -- Copyright   :  (c) The University of Glasgow 2001
--- -- License     :  BSD-style (see the file libraries/base/LICENSE)
--- --
--- -- Maintainer  :  libraries@haskell.org
--- -- Stability   :  provisional
--- -- Portability :  portable
--- --
--- -- Complex numbers.
--- --
--- -----------------------------------------------------------------------------
--- 
--- module Data.Complex
---         (
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveTraversable #-}
+
+-----------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Complex
+-- Copyright   :  (c) The University of Glasgow 2001
+-- License     :  BSD-style (see the file libraries/base/LICENSE)
+--
+-- Maintainer  :  libraries@haskell.org
+-- Stability   :  provisional
+-- Portability :  portable
+--
+-- Complex numbers.
+--
+-----------------------------------------------------------------------------
+
+module Data.Complex
+        (
 --         -- * Rectangular form
---           Complex((:+))
+          Complex((:+))
 -- 
---         , realPart
---         , imagPart
---         -- * Polar form
---         , mkPolar
---         , cis
---         , polar
---         , magnitude
---         , phase
---         -- * Conjugate
---         , conjugate
--- 
---         )  where
--- 
+        , realPart
+        , imagPart
+        -- * Polar form
+        , mkPolar
+        , cis
+        , polar
+        , magnitude
+        -- , phase
+        -- * Conjugate
+        , conjugate
+
+        )  where
+
 -- import GHC.Generics (Generic, Generic1)
--- import GHC.Float (Floating(..))
+import GHC.Float (Floating(..))
 -- import Data.Data (Data)
 -- import Foreign (Storable, castPtr, peek, poke, pokeElemOff, peekElemOff, sizeOf,
 --                 alignment)
--- 
--- infix  6  :+
--- 
--- -- -----------------------------------------------------------------------------
--- -- The Complex type
--- 
--- -- | Complex numbers are an algebraic type.
--- --
--- -- For a complex number @z@, @'abs' z@ is a number with the magnitude of @z@,
--- -- but oriented in the positive real direction, whereas @'signum' z@
--- -- has the phase of @z@, but unit magnitude.
--- --
--- -- The 'Foldable' and 'Traversable' instances traverse the real part first.
--- data Complex a
---   = !a :+ !a    -- ^ forms a complex number from its real and imaginary
---                 -- rectangular components.
---         deriving (Eq, Show, Read, Data, Generic, Generic1
---                 , Functor, Foldable, Traversable)
--- 
--- -- -----------------------------------------------------------------------------
--- -- Functions over Complex
--- 
--- -- | Extracts the real part of a complex number.
--- realPart :: Complex a -> a
--- realPart (x :+ _) =  x
--- 
--- -- | Extracts the imaginary part of a complex number.
--- imagPart :: Complex a -> a
--- imagPart (_ :+ y) =  y
--- 
--- -- | The conjugate of a complex number.
--- {-# SPECIALISE conjugate :: Complex Double -> Complex Double #-}
--- conjugate        :: Num a => Complex a -> Complex a
--- conjugate (x:+y) =  x :+ (-y)
--- 
--- -- | Form a complex number from polar components of magnitude and phase.
--- {-# SPECIALISE mkPolar :: Double -> Double -> Complex Double #-}
--- mkPolar          :: Floating a => a -> a -> Complex a
--- mkPolar r theta  =  r * cos theta :+ r * sin theta
--- 
--- -- | @'cis' t@ is a complex value with magnitude @1@
--- -- and phase @t@ (modulo @2*'pi'@).
--- {-# SPECIALISE cis :: Double -> Complex Double #-}
--- cis              :: Floating a => a -> Complex a
--- cis theta        =  cos theta :+ sin theta
--- 
--- -- | The function 'polar' takes a complex number and
--- -- returns a (magnitude, phase) pair in canonical form:
--- -- the magnitude is nonnegative, and the phase in the range @(-'pi', 'pi']@;
--- -- if the magnitude is zero, then so is the phase.
--- {-# SPECIALISE polar :: Complex Double -> (Double,Double) #-}
--- polar            :: (RealFloat a) => Complex a -> (a,a)
--- polar z          =  (magnitude z, phase z)
--- 
--- -- | The nonnegative magnitude of a complex number.
--- {-# SPECIALISE magnitude :: Complex Double -> Double #-}
--- magnitude :: (RealFloat a) => Complex a -> a
--- magnitude (x:+y) =  scaleFloat k
---                      (sqrt (sqr (scaleFloat mk x) + sqr (scaleFloat mk y)))
---                     where k  = max (exponent x) (exponent y)
---                           mk = - k
---                           sqr z = z * z
--- 
--- -- | The phase of a complex number, in the range @(-'pi', 'pi']@.
--- -- If the magnitude is zero, then so is the phase.
--- {-# SPECIALISE phase :: Complex Double -> Double #-}
+
+infix  6  :+
+
+-----------------------------------------------------------------------------
+-- The Complex type
+
+-- | Complex numbers are an algebraic type.
+--
+-- For a complex number @z@, @'abs' z@ is a number with the magnitude of @z@,
+-- but oriented in the positive real direction, whereas @'signum' z@
+-- has the phase of @z@, but unit magnitude.
+--
+-- The 'Foldable' and 'Traversable' instances traverse the real part first.
+data Complex a
+  = !a :+ !a    -- ^ forms a complex number from its real and imaginary
+                -- rectangular components.
+        -- deriving (Eq, Show, Read, Data, Generic, Generic1
+        --         , Functor, Foldable, Traversable)
+
+-----------------------------------------------------------------------------
+-- Functions over Complex
+
+-- | Extracts the real part of a complex number.
+realPart :: Complex a -> a
+realPart (x :+ _) =  x
+
+-- | Extracts the imaginary part of a complex number.
+imagPart :: Complex a -> a
+imagPart (_ :+ y) =  y
+
+-- | The conjugate of a complex number.
+{-# SPECIALISE conjugate :: Complex Double -> Complex Double #-}
+conjugate        :: Num a => Complex a -> Complex a
+conjugate (x:+y) =  x :+ (-y)
+
+-- | Form a complex number from polar components of magnitude and phase.
+{-# SPECIALISE mkPolar :: Double -> Double -> Complex Double #-}
+mkPolar          :: Floating a => a -> a -> Complex a
+mkPolar r theta  =  r * cos theta :+ r * sin theta
+
+-- | @'cis' t@ is a complex value with magnitude @1@
+-- and phase @t@ (modulo @2*'pi'@).
+{-# SPECIALISE cis :: Double -> Complex Double #-}
+cis              :: Floating a => a -> Complex a
+cis theta        =  cos theta :+ sin theta
+
+-- | The function 'polar' takes a complex number and
+-- returns a (magnitude, phase) pair in canonical form:
+-- the magnitude is nonnegative, and the phase in the range @(-'pi', 'pi']@;
+-- if the magnitude is zero, then so is the phase.
+{-# SPECIALISE polar :: Complex Double -> (Double,Double) #-}
+polar            :: (RealFloat a) => Complex a -> (a,a)
+polar z          =  (magnitude z, phase z)
+
+-- | The nonnegative magnitude of a complex number.
+{-# SPECIALISE magnitude :: Complex Double -> Double #-}
+magnitude :: (RealFloat a) => Complex a -> a
+magnitude (x:+y) =  scaleFloat k
+                     (sqrt (sqr (scaleFloat mk x) + sqr (scaleFloat mk y)))
+                    where k  = max (exponent x) (exponent y)
+                          mk = - k
+                          sqr z = z * z
+
+-- | The phase of a complex number, in the range @(-'pi', 'pi']@.
+-- If the magnitude is zero, then so is the phase.
+{-# SPECIALISE phase :: Complex Double -> Double #-}
 -- phase :: (RealFloat a) => Complex a -> a
 -- phase (0 :+ 0)   = 0            -- SLPJ July 97 from John Peterson
 -- phase (x:+y)     = atan2 y x
--- 
+
 -- 
 -- -- -----------------------------------------------------------------------------
 -- -- Instances of Complex
 -- 
--- instance  (RealFloat a) => Num (Complex a)  where
---     {-# SPECIALISE instance Num (Complex Float) #-}
---     {-# SPECIALISE instance Num (Complex Double) #-}
---     (x:+y) + (x':+y')   =  (x+x') :+ (y+y')
---     (x:+y) - (x':+y')   =  (x-x') :+ (y-y')
---     (x:+y) * (x':+y')   =  (x*x'-y*y') :+ (x*y'+y*x')
---     negate (x:+y)       =  negate x :+ negate y
---     abs z               =  magnitude z :+ 0
---     signum (0:+0)       =  0
---     signum z@(x:+y)     =  x/r :+ y/r  where r = magnitude z
---     fromInteger n       =  fromInteger n :+ 0
+instance  (RealFloat a) => Num (Complex a)  where
+    {-# SPECIALISE instance Num (Complex Float) #-}
+    {-# SPECIALISE instance Num (Complex Double) #-}
+    (x:+y) + (x':+y')   =  (x+x') :+ (y+y')
+    (x:+y) - (x':+y')   =  (x-x') :+ (y-y')
+    (x:+y) * (x':+y')   =  (x*x'-y*y') :+ (x*y'+y*x')
+    negate (x:+y)       =  negate x :+ negate y
+    abs z               =  magnitude z :+ 0
+    signum (0:+0)       =  0
+    signum z@(x:+y)     =  x/r :+ y/r  where r = magnitude z
+    fromInteger n       =  fromInteger n :+ 0
 -- 
 -- instance  (RealFloat a) => Fractional (Complex a)  where
 --     {-# SPECIALISE instance Fractional (Complex Float) #-}
