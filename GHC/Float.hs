@@ -25,7 +25,7 @@
 -- --
 -- -----------------------------------------------------------------------------
 -- 
--- #include "ieee-flpt.h"
+#include "include/ieee-flpt.h"
 -- 
 module GHC.Float
    ( module GHC.Float
@@ -137,7 +137,7 @@ class  (RealFrac a, Floating a) => RealFloat a  where
 --     floatRadix          :: a -> Integer
 --     -- | a constant function, returning the number of digits of
 --     -- 'floatRadix' in the significand
---     floatDigits         :: a -> Int
+    floatDigits         :: a -> Int
 --     -- | a constant function, returning the lowest and highest values
 --     -- the exponent may assume
 --     floatRange          :: a -> (Int,Int)
@@ -152,7 +152,7 @@ class  (RealFrac a, Floating a) => RealFloat a  where
 --     -- contains a negative zero, also @'decodeFloat' (-0.0) = (0,0)@.
 --     -- /The result of/ @'decodeFloat' x@ /is unspecified if either of/
 --     -- @'isNaN' x@ /or/ @'isInfinite' x@ /is/ 'True'.
---     decodeFloat         :: a -> (Integer,Int)
+    decodeFloat         :: a -> (Integer,Int)
 --     -- | 'encodeFloat' performs the inverse of 'decodeFloat' in the
 --     -- sense that for finite @x@ with the exception of @-0.0@,
 --     -- @'uncurry' 'encodeFloat' ('decodeFloat' x) = x@.
@@ -168,7 +168,7 @@ class  (RealFrac a, Floating a) => RealFloat a  where
 --     -- @'significand' x * b ^^ 'exponent' x@, where @b@ is the
 --     -- floating-point radix.
 --     -- The behaviour is unspecified on infinite or @NaN@ values.
---     exponent            :: a -> Int
+    exponent            :: a -> Int
 --     -- | The first component of 'decodeFloat', scaled to lie in the open
 --     -- interval (@-1@,@1@), either @0.0@ or of absolute value @>= 1\/b@,
 --     -- where @b@ is the floating-point radix.
@@ -180,9 +180,9 @@ class  (RealFrac a, Floating a) => RealFloat a  where
     isNaN               :: a -> Bool
     -- | 'True' if the argument is an IEEE infinity or negative infinity
     isInfinite          :: a -> Bool
---     -- | 'True' if the argument is too small to be represented in
---     -- normalized format
---     isDenormalized      :: a -> Bool
+    -- | 'True' if the argument is too small to be represented in
+    -- normalized format
+    isDenormalized      :: a -> Bool
 --     -- | 'True' if the argument is an IEEE negative zero
     isNegativeZero      :: a -> Bool
 --     -- | 'True' if the argument is an IEEE floating point number
@@ -390,16 +390,17 @@ instance  Floating Float  where
 -- 
 instance  RealFloat Float  where
 --     floatRadix _        =  FLT_RADIX        -- from float.h
---     floatDigits _       =  FLT_MANT_DIG     -- ditto
+    floatDigits _       =  FLT_MANT_DIG     -- ditto
 --     floatRange _        =  (FLT_MIN_EXP, FLT_MAX_EXP) -- ditto
 -- 
---     decodeFloat (F# f#) = case decodeFloat_Int# f# of
---                           (# i, e #) -> (smallInteger i, I# e)
+    decodeFloat (F# f) = case decodeFloat# f of
+                          (# i, e #) -> (Z# i, I# (if (e $==# 255#) then 0#
+                                                        else e -# 150#))
 -- 
 --     encodeFloat i (I# e) = F# (encodeFloatInteger i e)
 -- 
---     exponent x          = case decodeFloat x of
---                             (m,n) -> if m == 0 then 0 else n + floatDigits x
+    exponent x          = case decodeFloat x of
+                            (m,n) -> if m == (Z# 0#) then (I# 0#) else n + floatDigits x
 -- 
 --     significand x       = case decodeFloat x of
 --                             (m,_) -> encodeFloat m (negate (floatDigits x))
@@ -414,7 +415,7 @@ instance  RealFloat Float  where
 -- 
     isNaN x          = (I# 0#) /= isFloatNaN x
     isInfinite x     = I# 0# /= isFloatInfinite x
---     isDenormalized x = 0 /= isFloatDenormalized x
+    isDenormalized x = I# 0# /= isFloatDenormalized x
     isNegativeZero x = (I# 0#) /= isFloatNegativeZero x
 --     isIEEE _         = True
 -- 
@@ -570,18 +571,19 @@ instance  RealFrac Double  where
 -- 
 instance  RealFloat Double  where
 --     floatRadix _        =  FLT_RADIX        -- from float.h
---     floatDigits _       =  DBL_MANT_DIG     -- ditto
+    floatDigits _       =  DBL_MANT_DIG     -- ditto
 --     floatRange _        =  (DBL_MIN_EXP, DBL_MAX_EXP) -- ditto
 -- 
---     decodeFloat (D# x#)
---       = case decodeDoubleInteger x#   of
---           (# i, j #) -> (i, I# j)
+    decodeFloat (D# x)
+      = case decodeDouble# x   of
+          (# i, e #) -> (Z# i, I# (if (e $==# 2047#) then 0#
+                                                     else e -# 1075#))
 -- 
 --     encodeFloat i (I# j) = D# (encodeDoubleInteger i j)
 -- 
---     exponent x          = case decodeFloat x of
---                             (m,n) -> if m == 0 then 0 else n + floatDigits x
--- 
+    exponent x          = case decodeFloat x of
+                            (m,n) -> if m == (Z# 0#) then (I# 0#) else n + floatDigits x
+
 --     significand x       = case decodeFloat x of
 --                             (m,_) -> encodeFloat m (negate (floatDigits x))
 -- 
@@ -595,7 +597,7 @@ instance  RealFloat Double  where
 -- 
     isNaN x             = I# 0# /= isDoubleNaN x
     isInfinite x        = I# 0# /= isDoubleInfinite x
---     isDenormalized x    = 0 /= isDoubleDenormalized x
+    isDenormalized x    = I# 0# /= isDoubleDenormalized x
     isNegativeZero x    = I# 0# /= isDoubleNegativeZero x
 --     isIEEE _            = True
 -- 
@@ -1226,6 +1228,8 @@ isFloatNaN (F# f) = if isFloatNaN# f then I# 1# else I# 0#
 isFloatInfinite :: Float -> Int
 isFloatInfinite (F# f) = if isFloatInfinite# f then I# 1# else I# 0#
 -- foreign import ccall unsafe "isFloatDenormalized" isFloatDenormalized :: Float -> Int
+isFloatDenormalized :: Float -> Int
+isFloatDenormalized (F# f) = if isFloatDenormalized# f then I# 1# else I# 0#
 -- foreign import ccall unsafe "isFloatNegativeZero" isFloatNegativeZero :: Float -> Int
 isFloatNegativeZero :: Float -> Int
 isFloatNegativeZero (F# f) = if isFloatNegativeZero# f then I# 1# else I# 0#
@@ -1238,6 +1242,8 @@ isDoubleNaN (D# d) = if isDoubleNaN# d then I# 1# else I# 0#
 isDoubleInfinite :: Double -> Int
 isDoubleInfinite (D# d) = if isDoubleInfinite# d then I# 1# else I# 0#
 -- foreign import ccall unsafe "isDoubleDenormalized" isDoubleDenormalized :: Double -> Int
+isDoubleDenormalized :: Double -> Int
+isDoubleDenormalized (D# d) = if isDoubleDenormalized# d then I# 1# else I# 0#
 -- foreign import ccall unsafe "isDoubleNegativeZero" isDoubleNegativeZero :: Double -> Int
 isDoubleNegativeZero :: Double -> Int
 isDoubleNegativeZero (D# d) = if isDoubleNegativeZero# d then I# 1# else I# 0#

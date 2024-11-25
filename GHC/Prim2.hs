@@ -155,8 +155,14 @@ x <=## y = case x $<=## y of
 negateDouble# :: Double# -> Double#
 negateDouble# = negateDouble#
 
+decodeDouble# :: Double# -> (# Int#, Int# #)
+decodeDouble# = decodeDouble#
+
 isDoubleNegativeZero# :: Double# -> Bool
 isDoubleNegativeZero# = isDoubleNegativeZero#
+
+isDoubleDenormalized# :: Double# -> Bool
+isDoubleDenormalized# = isDoubleDenormalized#
 
 isDoubleNaN# :: Double# -> Bool
 isDoubleNaN# = isDoubleNaN#
@@ -228,8 +234,14 @@ divideFloat# = divideFloat#
 sqrtFloat# :: Float# -> Float#
 sqrtFloat# = sqrtFloat#
 
+decodeFloat# :: Float# -> (# Int#, Int# #)
+decodeFloat# = decodeFloat#
+
 isFloatNegativeZero# :: Float# -> Bool
 isFloatNegativeZero# = isFloatNegativeZero#
+
+isFloatDenormalized# :: Float# -> Bool
+isFloatDenormalized# = isFloatDenormalized#
 
 isFloatNaN# :: Float# -> Bool
 isFloatNaN# = isFloatNaN#
