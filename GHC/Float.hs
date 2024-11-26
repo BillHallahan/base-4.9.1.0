@@ -393,9 +393,11 @@ instance  RealFloat Float  where
     floatDigits _       =  FLT_MANT_DIG     -- ditto
 --     floatRange _        =  (FLT_MIN_EXP, FLT_MAX_EXP) -- ditto
 -- 
-    decodeFloat (F# f) = case decodeFloat# f of
-                          (# i, e #) -> (Z# i, I# (if (e $==# 255#) then 0#
-                                                        else e -# 150#))
+    decodeFloat (F# f) = case f `smtEqFloat#` 0.0# of
+                            True -> (Z# 0#, I# 0#)
+                            False -> case decodeFloat# f of
+                                        (# i, e #) -> (Z# i, I# (if (e $==# 255#) then 0#
+                                                                        else e -# 150#))
 -- 
 --     encodeFloat i (I# e) = F# (encodeFloatInteger i e)
 -- 
@@ -574,11 +576,11 @@ instance  RealFloat Double  where
     floatDigits _       =  DBL_MANT_DIG     -- ditto
 --     floatRange _        =  (DBL_MIN_EXP, DBL_MAX_EXP) -- ditto
 -- 
-    decodeFloat (D# x)
-      = case decodeDouble# x   of
-          (# i, e #) -> (Z# i, I# (if (e $==# 2047#) then 0#
-                                                     else e -# 1075#))
--- 
+    decodeFloat (D# f) = case f $==## 0.0## of
+                            True -> (Z# 0#, I# 0#)
+                            False -> case decodeDouble# f of
+                                        (# i, e #) -> (Z# i, I# (if (e $==# 255#) then 0#
+                                                                        else e -# 150#))-- 
 --     encodeFloat i (I# j) = D# (encodeDoubleInteger i j)
 -- 
     exponent x          = case decodeFloat x of
