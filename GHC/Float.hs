@@ -579,8 +579,8 @@ instance  RealFloat Double  where
     decodeFloat (D# f) = case f $==## 0.0## of
                             True -> (Z# 0#, I# 0#)
                             False -> case decodeDouble# f of
-                                        (# i, e #) -> (Z# i, I# (if (e $==# 255#) then 0#
-                                                                        else e -# 150#))-- 
+                                        (# i, e #) -> (Z# i, I# (if (e $==# 2047#) then 0#
+                                                                        else e -# 1075#))-- 
 --     encodeFloat i (I# j) = D# (encodeDoubleInteger i j)
 -- 
     exponent x          = case decodeFloat x of
