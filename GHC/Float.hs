@@ -153,14 +153,14 @@ class  (RealFrac a, Floating a) => RealFloat a  where
 --     -- /The result of/ @'decodeFloat' x@ /is unspecified if either of/
 --     -- @'isNaN' x@ /or/ @'isInfinite' x@ /is/ 'True'.
     decodeFloat         :: a -> (Integer,Int)
---     -- | 'encodeFloat' performs the inverse of 'decodeFloat' in the
---     -- sense that for finite @x@ with the exception of @-0.0@,
---     -- @'uncurry' 'encodeFloat' ('decodeFloat' x) = x@.
---     -- @'encodeFloat' m n@ is one of the two closest representable
---     -- floating-point numbers to @m*b^^n@ (or @&#177;Infinity@ if overflow
---     -- occurs); usually the closer, but if @m@ contains too many bits,
---     -- the result may be rounded in the wrong direction.
---     encodeFloat         :: Integer -> Int -> a
+    -- | 'encodeFloat' performs the inverse of 'decodeFloat' in the
+    -- sense that for finite @x@ with the exception of @-0.0@,
+    -- @'uncurry' 'encodeFloat' ('decodeFloat' x) = x@.
+    -- @'encodeFloat' m n@ is one of the two closest representable
+    -- floating-point numbers to @m*b^^n@ (or @&#177;Infinity@ if overflow
+    -- occurs); usually the closer, but if @m@ contains too many bits,
+    -- the result may be rounded in the wrong direction.
+    encodeFloat         :: Integer -> Int -> a
 --     -- | 'exponent' corresponds to the second component of 'decodeFloat'.
 --     -- @'exponent' 0 = 0@ and for finite nonzero @x@,
 --     -- @'exponent' x = snd ('decodeFloat' x) + 'floatDigits' x@.
@@ -399,7 +399,7 @@ instance  RealFloat Float  where
                                         (# i, e #) -> (Z# i, I# (if (e $==# 255#) then 0#
                                                                         else e -# 150#))
 -- 
---     encodeFloat i (I# e) = F# (encodeFloatInteger i e)
+    encodeFloat (Z# i) (I# e) = F# (encodeFloatInteger# i e)
 -- 
     exponent x          = case decodeFloat x of
                             (m,n) -> if m == (Z# 0#) then (I# 0#) else n + floatDigits x
@@ -581,7 +581,7 @@ instance  RealFloat Double  where
                             False -> case decodeDouble# f of
                                         (# i, e #) -> (Z# i, I# (if (e $==# 2047#) then 0#
                                                                         else e -# 1075#))-- 
---     encodeFloat i (I# j) = D# (encodeDoubleInteger i j)
+    encodeFloat (Z# i) (I# j) = D# (encodeDoubleInteger# i j)
 -- 
     exponent x          = case decodeFloat x of
                             (m,n) -> if m == (Z# 0#) then (I# 0#) else n + floatDigits x

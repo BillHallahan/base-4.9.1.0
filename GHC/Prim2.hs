@@ -158,6 +158,9 @@ negateDouble# = negateDouble#
 decodeDouble# :: Double# -> (# Int#, Int# #)
 decodeDouble# = decodeDouble#
 
+encodeDoubleInteger# :: Int# -> Int# -> Double#
+encodeDoubleInteger# = encodeDoubleInteger#
+
 isDoubleNegativeZero# :: Double# -> Bool
 isDoubleNegativeZero# = isDoubleNegativeZero#
 
@@ -236,6 +239,9 @@ sqrtFloat# = sqrtFloat#
 
 decodeFloat# :: Float# -> (# Int#, Int# #)
 decodeFloat# = decodeFloat#
+
+encodeFloatInteger# :: Int# -> Int# -> Float#
+encodeFloatInteger# = encodeFloatInteger#
 
 isFloatNegativeZero# :: Float# -> Bool
 isFloatNegativeZero# = isFloatNegativeZero#
