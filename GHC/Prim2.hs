@@ -392,6 +392,12 @@ seq !_ b = b
 
 -- Misc add-ons
 
+float2Double# :: Float# -> Double#
+float2Double# = float2Double#
+
+double2Float# :: Double# -> Float#
+double2Float# = double2Float#
+
 fromIntToFloat :: Int# -> Float#
 fromIntToFloat = fromIntToFloat
 

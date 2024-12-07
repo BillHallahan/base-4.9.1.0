@@ -399,7 +399,7 @@ instance  RealFloat Float  where
                                         (# i, e #) -> (Z# i, I# (if (e $==# 255#) then 0#
                                                                         else e -# 150#))
 -- 
-    encodeFloat (Z# i) (I# e) = F# (encodeFloatInteger# i e)
+    encodeFloat (Z# i) (I# e) = let !x = encodeDoubleInteger# i e in F# (double2Float# x)
 -- 
     exponent x          = case decodeFloat x of
                             (m,n) -> if m == (Z# 0#) then (I# 0#) else n + floatDigits x
@@ -1194,14 +1194,11 @@ geDouble    (D# x) (D# y) = (x $>=## y)
 ltDouble    (D# x) (D# y) = (x $<##  y)
 leDouble    (D# x) (D# y) = (x $<=## y)
 -- 
--- double2Float :: Double -> Float
--- double2Float (D# x) = F# (double2Float# x)
+double2Float :: Double -> Float
+double2Float (D# x) = F# (double2Float# x)
 -- 
 float2Double :: Float -> Double
 float2Double (F# x) = D# (float2Double# x)
-
-float2Double# :: Float# -> Double#
-float2Double# = float2Double#
 -- 
 expDouble, logDouble, sqrtDouble :: Double -> Double
 -- sinDouble, cosDouble, tanDouble  :: Double -> Double
