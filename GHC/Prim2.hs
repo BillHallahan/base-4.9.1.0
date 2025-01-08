@@ -155,8 +155,17 @@ x <=## y = case x $<=## y of
 negateDouble# :: Double# -> Double#
 negateDouble# = negateDouble#
 
+decodeDouble# :: Double# -> (# Int#, Int# #)
+decodeDouble# = decodeDouble#
+
+encodeDoubleInteger# :: Int# -> Int# -> Double#
+encodeDoubleInteger# = encodeDoubleInteger#
+
 isDoubleNegativeZero# :: Double# -> Bool
 isDoubleNegativeZero# = isDoubleNegativeZero#
+
+isDoubleDenormalized# :: Double# -> Bool
+isDoubleDenormalized# = isDoubleDenormalized#
 
 isDoubleNaN# :: Double# -> Bool
 isDoubleNaN# = isDoubleNaN#
@@ -228,8 +237,17 @@ divideFloat# = divideFloat#
 sqrtFloat# :: Float# -> Float#
 sqrtFloat# = sqrtFloat#
 
+decodeFloat# :: Float# -> (# Int#, Int# #)
+decodeFloat# = decodeFloat#
+
+encodeFloatInteger# :: Int# -> Int# -> Float#
+encodeFloatInteger# = encodeFloatInteger#
+
 isFloatNegativeZero# :: Float# -> Bool
 isFloatNegativeZero# = isFloatNegativeZero#
+
+isFloatDenormalized# :: Float# -> Bool
+isFloatDenormalized# = isFloatDenormalized#
 
 isFloatNaN# :: Float# -> Bool
 isFloatNaN# = isFloatNaN#
@@ -373,6 +391,12 @@ seq :: a -> b -> b
 seq !_ b = b
 
 -- Misc add-ons
+
+float2Double# :: Float# -> Double#
+float2Double# = float2Double#
+
+double2Float# :: Double# -> Float#
+double2Float# = double2Float#
 
 fromIntToFloat :: Int# -> Float#
 fromIntToFloat = fromIntToFloat
