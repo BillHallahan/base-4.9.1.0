@@ -8,4 +8,4 @@ module GHC.Tuple2
 
 -- import GHC.Tuple
 
-data Unit a = Unit a
+-- data Unit a = Unit a
