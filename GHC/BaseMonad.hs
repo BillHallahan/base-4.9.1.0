@@ -88,8 +88,13 @@ flip f x y              =  f y x
 -- -- It is also useful in higher-order situations, such as @'map' ('$' 0) xs@,
 -- -- or @'Data.List.zipWith' ('$') fs xs@.
 {-# INLINE ($) #-}
+#if MIN_VERSION_GLASGOW_HASKELL(9,8,0,0)
+($) :: forall repa repb (a :: TYPE repa) (b :: TYPE repb). (a -> b) -> a -> b
+($) f = f
+#else
 ($) :: forall r a (b :: TYPE r). (a -> b) -> a -> b
-f $ x =  f x
+f $ x = f x
+#endif
 
 ($!) :: forall r a (b :: TYPE r). (a -> b) -> a -> b
 f $! x = let !vx = x in f vx  -- see #2273
