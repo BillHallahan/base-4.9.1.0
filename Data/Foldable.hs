@@ -40,7 +40,7 @@ module Data.Foldable (
 --     -- ** Specialized folds
     concat,
     concatMap,
---     and,
+    and,
     or,
     any,
     all,
@@ -550,12 +550,12 @@ concatMap f xs = build (\c n -> foldr (\x b -> foldr c b (f x)) n xs)
 -- 
 -- -- These use foldr rather than foldMap to avoid repeated concatenation.
 -- 
--- -- | 'and' returns the conjunction of a container of Bools.  For the
--- -- result to be 'True', the container must be finite; 'False', however,
--- -- results from a 'False' value finitely far from the left end.
--- and :: Foldable t => t Bool -> Bool
--- and = getAll #. foldMap All
--- 
+-- | 'and' returns the conjunction of a container of Bools.  For the
+-- result to be 'True', the container must be finite; 'False', however,
+-- results from a 'False' value finitely far from the left end.
+and :: Foldable t => t Bool -> Bool
+and = getAll #. foldMap All
+
 -- -- | 'or' returns the disjunction of a container of Bools.  For the
 -- -- result to be 'False', the container must be finite; 'True', however,
 -- -- results from a 'True' value finitely far from the left end.

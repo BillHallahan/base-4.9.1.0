@@ -214,7 +214,7 @@ import Data.Traversable
 -- 
 import Data.OldList hiding (
     all,
---     and,
+    and,
     any,
     concat,
     concatMap,
