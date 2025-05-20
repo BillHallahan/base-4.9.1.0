@@ -42,7 +42,7 @@ module GHC.Show
         shows, showChar, showString,
           --  showMultiLineString,
         showParen,
---         showList__, showSpace,
+        showList__, showSpace,
 --         showLitChar, showLitString, protectEsc,
 --         intToDigit, showSignedInt,
 --         appPrec, appPrec1,
@@ -325,10 +325,10 @@ showString      =  (++)
 -- parentheses when the 'Bool' parameter is 'True'.
 showParen       :: Bool -> ShowS -> ShowS
 showParen b p   =  if b then showChar '(' . p . showChar ')' else p
--- 
--- showSpace :: ShowS
--- showSpace = {-showChar ' '-} \ xs -> ' ' : xs
--- 
+
+showSpace :: ShowS
+showSpace = {-showChar ' '-} \ xs -> ' ' : xs
+
 -- Code specific for characters
 
 -- | Convert a character to a string using only printable characters,
