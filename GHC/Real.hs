@@ -23,7 +23,7 @@ module GHC.Real where
 -- 
 import GHC.Base
 import GHC.Num
--- import GHC.List
+import GHC.List
 import GHC.Enum
 import GHC.Show
 -- import {-# SOURCE #-} GHC.Exception( divZeroException, overflowException, ratioZeroDenomException )
@@ -231,30 +231,30 @@ class  (Real a, Fractional a) => RealFrac a  where
 
     floor x             =  if r < fromInteger (Z# 0#) then n - fromInteger (Z# 1#) else n
                            where (n,r) = properFraction x
--- 
--- -- These 'numeric' enumerations come straight from the Report
--- 
--- numericEnumFrom         :: (Fractional a) => a -> [a]
--- numericEnumFrom n       =  n `seq` (n : numericEnumFrom (n + 1))
--- 
--- numericEnumFromThen     :: (Fractional a) => a -> a -> [a]
--- numericEnumFromThen n m = n `seq` m `seq` (n : numericEnumFromThen m (m+m-n))
--- 
--- numericEnumFromTo       :: (Ord a, Fractional a) => a -> a -> [a]
--- numericEnumFromTo n m   = takeWhile (<= m + 1/2) (numericEnumFrom n)
--- 
--- numericEnumFromThenTo   :: (Ord a, Fractional a) => a -> a -> a -> [a]
--- numericEnumFromThenTo e1 e2 e3
---     = takeWhile predicate (numericEnumFromThen e1 e2)
---                                 where
---                                  mid = (e2 - e1) / 2
---                                  predicate | e2 >= e1  = (<= e3 + mid)
---                                            | otherwise = (>= e3 + mid)
--- 
--- --------------------------------------------------------------
--- -- Instances for Int
--- --------------------------------------------------------------
--- 
+
+-- These 'numeric' enumerations come straight from the Report
+
+numericEnumFrom         :: (Fractional a) => a -> [a]
+numericEnumFrom n       =  n `seq` (n : numericEnumFrom (n + fromInteger (Z# 1#)))
+
+numericEnumFromThen     :: (Fractional a) => a -> a -> [a]
+numericEnumFromThen n m = n `seq` m `seq` (n : numericEnumFromThen m (m+m-n))
+
+numericEnumFromTo       :: (Ord a, Fractional a) => a -> a -> [a]
+numericEnumFromTo n m   = takeWhile (<= m + fromInteger (Z# 1#)/fromInteger (Z# 2#)) (numericEnumFrom n)
+
+numericEnumFromThenTo   :: (Ord a, Fractional a) => a -> a -> a -> [a]
+numericEnumFromThenTo e1 e2 e3
+    = takeWhile predicate (numericEnumFromThen e1 e2)
+                                where
+                                 mid = (e2 - e1) / fromInteger (Z# 2#)
+                                 predicate | e2 >= e1  = (<= e3 + mid)
+                                           | otherwise = (>= e3 + mid)
+
+--------------------------------------------------------------
+-- Instances for Int
+--------------------------------------------------------------
+
 instance  Real Int  where
     toRational x        =  toInteger x :% (fromInteger oneInteger)
 -- 

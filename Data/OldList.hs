@@ -32,7 +32,7 @@ module Data.OldList
    , map
    , reverse
 -- 
---    , intersperse
+   , intersperse
 --    , intercalate
 --    , transpose
 -- 
@@ -439,24 +439,24 @@ deleteBy eq x (y:ys)    = if x `eq` y then ys else y : deleteBy eq x ys
 -- intersectBy _  _  []    =  []
 -- intersectBy eq xs ys    =  [x | x <- xs, any (eq x) ys]
 -- 
--- -- | The 'intersperse' function takes an element and a list and
--- -- \`intersperses\' that element between the elements of the list.
--- -- For example,
--- --
--- -- > intersperse ',' "abcde" == "a,b,c,d,e"
+-- | The 'intersperse' function takes an element and a list and
+-- \`intersperses\' that element between the elements of the list.
+-- For example,
+--
+-- > intersperse ',' "abcde" == "a,b,c,d,e"
+
+intersperse             :: a -> [a] -> [a]
+intersperse _   []      = []
+intersperse sep (x:xs)  = x : prependToAll sep xs
 -- 
--- intersperse             :: a -> [a] -> [a]
--- intersperse _   []      = []
--- intersperse sep (x:xs)  = x : prependToAll sep xs
 -- 
--- 
--- -- Not exported:
--- -- We want to make every element in the 'intersperse'd list available
--- -- as soon as possible to avoid space leaks. Experiments suggested that
--- -- a separate top-level helper is more efficient than a local worker.
--- prependToAll            :: a -> [a] -> [a]
--- prependToAll _   []     = []
--- prependToAll sep (x:xs) = sep : x : prependToAll sep xs
+-- Not exported:
+-- We want to make every element in the 'intersperse'd list available
+-- as soon as possible to avoid space leaks. Experiments suggested that
+-- a separate top-level helper is more efficient than a local worker.
+prependToAll            :: a -> [a] -> [a]
+prependToAll _   []     = []
+prependToAll sep (x:xs) = sep : x : prependToAll sep xs
 -- 
 -- -- | 'intercalate' @xs xss@ is equivalent to @('concat' ('intersperse' xs xss))@.
 -- -- It inserts the list @xs@ in between the lists in @xss@ and concatenates the

@@ -633,20 +633,20 @@ instance  Enum Float  where
     pred x         = x - F# 1.0#
     toEnum         = int2Float
     fromEnum       = undefined -- fromInteger . truncate   -- may overflow
-    enumFrom       = undefined -- numericEnumFrom
-    enumFromTo     = undefined -- numericEnumFromTo
-    enumFromThen   = undefined -- numericEnumFromThen
-    enumFromThenTo = undefined -- numericEnumFromThenTo
+    enumFrom       = numericEnumFrom
+    enumFromTo     = numericEnumFromTo
+    enumFromThen   = numericEnumFromThen
+    enumFromThenTo = numericEnumFromThenTo
 -- 
 instance  Enum Double  where
     succ x         = x + D# 1.0##
     pred x         = x - D# 1.0##
     toEnum         =  int2Double
     fromEnum       =  undefined -- fromInteger . truncate   -- may overflow
-    enumFrom       =  undefined -- numericEnumFrom
-    enumFromTo     =  undefined -- numericEnumFromTo
-    enumFromThen   =  undefined -- numericEnumFromThen
-    enumFromThenTo =  undefined -- numericEnumFromThenTo
+    enumFrom       =  numericEnumFrom
+    enumFromTo     =  numericEnumFromTo
+    enumFromThen   =  numericEnumFromThen
+    enumFromThenTo =  numericEnumFromThenTo
 -- 
 -- ------------------------------------------------------------------------
 -- -- Printing floating point
