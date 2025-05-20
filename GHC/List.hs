@@ -143,9 +143,15 @@ null (_:_)              =  False
 -- -- It is an instance of the more general 'Data.List.genericLength',
 -- -- the result type of which may be any kind of number.
 {-# NOINLINE [1] length #-}
-length                  :: [a] -> Int
+length :: [a] -> Int
+length xs =
+    case typeIndex# xs of
+        1# -> I# (strLen# xs)
+        _ -> length' xs
+
+length'                  :: [a] -> Int
 -- length xs               = lenAcc xs 0
-length xs               = lenAcc xs (fromInteger zeroInteger)
+length' xs               = lenAcc xs (fromInteger zeroInteger)
 -- 
 lenAcc          :: [a] -> Int -> Int
 lenAcc []     n = n
