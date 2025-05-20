@@ -409,26 +409,26 @@ instance  (Integral a)  => Num (Ratio a)  where
     abs (x:%y)          =  abs x :% y
     signum (x:%_)       =  signum x :% fromInteger (Z# 1#)
     fromInteger x       =  fromInteger x :% fromInteger (Z# 1#)
+
+{-# RULES "fromRational/id" fromRational = id :: Rational -> Rational #-}
+instance  (Integral a)  => Fractional (Ratio a)  where
+    {-# SPECIALIZE instance Fractional Rational #-}
+    (x:%y) / (x':%y')   =  (x*y') % (y*x')
+    recip (x:%_)   | x == fromInteger (Z# 0#)     = ratioZeroDenominatorError
+    recip (x:%y)
+        | x < 0         = negate y :% negate x
+        | otherwise     = y :% x
+    fromRational (x:%y) =  fromInteger x % fromInteger y
+
+instance  (Integral a)  => Real (Ratio a)  where
+    {-# SPECIALIZE instance Real Rational #-}
+    toRational (x:%y)   =  toInteger x :% toInteger y
 -- 
--- {-# RULES "fromRational/id" fromRational = id :: Rational -> Rational #-}
--- instance  (Integral a)  => Fractional (Ratio a)  where
---     {-# SPECIALIZE instance Fractional Rational #-}
---     (x:%y) / (x':%y')   =  (x*y') % (y*x')
---     recip (0:%_)        = ratioZeroDenominatorError
---     recip (x:%y)
---         | x < 0         = negate y :% negate x
---         | otherwise     = y :% x
---     fromRational (x:%y) =  fromInteger x % fromInteger y
--- 
--- instance  (Integral a)  => Real (Ratio a)  where
---     {-# SPECIALIZE instance Real Rational #-}
---     toRational (x:%y)   =  toInteger x :% toInteger y
--- 
--- instance  (Integral a)  => RealFrac (Ratio a)  where
---     {-# SPECIALIZE instance RealFrac Rational #-}
---     properFraction (x:%y) = (fromInteger (toInteger q), r:%y)
---                           where (q,r) = quotRem x y
--- 
+instance  (Integral a)  => RealFrac (Ratio a)  where
+    {-# SPECIALIZE instance RealFrac Rational #-}
+    properFraction (x:%y) = (fromInteger (toInteger q), r:%y)
+                          where (q,r) = quotRem x y
+
 instance  (Show a)  => Show (Ratio a)  where
     -- {-# SPECIALIZE instance Show Rational #-}
     showsPrec p (x:%y)  =  showParen (p > ratioPrec) $
