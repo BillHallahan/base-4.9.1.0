@@ -416,7 +416,7 @@ instance  (Integral a)  => Fractional (Ratio a)  where
     (x:%y) / (x':%y')   =  (x*y') % (y*x')
     recip (x:%_)   | x == fromInteger (Z# 0#)     = ratioZeroDenominatorError
     recip (x:%y)
-        | x < 0         = negate y :% negate x
+        | x < fromInteger (Z# 0#)         = negate y :% negate x
         | otherwise     = y :% x
     fromRational (x:%y) =  fromInteger x % fromInteger y
 
