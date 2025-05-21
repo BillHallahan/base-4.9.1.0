@@ -445,3 +445,7 @@ data (~#) a b (x :: a) (y :: b) = Co
 {-# NOINLINE strLen# #-}
 strLen# :: [a] -> Int#
 strLen# = strLen#
+
+{-# NOINLINE strAppend# #-}
+strAppend# :: [a] -> [a] -> [a]
+strAppend# = strAppend#
