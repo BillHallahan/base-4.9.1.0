@@ -7,7 +7,7 @@
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Data.Complex
--- Copyright   :  (c) The University of Glasgow 2001
+-- Copyright   :  (c) The University of Glasgow 2(fromInteger zeroInteger)(fromInteger zeroInteger)1
 -- License     :  BSD-style (see the file libraries/base/LICENSE)
 --
 -- Maintainer  :  libraries@haskell.org
@@ -28,7 +28,7 @@ module Data.Complex
         -- * Polar form
         , mkPolar
         , cis
-        , polar
+        -- , polar
         , magnitude
         -- , phase
         -- * Conjugate
@@ -38,6 +38,7 @@ module Data.Complex
 
 -- import GHC.Generics (Generic, Generic1)
 import GHC.Float (Floating(..))
+import GHC.Integer2
 -- import Data.Data (Data)
 -- import Foreign (Storable, castPtr, peek, poke, pokeElemOff, peekElemOff, sizeOf,
 --                 alignment)
@@ -74,7 +75,7 @@ imagPart (_ :+ y) =  y
 -- | The conjugate of a complex number.
 {-# SPECIALISE conjugate :: Complex Double -> Complex Double #-}
 conjugate        :: Num a => Complex a -> Complex a
-conjugate (x:+y) =  x :+ (-y)
+conjugate (x:+y) =  x :+ (negate y)
 
 -- | Form a complex number from polar components of magnitude and phase.
 {-# SPECIALISE mkPolar :: Double -> Double -> Complex Double #-}
@@ -91,9 +92,9 @@ cis theta        =  cos theta :+ sin theta
 -- returns a (magnitude, phase) pair in canonical form:
 -- the magnitude is nonnegative, and the phase in the range @(-'pi', 'pi']@;
 -- if the magnitude is zero, then so is the phase.
-{-# SPECIALISE polar :: Complex Double -> (Double,Double) #-}
-polar            :: (RealFloat a) => Complex a -> (a,a)
-polar z          =  (magnitude z, phase z)
+-- {-# SPECIALISE polar :: Complex Double -> (Double,Double) #-}
+-- polar            :: (RealFloat a) => Complex a -> (a,a)
+-- polar z          =  (magnitude z, phase z)
 
 -- | The nonnegative magnitude of a complex number.
 {-# SPECIALISE magnitude :: Complex Double -> Double #-}
@@ -106,9 +107,9 @@ magnitude (x:+y) =  scaleFloat k
 
 -- | The phase of a complex number, in the range @(-'pi', 'pi']@.
 -- If the magnitude is zero, then so is the phase.
-{-# SPECIALISE phase :: Complex Double -> Double #-}
+-- {-# SPECIALISE phase :: Complex Double -> Double #-}
 -- phase :: (RealFloat a) => Complex a -> a
--- phase (0 :+ 0)   = 0            -- SLPJ July 97 from John Peterson
+-- phase ((fromInteger zeroInteger) :+ (fromInteger zeroInteger))   = (fromInteger zeroInteger)            -- SLPJ July 97 from John Peterson
 -- phase (x:+y)     = atan2 y x
 
 -- 
@@ -122,10 +123,12 @@ instance  (RealFloat a) => Num (Complex a)  where
     (x:+y) - (x':+y')   =  (x-x') :+ (y-y')
     (x:+y) * (x':+y')   =  (x*x'-y*y') :+ (x*y'+y*x')
     negate (x:+y)       =  negate x :+ negate y
-    abs z               =  magnitude z :+ 0
-    signum (0:+0)       =  0
+    abs z               =  magnitude z :+ (fromInteger zeroInteger)
+    signum (x :+ y)
+        | x == fromInteger zeroInteger
+        , y == fromInteger zeroInteger =  (fromInteger zeroInteger)
     signum z@(x:+y)     =  x/r :+ y/r  where r = magnitude z
-    fromInteger n       =  fromInteger n :+ 0
+    fromInteger n       =  fromInteger n :+ (fromInteger zeroInteger)
 -- 
 -- instance  (RealFloat a) => Fractional (Complex a)  where
 --     {-# SPECIALISE instance Fractional (Complex Float) #-}
@@ -136,35 +139,35 @@ instance  (RealFloat a) => Num (Complex a)  where
 --                                  k   = - max (exponent x') (exponent y')
 --                                  d   = x'*x'' + y'*y''
 -- 
---     fromRational a      =  fromRational a :+ 0
+--     fromRational a      =  fromRational a :+ (fromInteger zeroInteger)
 -- 
 -- instance  (RealFloat a) => Floating (Complex a) where
 --     {-# SPECIALISE instance Floating (Complex Float) #-}
 --     {-# SPECIALISE instance Floating (Complex Double) #-}
---     pi             =  pi :+ 0
+--     pi             =  pi :+ (fromInteger zeroInteger)
 --     exp (x:+y)     =  expx * cos y :+ expx * sin y
 --                       where expx = exp x
 --     log z          =  log (magnitude z) :+ phase z
 -- 
 --     x ** y = case (x,y) of
---       (_ , (0:+0))  -> 1 :+ 0
---       ((0:+0), (exp_re:+_)) -> case compare exp_re 0 of
---                  GT -> 0 :+ 0
---                  LT -> inf :+ 0
+--       (_ , ((fromInteger zeroInteger):+(fromInteger zeroInteger)))  -> 1 :+ (fromInteger zeroInteger)
+--       (((fromInteger zeroInteger):+(fromInteger zeroInteger)), (exp_re:+_)) -> case compare exp_re (fromInteger zeroInteger) of
+--                  GT -> (fromInteger zeroInteger) :+ (fromInteger zeroInteger)
+--                  LT -> inf :+ (fromInteger zeroInteger)
 --                  EQ -> nan :+ nan
 --       ((re:+im), (exp_re:+_))
---         | (isInfinite re || isInfinite im) -> case compare exp_re 0 of
---                  GT -> inf :+ 0
---                  LT -> 0 :+ 0
+--         | (isInfinite re || isInfinite im) -> case compare exp_re (fromInteger zeroInteger) of
+--                  GT -> inf :+ (fromInteger zeroInteger)
+--                  LT -> (fromInteger zeroInteger) :+ (fromInteger zeroInteger)
 --                  EQ -> nan :+ nan
 --         | otherwise -> exp (log x * y)
 --       where
---         inf = 1/0
---         nan = 0/0
+--         inf = 1/(fromInteger zeroInteger)
+--         nan = (fromInteger zeroInteger)/(fromInteger zeroInteger)
 -- 
---     sqrt (0:+0)    =  0
---     sqrt z@(x:+y)  =  u :+ (if y < 0 then -v else v)
---                       where (u,v) = if x < 0 then (v',u') else (u',v')
+--     sqrt ((fromInteger zeroInteger):+(fromInteger zeroInteger))    =  (fromInteger zeroInteger)
+--     sqrt z@(x:+y)  =  u :+ (if y < (fromInteger zeroInteger) then -v else v)
+--                       where (u,v) = if x < (fromInteger zeroInteger) then (v',u') else (u',v')
 --                             v'    = abs y / (u'*2)
 --                             u'    = sqrt ((magnitude z + abs x) / 2)
 -- 
@@ -194,10 +197,10 @@ instance  (RealFloat a) => Num (Complex a)  where
 -- 
 --     asinh z        =  log (z + sqrt (1+z*z))
 --     acosh z        =  log (z + (z+1) * sqrt ((z-1)/(z+1)))
---     atanh z        =  0.5 * log ((1.0+z) / (1.0-z))
+--     atanh z        =  (fromInteger zeroInteger).5 * log ((1.(fromInteger zeroInteger)+z) / (1.(fromInteger zeroInteger)-z))
 -- 
 --     log1p x@(a :+ b)
---       | abs a < 0.5 && abs b < 0.5
+--       | abs a < (fromInteger zeroInteger).5 && abs b < (fromInteger zeroInteger).5
 --       , u <- 2*a + a*a + b*b = log1p (u/(1 + sqrt(u+1))) :+ atan2 (1 + a) b
 --       | otherwise = log (1 + x)
 --     {-# INLINE log1p #-}
