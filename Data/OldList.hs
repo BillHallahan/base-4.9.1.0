@@ -158,11 +158,11 @@ module Data.OldList
 -- 
    , nub
 -- 
---    , delete
+   , delete
    , (\\)
 -- 
---    , union
---    , intersect
+   , union
+   , intersect
 -- 
 --    -- ** Ordered lists
    , sort
@@ -182,10 +182,10 @@ module Data.OldList
 --    -- *** User-supplied equality (replacing an @Eq@ context)
 --    -- | The predicate is assumed to define an equivalence.
    , nubBy
---    , deleteBy
---    , deleteFirstsBy
---    , unionBy
---    , intersectBy
+   , deleteBy
+   , deleteFirstsBy
+   , unionBy
+   , intersectBy
 --    , groupBy
 -- 
 --    -- *** User-supplied comparison (replacing an @Ord@ context)
@@ -398,47 +398,47 @@ deleteBy eq x (y:ys)    = if x `eq` y then ys else y : deleteBy eq x ys
 
 (\\)                    :: (Eq a) => [a] -> [a] -> [a]
 (\\)                    =  foldl (flip delete)
--- 
--- -- | The 'union' function returns the list union of the two lists.
--- -- For example,
--- --
--- -- > "dog" `union` "cow" == "dogcw"
--- --
--- -- Duplicates, and elements of the first list, are removed from the
--- -- the second list, but if the first list contains duplicates, so will
--- -- the result.
--- -- It is a special case of 'unionBy', which allows the programmer to supply
--- -- their own equality test.
--- 
--- union                   :: (Eq a) => [a] -> [a] -> [a]
--- union                   = unionBy (==)
--- 
--- -- | The 'unionBy' function is the non-overloaded version of 'union'.
--- unionBy                 :: (a -> a -> Bool) -> [a] -> [a] -> [a]
--- unionBy eq xs ys        =  xs ++ foldl (flip (deleteBy eq)) (nubBy eq ys) xs
--- 
--- -- | The 'intersect' function takes the list intersection of two lists.
--- -- For example,
--- --
--- -- > [1,2,3,4] `intersect` [2,4,6,8] == [2,4]
--- --
--- -- If the first list contains duplicates, so will the result.
--- --
--- -- > [1,2,2,3,4] `intersect` [6,4,4,2] == [2,2,4]
--- --
--- -- It is a special case of 'intersectBy', which allows the programmer to
--- -- supply their own equality test. If the element is found in both the first
--- -- and the second list, the element from the first list will be used.
--- 
--- intersect               :: (Eq a) => [a] -> [a] -> [a]
--- intersect               =  intersectBy (==)
--- 
--- -- | The 'intersectBy' function is the non-overloaded version of 'intersect'.
--- intersectBy             :: (a -> a -> Bool) -> [a] -> [a] -> [a]
--- intersectBy _  [] _     =  []
--- intersectBy _  _  []    =  []
--- intersectBy eq xs ys    =  [x | x <- xs, any (eq x) ys]
--- 
+
+-- | The 'union' function returns the list union of the two lists.
+-- For example,
+--
+-- > "dog" `union` "cow" == "dogcw"
+--
+-- Duplicates, and elements of the first list, are removed from the
+-- the second list, but if the first list contains duplicates, so will
+-- the result.
+-- It is a special case of 'unionBy', which allows the programmer to supply
+-- their own equality test.
+
+union                   :: (Eq a) => [a] -> [a] -> [a]
+union                   = unionBy (==)
+
+-- | The 'unionBy' function is the non-overloaded version of 'union'.
+unionBy                 :: (a -> a -> Bool) -> [a] -> [a] -> [a]
+unionBy eq xs ys        =  xs ++ foldl (flip (deleteBy eq)) (nubBy eq ys) xs
+
+-- | The 'intersect' function takes the list intersection of two lists.
+-- For example,
+--
+-- > [1,2,3,4] `intersect` [2,4,6,8] == [2,4]
+--
+-- If the first list contains duplicates, so will the result.
+--
+-- > [1,2,2,3,4] `intersect` [6,4,4,2] == [2,2,4]
+--
+-- It is a special case of 'intersectBy', which allows the programmer to
+-- supply their own equality test. If the element is found in both the first
+-- and the second list, the element from the first list will be used.
+
+intersect               :: (Eq a) => [a] -> [a] -> [a]
+intersect               =  intersectBy (==)
+
+-- | The 'intersectBy' function is the non-overloaded version of 'intersect'.
+intersectBy             :: (a -> a -> Bool) -> [a] -> [a] -> [a]
+intersectBy _  [] _     =  []
+intersectBy _  _  []    =  []
+intersectBy eq xs ys    =  [x | x <- xs, any (eq x) ys]
+
 -- | The 'intersperse' function takes an element and a list and
 -- \`intersperses\' that element between the elements of the list.
 -- For example,
@@ -721,14 +721,14 @@ genericLength (_:l)     =  fromInteger (Z# 1#) + genericLength l
 -- unzip7          =  foldr (\(a,b,c,d,e,f,g) ~(as,bs,cs,ds,es,fs,gs) ->
 --                                 (a:as,b:bs,c:cs,d:ds,e:es,f:fs,g:gs))
 --                          ([],[],[],[],[],[],[])
--- 
--- 
--- -- | The 'deleteFirstsBy' function takes a predicate and two lists and
--- -- returns the first list with the first occurrence of each element of
--- -- the second list removed.
--- deleteFirstsBy          :: (a -> a -> Bool) -> [a] -> [a] -> [a]
--- deleteFirstsBy eq       =  foldl (flip (deleteBy eq))
--- 
+
+
+-- | The 'deleteFirstsBy' function takes a predicate and two lists and
+-- returns the first list with the first occurrence of each element of
+-- the second list removed.
+deleteFirstsBy          :: (a -> a -> Bool) -> [a] -> [a] -> [a]
+deleteFirstsBy eq       =  foldl (flip (deleteBy eq))
+
 -- -- | The 'group' function takes a list and returns a list of lists such
 -- -- that the concatenation of the result is equal to the argument.  Moreover,
 -- -- each sublist in the result contains only equal elements.  For example,
