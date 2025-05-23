@@ -1,26 +1,26 @@
--- {-# LANGUAGE Trustworthy #-}
--- {-# LANGUAGE CPP, NoImplicitPrelude, BangPatterns, MagicHash, UnboxedTuples #-}
--- {-# OPTIONS_HADDOCK hide #-}
--- 
--- -----------------------------------------------------------------------------
--- -- |
--- -- Module      :  GHC.Word
--- -- Copyright   :  (c) The University of Glasgow, 1997-2002
--- -- License     :  see libraries/base/LICENSE
--- --
--- -- Maintainer  :  cvs-ghc@haskell.org
--- -- Stability   :  internal
--- -- Portability :  non-portable (GHC Extensions)
--- --
--- -- Sized unsigned integral types: 'Word', 'Word8', 'Word16', 'Word32', and
--- -- 'Word64'.
--- --
--- -----------------------------------------------------------------------------
--- 
+{-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE CPP, NoImplicitPrelude, BangPatterns, MagicHash, UnboxedTuples #-}
+{-# OPTIONS_HADDOCK hide #-}
+
+-----------------------------------------------------------------------------
+-- |
+-- Module      :  GHC.Word
+-- Copyright   :  (c) The University of Glasgow, 1997-2002
+-- License     :  see libraries/base/LICENSE
+--
+-- Maintainer  :  cvs-ghc@haskell.org
+-- Stability   :  internal
+-- Portability :  non-portable (GHC Extensions)
+--
+-- Sized unsigned integral types: 'Word', 'Word8', 'Word16', 'Word32', and
+-- 'Word64'.
+--
+-----------------------------------------------------------------------------
+
 -- #include "MachDeps.h"
--- 
--- module GHC.Word (
---     Word(..), Word8(..), Word16(..), Word32(..), Word64(..),
+
+module GHC.Word (
+    Word(..) -- , Word8(..), Word16(..), Word32(..), Word64(..),
 -- 
 --     -- * Shifts
 --     uncheckedShiftL64#,
@@ -38,7 +38,7 @@
 --     eqWord16, neWord16, gtWord16, geWord16, ltWord16, leWord16,
 --     eqWord32, neWord32, gtWord32, geWord32, ltWord32, leWord32,
 --     eqWord64, neWord64, gtWord64, geWord64, ltWord64, leWord64
---     ) where
+    ) where
 -- 
 -- import Data.Bits
 -- import Data.Maybe
@@ -47,7 +47,7 @@
 -- import GHC.IntWord64
 -- #endif
 -- 
--- import GHC.Base
+import GHC.Base
 -- import GHC.Enum
 -- import GHC.Num
 -- import GHC.Real

@@ -65,7 +65,7 @@ smallInteger x = Z# x
 --                   else Positive (Some w None)
 -- 
 integerToWord :: Integer -> Word#
-integerToWord (Z# i) = integerToWord# i
+integerToWord (Z# i) = if i $># 0# then integerToWord# i else integerToWord# i `plusWord#` 18446744073709551615##
 
 -- The definition of integerToWord will be replaced with a primitive operation in GHC.
 -- Having it (incorrectly) just return 0 here avoids incorrect inlining based on the idea
