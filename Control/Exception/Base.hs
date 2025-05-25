@@ -78,9 +78,9 @@ module Control.Exception.Base (
 --         MaskingState(..),
 --         getMaskingState,
 -- 
---         -- * Assertions
--- 
---         assert,
+        -- * Assertions
+
+        assert,
 -- 
 --         -- * Utilities
 -- 
@@ -101,9 +101,9 @@ module Control.Exception.Base (
 --         nonTermination, nestedAtomically,
   ) where
 -- 
--- import GHC.Base
+import GHC.Base
 -- import GHC.IO hiding (bracket,finally,onException)
--- import GHC.IO.Exception
+import GHC.IO.Exception
 -- import GHC.Exception
 -- import GHC.Show
 -- -- import GHC.Exception hiding ( Exception )

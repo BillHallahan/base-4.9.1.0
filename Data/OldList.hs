@@ -34,7 +34,7 @@ module Data.OldList
 -- 
    , intersperse
 --    , intercalate
---    , transpose
+   , transpose
 -- 
 --    , subsequences
 --    , permutations
@@ -458,33 +458,33 @@ prependToAll            :: a -> [a] -> [a]
 prependToAll _   []     = []
 prependToAll sep (x:xs) = sep : x : prependToAll sep xs
 -- 
--- -- | 'intercalate' @xs xss@ is equivalent to @('concat' ('intersperse' xs xss))@.
--- -- It inserts the list @xs@ in between the lists in @xss@ and concatenates the
--- -- result.
--- intercalate :: [a] -> [[a]] -> [a]
--- intercalate xs xss = concat (intersperse xs xss)
--- 
--- -- | The 'transpose' function transposes the rows and columns of its argument.
--- -- For example,
--- --
--- -- > transpose [[1,2,3],[4,5,6]] == [[1,4],[2,5],[3,6]]
--- --
--- -- If some of the rows are shorter than the following rows, their elements are skipped:
--- --
--- -- > transpose [[10,11],[20],[],[30,31,32]] == [[10,20,30],[11,31],[32]]
--- 
--- transpose               :: [[a]] -> [[a]]
--- transpose []             = []
--- transpose ([]   : xss)   = transpose xss
--- transpose ((x:xs) : xss) = (x : [h | (h:_) <- xss]) : transpose (xs : [ t | (_:t) <- xss])
--- 
--- 
--- -- | The 'partition' function takes a predicate a list and returns
--- -- the pair of lists of elements which do and do not satisfy the
--- -- predicate, respectively; i.e.,
--- --
--- -- > partition p xs == (filter p xs, filter (not . p) xs)
--- 
+-- | 'intercalate' @xs xss@ is equivalent to @('concat' ('intersperse' xs xss))@.
+-- It inserts the list @xs@ in between the lists in @xss@ and concatenates the
+-- result.
+intercalate :: [a] -> [[a]] -> [a]
+intercalate xs xss = concat (intersperse xs xss)
+
+-- | The 'transpose' function transposes the rows and columns of its argument.
+-- For example,
+--
+-- > transpose [[1,2,3],[4,5,6]] == [[1,4],[2,5],[3,6]]
+--
+-- If some of the rows are shorter than the following rows, their elements are skipped:
+--
+-- > transpose [[10,11],[20],[],[30,31,32]] == [[10,20,30],[11,31],[32]]
+
+transpose               :: [[a]] -> [[a]]
+transpose []             = []
+transpose ([]   : xss)   = transpose xss
+transpose ((x:xs) : xss) = (x : [h | (h:_) <- xss]) : transpose (xs : [ t | (_:t) <- xss])
+
+
+-- | The 'partition' function takes a predicate a list and returns
+-- the pair of lists of elements which do and do not satisfy the
+-- predicate, respectively; i.e.,
+--
+-- > partition p xs == (filter p xs, filter (not . p) xs)
+
 partition               :: (a -> Bool) -> [a] -> ([a],[a])
 {-# INLINE partition #-}
 partition p xs = foldr (select p) ([],[]) xs
