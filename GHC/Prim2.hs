@@ -449,3 +449,8 @@ strLen# = strLen#
 {-# NOINLINE strAppend# #-}
 strAppend# :: [a] -> [a] -> [a]
 strAppend# = strAppend#
+
+{-# NOINLINE strAt# #-}
+strAt# :: [a] -> Int# -> [a]
+strAt# = strAt#
+

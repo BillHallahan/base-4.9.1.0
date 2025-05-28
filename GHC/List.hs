@@ -890,12 +890,28 @@ concat = foldr (++) []
 #endif
 -- #ifdef USE_REPORT_PRELUDE
 -- xs     !! n | n < 0 =  errorWithoutStackTrace "Prelude.!!: negative index"
-xs     !! n | n < (fromInteger zeroInteger) =  errorWithoutStackTrace "Prelude.!!: negative index"
+-- xs     !! n | n < (fromInteger zeroInteger) =  errorWithoutStackTrace "Prelude.!!: negative index"
 -- []     !! _         =  errorWithoutStackTrace "Prelude.!!: index too large"
-[]     !! _         =  errorWithoutStackTrace "Prelude.!!: index too large"
+-- []     !! _         =  errorWithoutStackTrace "Prelude.!!: index too large"
 -- (x:_)  !! 0         =  x
 -- (_:xs) !! n         =  xs !! (n-1)
-(x:xs) !! n = if n == fromInteger zeroInteger then x else xs !! (n - fromInteger oneInteger)
+-- (x:xs) !! n = if n == fromInteger zeroInteger then x else xs !! (n - fromInteger oneInteger)
+
+-- For strings, smt-lib has a function str.at that takes a string and an index
+-- and returns a string with the char at that index or an empty string if the index is invalid
+xs !! n =
+    let reg_idx xs n | n < (fromInteger zeroInteger) = errorWithoutStackTrace "Prelude.!!: negative index"
+        reg_idx [] _     = errorWithoutStackTrace "Prelude.!!: index too large"
+        reg_idx (x:xs) n = if n == fromInteger zeroInteger then x else xs !! (n - fromInteger oneInteger)
+
+        str_idx xs n
+            | (h:_) <- i = h
+            | otherwise  = errorWithoutStackTrace "Prelude.!!: error with smtlib str.at"
+            where i = strAt# xs n
+
+    in case typeIndex# xs of
+        1# -> str_idx xs n
+        _ -> reg_idx xs n
 -- #else
 -- 
 -- -- We don't really want the errors to inline with (!!).
