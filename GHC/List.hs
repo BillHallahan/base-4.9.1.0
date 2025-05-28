@@ -907,7 +907,8 @@ xs !! n =
         str_idx xs n
             | (h:_) <- i = h
             | otherwise  = errorWithoutStackTrace "Prelude.!!: error with smtlib str.at"
-            where i = strAt# xs n
+            where I# n' = n
+                  i = strAt# xs n'
 
     in case typeIndex# xs of
         1# -> str_idx xs n
