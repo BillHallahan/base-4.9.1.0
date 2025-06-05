@@ -1,5 +1,5 @@
--- {-# LANGUAGE Trustworthy #-}
--- {-# LANGUAGE NoImplicitPrelude, ExistentialQuantification #-}
+{-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE NoImplicitPrelude, ExistentialQuantification #-}
 -- 
 -- -----------------------------------------------------------------------------
 -- -- |
@@ -31,7 +31,7 @@
 -- --
 -- -----------------------------------------------------------------------------
 -- 
--- module Control.Exception (
+module Control.Exception (
 -- 
 --         -- * The Exception type
 --         SomeException(..),
@@ -119,7 +119,7 @@
 -- 
 --         -- * Assertions
 -- 
---         assert,
+        assert
 -- 
 --         -- * Utilities
 -- 
@@ -130,11 +130,11 @@
 --         finally,
 --         onException,
 -- 
---   ) where
+  ) where
 -- 
 -- import Control.Exception.Base
 -- 
--- import GHC.Base
+import GHC.Base
 -- import GHC.IO (interruptible)
 -- 
 -- -- | You need this when using 'catches'.

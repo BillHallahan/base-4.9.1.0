@@ -239,8 +239,7 @@ isAlphaNum              :: Char -> Bool
 -- 
 -- -- | Selects ASCII digits, i.e. @\'0\'@..@\'9\'@.
 isDigit                 :: Char -> Bool
-isDigit = isDigit
--- isDigit c               =  (fromIntegral (ord c - ord '0') :: Word) <= 9
+isDigit c               =  (fromIntegral (ord c - ord '0') :: Word) <= fromInteger (Z# 9#)
 -- 
 -- -- We use an addition and an unsigned comparison instead of two signed
 -- -- comparisons because it's usually faster and puts less strain on branch

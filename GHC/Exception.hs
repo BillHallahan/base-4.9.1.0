@@ -1,10 +1,10 @@
--- {-# LANGUAGE Trustworthy #-}
--- {-# LANGUAGE NoImplicitPrelude
---            , ExistentialQuantification
---            , MagicHash
---            , RecordWildCards
---            , PatternSynonyms
---   #-}
+{-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE NoImplicitPrelude
+           , ExistentialQuantification
+           , MagicHash
+           , RecordWildCards
+           , PatternSynonyms
+  #-}
 -- {-# OPTIONS_HADDOCK hide #-}
 -- 
 -- -----------------------------------------------------------------------------
@@ -21,7 +21,8 @@
 -- --
 -- -----------------------------------------------------------------------------
 -- 
--- module GHC.Exception
+module GHC.Exception
+          (
 --        ( Exception(..)    -- Class
 --        , throw
 --        , SomeException(..), ErrorCall(..,ErrorCall), ArithException(..)
@@ -31,7 +32,7 @@
 --        , CallStack, fromCallSiteList, getCallStack, prettyCallStack
 --        , prettyCallStackLines, showCCSStack
 --        , SrcLoc(..), prettySrcLoc
---        ) where
+       ) where
 -- 
 -- import Data.Maybe
 -- import Data.Typeable (Typeable, cast)

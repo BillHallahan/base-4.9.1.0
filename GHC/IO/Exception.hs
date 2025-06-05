@@ -1,6 +1,6 @@
--- {-# LANGUAGE Trustworthy #-}
--- {-# LANGUAGE DeriveGeneric, NoImplicitPrelude, MagicHash,
---              ExistentialQuantification, ImplicitParams #-}
+{-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE DeriveGeneric, NoImplicitPrelude, MagicHash,
+             ExistentialQuantification, ImplicitParams #-}
 -- {-# OPTIONS_GHC -funbox-strict-fields #-}
 -- {-# OPTIONS_HADDOCK hide #-}
 -- 
@@ -18,7 +18,7 @@
 -- --
 -- -----------------------------------------------------------------------------
 -- 
--- module GHC.IO.Exception (
+module GHC.IO.Exception (
 --   BlockedIndefinitelyOnMVar(..), blockedIndefinitelyOnMVar,
 --   BlockedIndefinitelyOnSTM(..), blockedIndefinitelyOnSTM,
 --   Deadlock(..),
@@ -38,12 +38,12 @@
 --   IOException(..),
 --   IOErrorType(..),
 --   userError,
---   assertError,
+  assertError,
 --   unsupportedOperation,
 --   untangle,
---  ) where
+ ) where
 -- 
--- import GHC.Base
+import GHC.Base
 -- import GHC.Generics
 -- import GHC.List
 -- import GHC.IO
@@ -56,6 +56,8 @@
 -- import Foreign.C.Types
 -- 
 -- import Data.Typeable ( cast )
+
+import GHC.Stack.Types
 -- 
 -- -- ------------------------------------------------------------------------
 -- -- Exception datatypes and operations
@@ -354,8 +356,9 @@
 -- -- Note the use of "lazy". This means that
 -- --     assert False (throw e)
 -- -- will throw the assertion failure rather than e. See trac #5561.
--- assertError :: (?callStack :: CallStack) => Bool -> a -> a
--- assertError predicate v
+assertError :: (?callStack :: CallStack) => Bool -> a -> a
+assertError predicate v
+      = v
 --   | predicate = lazy v
 --   | otherwise = unsafeDupablePerformIO $ do
 --     ccsStack <- currentCallStack
