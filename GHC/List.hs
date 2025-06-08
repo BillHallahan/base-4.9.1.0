@@ -579,10 +579,20 @@ dropWhile p xs@(x:xs')
 -- -- It is an instance of the more general 'Data.List.genericTake',
 -- -- in which @n@ may be of any integral type.
 take                   :: Int -> [a] -> [a]
+take n xs = let
+                take' n _ | n <= (fromInteger zeroInteger) =  []
+                take' _ [] =  []
+                take' n (x:xs) = x : take' (n - (fromInteger oneInteger)) xs
+                
+                I# n' = n
+            in case typeIndex# xs of
+                1# -> strSubstr# xs 0# n'
+                _ -> take' n xs
+            
 -- #ifdef USE_REPORT_PRELUDE
-take n _      | n <= (fromInteger zeroInteger) =  []
-take _ []              =  []
-take n (x:xs)          =  x : take (n-(fromInteger oneInteger)) xs
+-- take n _      | n <= (fromInteger zeroInteger) =  []
+-- take _ []              =  []
+-- take n (x:xs)          =  x : take (n-(fromInteger oneInteger)) xs
 -- #else
 -- 
 -- {- We always want to inline this to take advantage of a known length argument

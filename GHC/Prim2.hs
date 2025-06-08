@@ -442,6 +442,8 @@ tagToEnum# _ = let x = x in x
 
 data (~#) a b (x :: a) (y :: b) = Co
 
+-- String primitives
+
 {-# NOINLINE strLen# #-}
 strLen# :: [a] -> Int#
 strLen# = strLen#
@@ -454,3 +456,6 @@ strAppend# = strAppend#
 strAt# :: [a] -> Int# -> [a]
 strAt# = strAt#
 
+{-# NOINLINE strSubstr# #-}
+strSubstr# :: [a] -> Int# -> Int# -> [a]
+strSubstr# = strSubstr#
