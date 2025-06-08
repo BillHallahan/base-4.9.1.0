@@ -459,3 +459,7 @@ strAt# = strAt#
 {-# NOINLINE strSubstr# #-}
 strSubstr# :: [a] -> Int# -> Int# -> [a]
 strSubstr# = strSubstr#
+
+{-# NOINLINE strEq# #-}
+strEq# :: [a] -> [a] -> Bool
+strEq# = strEq#

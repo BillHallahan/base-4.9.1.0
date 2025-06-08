@@ -94,16 +94,16 @@ instance (Eq a) => Eq [a] where
     {-# SPECIALISE instance Eq [Char] #-}
     {-# SPECIALISE instance Eq [Int] #-}
     -- Special handling for string equality as smtlib supports it directly
-    -- xs ys = let
-    --             listEq [] [] = True
-    --             listEq (a:as) (b:bs) = a == b && listEq as bs
-    --             listEq _ _ = False 
-    --         in case typeIndex# xs of
-    --             1# -> strEq# xs ys
-    --             _ -> listEq xs ys
-    []     == []     = True
-    (x:xs) == (y:ys) = x == y && xs == ys
-    _xs    == _ys    = False
+    xs == ys = let
+                listEq [] [] = True
+                listEq (a:as) (b:bs) = a == b && listEq as bs
+                listEq _ _ = False 
+            in case typeIndex# xs of
+                1# -> strEq# xs ys
+                _ -> listEq xs ys
+    -- []     == []     = True
+    -- (x:xs) == (y:ys) = x == y && xs == ys
+    -- _xs    == _ys    = False
 
 instance Eq Bool where
     True  == True  = True
