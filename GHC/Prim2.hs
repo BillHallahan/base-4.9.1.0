@@ -55,6 +55,10 @@ import GHC.PrimSMT
 
 -- Int# operators
 
+-- Returns 0 to indicate an unrecognized type, or positive Ints for special recognized types.
+typeIndex# :: forall a . a -> Int#
+typeIndex# = typeIndex#
+
 (+#) :: Int# -> Int# -> Int#
 (+#) = (+#)
 
@@ -437,3 +441,25 @@ tagToEnum# :: Int# -> a
 tagToEnum# _ = let x = x in x
 
 data (~#) a b (x :: a) (y :: b) = Co
+
+-- String primitives
+
+{-# NOINLINE strLen# #-}
+strLen# :: [a] -> Int#
+strLen# = strLen#
+
+{-# NOINLINE strAppend# #-}
+strAppend# :: [a] -> [a] -> [a]
+strAppend# = strAppend#
+
+{-# NOINLINE strAt# #-}
+strAt# :: [a] -> Int# -> [a]
+strAt# = strAt#
+
+{-# NOINLINE strSubstr# #-}
+strSubstr# :: [a] -> Int# -> Int# -> [a]
+strSubstr# = strSubstr#
+
+{-# NOINLINE strEq# #-}
+strEq# :: [a] -> [a] -> Bool
+strEq# = strEq#

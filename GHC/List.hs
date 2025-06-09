@@ -143,9 +143,15 @@ null (_:_)              =  False
 -- -- It is an instance of the more general 'Data.List.genericLength',
 -- -- the result type of which may be any kind of number.
 {-# NOINLINE [1] length #-}
-length                  :: [a] -> Int
+length :: [a] -> Int
+length xs =
+    case typeIndex# xs of
+        1# -> I# (strLen# xs)
+        _ -> length' xs
+
+length'                  :: [a] -> Int
 -- length xs               = lenAcc xs 0
-length xs               = lenAcc xs (fromInteger zeroInteger)
+length' xs               = lenAcc xs (fromInteger zeroInteger)
 -- 
 lenAcc          :: [a] -> Int -> Int
 lenAcc []     n = n
@@ -573,10 +579,20 @@ dropWhile p xs@(x:xs')
 -- -- It is an instance of the more general 'Data.List.genericTake',
 -- -- in which @n@ may be of any integral type.
 take                   :: Int -> [a] -> [a]
+take n xs = let
+                take' n _ | n <= (fromInteger zeroInteger) =  []
+                take' _ [] =  []
+                take' n (x:xs) = x : take' (n - (fromInteger oneInteger)) xs
+                
+                I# n' = n
+            in case typeIndex# xs of
+                1# -> strSubstr# xs 0# n'
+                _ -> take' n xs
+            
 -- #ifdef USE_REPORT_PRELUDE
-take n _      | n <= (fromInteger zeroInteger) =  []
-take _ []              =  []
-take n (x:xs)          =  x : take (n-(fromInteger oneInteger)) xs
+-- take n _      | n <= (fromInteger zeroInteger) =  []
+-- take _ []              =  []
+-- take n (x:xs)          =  x : take (n-(fromInteger oneInteger)) xs
 -- #else
 -- 
 -- {- We always want to inline this to take advantage of a known length argument
@@ -884,12 +900,29 @@ concat = foldr (++) []
 #endif
 -- #ifdef USE_REPORT_PRELUDE
 -- xs     !! n | n < 0 =  errorWithoutStackTrace "Prelude.!!: negative index"
-xs     !! n | n < (fromInteger zeroInteger) =  errorWithoutStackTrace "Prelude.!!: negative index"
+-- xs     !! n | n < (fromInteger zeroInteger) =  errorWithoutStackTrace "Prelude.!!: negative index"
 -- []     !! _         =  errorWithoutStackTrace "Prelude.!!: index too large"
-[]     !! _         =  errorWithoutStackTrace "Prelude.!!: index too large"
+-- []     !! _         =  errorWithoutStackTrace "Prelude.!!: index too large"
 -- (x:_)  !! 0         =  x
 -- (_:xs) !! n         =  xs !! (n-1)
-(x:xs) !! n = if n == fromInteger zeroInteger then x else xs !! (n - fromInteger oneInteger)
+-- (x:xs) !! n = if n == fromInteger zeroInteger then x else xs !! (n - fromInteger oneInteger)
+
+-- For strings, smt-lib has a function str.at that takes a string and an index
+-- and returns a string with the char at that index or an empty string if the index is invalid
+xs !! n =
+    let reg_idx xs n | n < (fromInteger zeroInteger) = errorWithoutStackTrace "Prelude.!!: negative index"
+        reg_idx [] _     = errorWithoutStackTrace "Prelude.!!: index too large"
+        reg_idx (x:xs) n = if n == fromInteger zeroInteger then x else xs !! (n - fromInteger oneInteger)
+
+        str_idx xs n
+            | (h:_) <- i = h
+            | otherwise  = errorWithoutStackTrace "Prelude.!!: error with smtlib str.at"
+            where I# n' = n
+                  i = strAt# xs n'
+
+    in case typeIndex# xs of
+        1# -> str_idx xs n
+        _ -> reg_idx xs n
 -- #else
 -- 
 -- -- We don't really want the errors to inline with (!!).
