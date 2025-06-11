@@ -788,7 +788,7 @@ eqString xs ys =
             eqString (c1:cs1) (c2:cs2) = c1 == c2 && cs1 `eqString` cs2
             eqString _        _        = False
         in
-        case typeIndex# xs of
+        case xs `adjStr` ys `adjStr` typeIndex# xs of
                 1# -> strEq# xs ys
                 _ -> eqString xs ys
 

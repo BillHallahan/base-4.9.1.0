@@ -12,6 +12,10 @@ import GHC.Types
 -- because we need to avoid GHC trying to optimize based on the idea
 -- that these functions lead to infinite loops
 
+{-# NOINLINE isSymbolic# #-}
+isSymbolic# :: forall a . a -> Bool
+isSymbolic# = isSymbolic#
+
 {-# NOINLINE ($==#) #-}
 ($==#) :: Int# -> Int# -> Bool
 ($==#) = ($==#)

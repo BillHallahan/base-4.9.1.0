@@ -463,3 +463,13 @@ strSubstr# = strSubstr#
 {-# NOINLINE strEq# #-}
 strEq# :: [a] -> [a] -> Bool
 strEq# = strEq#
+
+infixr 5 `adjStr`
+
+{-# NOINLINE adjStr #-}
+adjStr :: [a] -> Int# -> Int#
+adjStr !xs x = go xs
+  where
+    go xs | isSymbolic# xs = x
+    go [] = x
+    go (x:xs) = go xs
