@@ -464,11 +464,11 @@ strSubstr# = strSubstr#
 strEq# :: [a] -> [a] -> Bool
 strEq# = strEq#
 
-infixr 5 `adjStr`
+infixl 5 `adjStr`
 
 {-# NOINLINE adjStr #-}
-adjStr :: [a] -> Int# -> Int#
-adjStr !xs x = go xs
+adjStr :: forall a . Int# -> [a] -> Int#
+adjStr x xs = case x of 1# -> go xs; _ -> x
   where
     go xs | isSymbolic# xs = x
     go [] = x
