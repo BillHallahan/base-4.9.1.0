@@ -12,9 +12,10 @@ import GHC.Types
 -- because we need to avoid GHC trying to optimize based on the idea
 -- that these functions lead to infinite loops
 
-{-# NOINLINE isSymbolic# #-}
-isSymbolic# :: forall a . a -> Bool
-isSymbolic# = isSymbolic#
+-- Is the value representable in the SMT solver?
+{-# NOINLINE isSMTRep# #-}
+isSMTRep# :: forall a . a -> Bool
+isSMTRep# = isSMTRep#
 
 {-# NOINLINE ($==#) #-}
 ($==#) :: Int# -> Int# -> Bool

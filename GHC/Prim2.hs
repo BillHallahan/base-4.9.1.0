@@ -466,10 +466,40 @@ strEq# = strEq#
 
 infixl 5 `adjStr`
 
+-- Note [adjStr]
+-- go walks over a String to make sure that it is representable in the SMT solver.
+-- Suppose we have:
+--
+-- > xs ++ (f ys)
+--
+-- (where xs is a symbolic variable of type String.)
+-- We must evaluate `f ys` to get a string that can be sent to the SMT solver.
+-- However, we want to avoid concretizing the symbolic variable xs.
+-- Thus, adjStr first checks if it is passed a symbolic variable (or other string that is
+-- already representable in the SMT solver, i.e. a literal or primtive application), and
+-- if so does nothing. Only if passed a non-SMT representable value does adjStr walk over the value,
+-- forcing evaluation.
+--
+-- Note that we:
+-- (1) first check if the input to go is SMT representable
+-- (2) if it is not, force evaluation of the input, then again check if the value is SMT representable.
+-- This is needed because of the following scenario: suppose we have:
+-- > xs Data.List.++ (ys Data.List.++ zs)
+-- This should result in no concretization- however, recognizing that `ys Data.List.++ zs` requires
+-- no evaluation requires evaluating it to reach the primitive StrAppend operator.
+-- However, we cannot ALWAYS force evaluation, because evaluating xs will result in case splitting.
+-- Thus, we first check if the value is ALREADY SMT representable, and only if it is not,
+-- force evaluation.
+-- (If the value is not SMT representable at all, even after evaluation, we are no worse off, since
+-- such values must just be concretized.)
+
+-- Force evaluation of Strings so that they can be sent to the SMT solver.
 {-# NOINLINE adjStr #-}
 adjStr :: forall a . Int# -> [a] -> Int#
 adjStr x xs = case x of 1# -> go xs; _ -> x
   where
-    go xs | isSymbolic# xs = x
+    -- See note [adjStr]
+    go xs | isSMTRep# xs = x
+    go !xs | isSMTRep# xs = x
     go [] = x
     go (x:xs) = go xs
