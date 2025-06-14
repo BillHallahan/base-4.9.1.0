@@ -98,7 +98,7 @@ instance (Eq a) => Eq [a] where
                 listEq [] [] = True
                 listEq (a:as) (b:bs) = a == b && listEq as bs
                 listEq _ _ = False 
-            in case typeIndex# xs of
+            in case typeIndex# xs `adjStr` xs `adjStr` ys of
                 1# -> strEq# xs ys
                 _ -> listEq xs ys
     -- []     == []     = True

@@ -325,7 +325,8 @@ negRange = errorWithoutStackTrace "Negative range size"
 -- 
 -- -- | A right fold over the elements
 -- {-# INLINABLE foldrElems #-}
--- foldrElems :: (a -> b -> b) -> b -> Array i a -> b
+foldrElems :: (a -> b -> b) -> b -> Array i a -> b
+foldrElems f b0 (Array _ _ _ es) = foldr f b0 es
 -- foldrElems f b0 = \ arr@(Array _ _ n _) ->
 --   let
 --     go i | i == n    = b0

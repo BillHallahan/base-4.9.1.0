@@ -145,7 +145,7 @@ null (_:_)              =  False
 {-# NOINLINE [1] length #-}
 length :: [a] -> Int
 length xs =
-    case typeIndex# xs of
+    case typeIndex# xs `adjStr` xs of
         1# -> I# (strLen# xs)
         _ -> length' xs
 
@@ -585,7 +585,7 @@ take n xs = let
                 take' n (x:xs) = x : take' (n - (fromInteger oneInteger)) xs
                 
                 I# n' = n
-            in case typeIndex# xs of
+            in case typeIndex# xs `adjStr` xs of
                 1# -> strSubstr# xs 0# n'
                 _ -> take' n xs
             
@@ -920,7 +920,7 @@ xs !! n =
             where I# n' = n
                   i = strAt# xs n'
 
-    in case typeIndex# xs of
+    in case typeIndex# xs `adjStr` xs of
         1# -> str_idx xs n
         _ -> reg_idx xs n
 -- #else

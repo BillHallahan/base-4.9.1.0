@@ -32,8 +32,8 @@
 module GHC.Stack.Types (
 --     -- * Implicit call stacks
     CallStack(..), T.HasCallStack,
---     emptyCallStack, freezeCallStack, fromCallSiteList,
---     getCallStack, pushCallStack,
+    emptyCallStack, -- freezeCallStack, fromCallSiteList,
+    getCallStack, pushCallStack,
 -- 
 --     -- * Source locations
 --     SrcLoc(..)
@@ -141,22 +141,22 @@ data CallStack
   = EmptyCallStack
   | PushCallStack [Char] SrcLoc CallStack
   | FreezeCallStack CallStack
---     -- ^ Freeze the stack at the given @CallStack@, preventing any further
---     -- call-sites from being pushed onto it.
--- 
---   -- See Note [Overview of implicit CallStacks]
--- 
--- -- | Extract a list of call-sites from the 'CallStack'.
--- --
--- -- The list is ordered by most recent call.
--- --
--- -- @since 4.8.1.0
--- getCallStack :: CallStack -> [([Char], SrcLoc)]
--- getCallStack stk = case stk of
---   EmptyCallStack            -> []
---   PushCallStack fn loc stk' -> (fn,loc) : getCallStack stk'
---   FreezeCallStack stk'      -> getCallStack stk'
--- 
+    -- ^ Freeze the stack at the given @CallStack@, preventing any further
+    -- call-sites from being pushed onto it.
+
+  -- See Note [Overview of implicit CallStacks]
+
+-- | Extract a list of call-sites from the 'CallStack'.
+--
+-- The list is ordered by most recent call.
+--
+-- @since 4.8.1.0
+getCallStack :: CallStack -> [([Char], SrcLoc)]
+getCallStack stk = case stk of
+  EmptyCallStack            -> []
+  PushCallStack fn loc stk' -> (fn,loc) : getCallStack stk'
+  FreezeCallStack stk'      -> getCallStack stk'
+
 -- -- | Convert a list of call-sites to a 'CallStack'.
 -- --
 -- -- @since 4.9.0.0
@@ -164,42 +164,42 @@ data CallStack
 -- fromCallSiteList ((fn,loc):cs) = PushCallStack fn loc (fromCallSiteList cs)
 -- fromCallSiteList []            = EmptyCallStack
 -- 
--- -- Note [Definition of CallStack]
--- -- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
--- -- CallStack is defined very early in base because it is
--- -- used by error and undefined. At this point in the dependency graph,
--- -- we do not have enough functionality to (conveniently) write a nice
--- -- pretty-printer for CallStack. The sensible place to define the
--- -- pretty-printer would be GHC.Stack, which is the main access point,
--- -- but unfortunately GHC.Stack imports GHC.Exception, which *needs*
--- -- the pretty-printer. So the CallStack type and functions are split
--- -- between three modules:
--- --
--- -- 1. GHC.Stack.Types: defines the type and *simple* functions
--- -- 2. GHC.Exception: defines the pretty-printer
--- -- 3. GHC.Stack: exports everything and acts as the main access point
--- 
--- 
--- -- | Push a call-site onto the stack.
--- --
--- -- This function has no effect on a frozen 'CallStack'.
--- --
--- -- @since 4.9.0.0
--- pushCallStack :: ([Char], SrcLoc) -> CallStack -> CallStack
--- pushCallStack (fn, loc) stk = case stk of
---   FreezeCallStack _ -> stk
---   _                 -> PushCallStack fn loc stk
--- {-# INLINE pushCallStack #-}
--- 
--- 
--- -- | The empty 'CallStack'.
--- --
--- -- @since 4.9.0.0
--- emptyCallStack :: CallStack
--- emptyCallStack = EmptyCallStack
--- {-# INLINE emptyCallStack #-}
--- 
--- 
+-- Note [Definition of CallStack]
+-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-- CallStack is defined very early in base because it is
+-- used by error and undefined. At this point in the dependency graph,
+-- we do not have enough functionality to (conveniently) write a nice
+-- pretty-printer for CallStack. The sensible place to define the
+-- pretty-printer would be GHC.Stack, which is the main access point,
+-- but unfortunately GHC.Stack imports GHC.Exception, which *needs*
+-- the pretty-printer. So the CallStack type and functions are split
+-- between three modules:
+--
+-- 1. GHC.Stack.Types: defines the type and *simple* functions
+-- 2. GHC.Exception: defines the pretty-printer
+-- 3. GHC.Stack: exports everything and acts as the main access point
+
+
+-- | Push a call-site onto the stack.
+--
+-- This function has no effect on a frozen 'CallStack'.
+--
+-- @since 4.9.0.0
+pushCallStack :: ([Char], SrcLoc) -> CallStack -> CallStack
+pushCallStack (fn, loc) stk = case stk of
+  FreezeCallStack _ -> stk
+  _                 -> PushCallStack fn loc stk
+{-# INLINE pushCallStack #-}
+
+
+-- | The empty 'CallStack'.
+--
+-- @since 4.9.0.0
+emptyCallStack :: CallStack
+emptyCallStack = EmptyCallStack
+{-# INLINE emptyCallStack #-}
+
+
 -- -- | Freeze a call-stack, preventing any further call-sites from being appended.
 -- --
 -- -- prop> pushCallStack callSite (freezeCallStack callStack) = freezeCallStack callStack

@@ -18,14 +18,15 @@
 -- 
 -- #include "MachDeps.h"
 -- 
-module GHC.Enum(
-        Bounded(..), Enum(..),
-        boundedEnumFrom, boundedEnumFromThen,
-        toEnumError, fromEnumError, succError, predError,
+module GHC.Enum --(
+        -- Bounded(..), Enum(..),
+        -- boundedEnumFrom, boundedEnumFromThen,
+        -- toEnumError, fromEnumError, succError, predError
 -- 
 --         -- Instances for Bounded and Enum: (), Char, Int
 -- 
-   ) where
+  --  ) 
+   where
 -- 
 import GHC.Base hiding ( many )
 import GHC.Char
@@ -522,19 +523,18 @@ eftInt x0 y | (x0 $># y) = []
 -- 
 {-# INLINE [0] eftIntFB #-}
 eftIntFB :: (Int -> r -> r) -> r -> Int# -> Int# -> r
-eftIntFB = eftIntFB
--- eftIntFB c n x0 y | isTrue# (x0 ># y) = n
---                   | otherwise         = go x0
---                  where
---                    go x = I# x `c` if isTrue# (x ==# y)
---                                    then n
---                                    else go (x +# 1#)
---                         -- Watch out for y=maxBound; hence ==, not >
---         -- Be very careful not to have more than one "c"
---         -- so that when eftInfFB is inlined we can inline
---         -- whatever is bound to "c"
--- 
--- 
+eftIntFB c n x0 y | isTrue# (x0 ># y) = n
+                  | otherwise         = go x0
+                 where
+                   go x = I# x `c` if isTrue# (x ==# y)
+                                   then n
+                                   else go (x +# 1#)
+                        -- Watch out for y=maxBound; hence ==, not >
+        -- Be very careful not to have more than one "c"
+        -- so that when eftInfFB is inlined we can inline
+        -- whatever is bound to "c"
+
+
 -- -----------------------------------------------------
 -- -- efdInt and efdtInt deal with [a,b..] and [a,b..c].
 -- -- The code is more complicated because of worries about Int overflow.
