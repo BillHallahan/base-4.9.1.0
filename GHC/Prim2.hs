@@ -494,6 +494,8 @@ infixl 5 `adjStr`
 -- such values must just be concretized.)
 
 -- Force evaluation of Strings so that they can be sent to the SMT solver.
+-- Intended to be used with typeIndex#- forces evaluation only if typeIndex#
+-- returns 1# (indicating a String.)
 {-# NOINLINE adjStr #-}
 adjStr :: forall a . Int# -> [a] -> Int#
 adjStr x xs = case x of 1# -> go xs; _ -> x
