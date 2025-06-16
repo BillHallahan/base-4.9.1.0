@@ -100,7 +100,7 @@ module Data.List
 
    , group
 
---   , inits
+   , inits
    , tails
 
    -- ** Predicates
