@@ -100,10 +100,10 @@ last                    :: [a] -> a
 last ys =
     let
         -- #ifdef USE_REPORT_PRELUDE
-        last [x]                =  x
-        last (_:xs)             =  last xs
+        last' [x]                =  x
+        last' (_:xs)             =  last' xs
         -- last []                 =  errorEmptyList "last"
-        last []                 =  errorEmptyList "last"
+        last' []                 =  errorEmptyList "last"
 
         strLast zs = let !len = strLen# zs
                          !end = len -# 1#
@@ -158,12 +158,12 @@ init ys =
 null                    :: [a] -> Bool
 null xs =
     let
-        null []                 =  True
-        null (_:_)              =  False
+        null' []                 =  True
+        null' (_:_)              =  False
     in
     case typeIndex# xs `adjStr` xs of
         1# -> let !len = strLen# xs in len $==# 0#
-        _ -> null xs
+        _ -> null' xs
 -- 
 -- -- | /O(n)/. 'length' returns the length of a finite list as an 'Int'.
 -- -- It is an instance of the more general 'Data.List.genericLength',
@@ -683,9 +683,17 @@ take n xs = let
 -- -- in which @n@ may be of any integral type.
 drop                   :: Int -> [a] -> [a]
 -- #ifdef USE_REPORT_PRELUDE
-drop n xs     | n <= (fromInteger zeroInteger) =  xs
-drop _ []              =  []
-drop n (_:xs)          =  drop (n-(fromInteger oneInteger)) xs
+drop k ys =
+    let
+        drop' n xs     | n <= (fromInteger zeroInteger) =  xs
+        drop' _ []              =  []
+        drop' n (_:xs)          =  drop' (n-(fromInteger oneInteger)) xs
+
+        I# k' = k
+    in
+    case typeIndex# ys `adjStr` ys of
+        1# -> let !len = strLen# ys in strSubstr# ys k' len
+        _ -> drop' k ys
 -- #else /* hack away */
 -- {-# INLINE drop #-}
 -- drop n ls
