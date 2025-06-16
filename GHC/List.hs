@@ -97,11 +97,24 @@ last                    :: HasCallStack => [a] -> a
 #else
 last                    :: [a] -> a
 #endif
--- #ifdef USE_REPORT_PRELUDE
-last [x]                =  x
-last (_:xs)             =  last xs
--- last []                 =  errorEmptyList "last"
-last []                 =  errorEmptyList "last"
+last ys =
+    let
+        -- #ifdef USE_REPORT_PRELUDE
+        last [x]                =  x
+        last (_:xs)             =  last xs
+        -- last []                 =  errorEmptyList "last"
+        last []                 =  errorEmptyList "last"
+
+        strLast zs = let !len = strLen# zs
+                         !end = len -# 1#
+                         !i = strAt# zs end in
+                     case i of
+                          (h:_) -> h
+                          _ -> errorEmptyList "last"
+    in
+    case typeIndex# ys `adjStr` ys of
+        1# -> strLast ys
+        _ -> last ys
 -- #else
 -- -- Use foldl to make last a good consumer.
 -- -- This will compile to good code for the actual GHC.List.last.
@@ -122,10 +135,17 @@ init                    :: HasCallStack => [a] -> [a]
 init                    :: [a] -> [a]
 #endif
 -- #ifdef USE_REPORT_PRELUDE
-init [x]                =  []
-init (x:xs)             =  x : init xs
--- init []                 =  errorEmptyList "init"
-init []                 =  errorEmptyList "init"
+init ys =
+    let
+        init' [x]                =  []
+        init' (x:xs)             =  x : init' xs
+        -- init []                 =  errorEmptyList "init"
+        init' []                 =  errorEmptyList "init"
+    in case typeIndex# ys `adjStr` ys of
+          1# -> case ys of
+                    [] -> errorEmptyList "init"
+                    _ -> let !len = strLen# ys; !end = len -# 1# in strSubstr# ys 0# end
+          _ -> init' ys
 -- #else
 -- -- eliminate repeated cases
 -- init []                 =  errorEmptyList "init"
@@ -136,8 +156,14 @@ init []                 =  errorEmptyList "init"
 -- 
 -- -- | Test whether a list is empty.
 null                    :: [a] -> Bool
-null []                 =  True
-null (_:_)              =  False
+null xs =
+    let
+        null []                 =  True
+        null (_:_)              =  False
+    in
+    case typeIndex# xs `adjStr` xs of
+        1# -> let !len = strLen# xs in len $==# 0#
+        _ -> null xs
 -- 
 -- -- | /O(n)/. 'length' returns the length of a finite list as an 'Int'.
 -- -- It is an instance of the more general 'Data.List.genericLength',
