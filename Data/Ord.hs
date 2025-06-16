@@ -48,5 +48,8 @@ comparing p x y = compare (p x) (p y)
 -- @since 4.6.0.0
 newtype Down a = Down a -- deriving (Eq, Show, Read)
 
+instance Eq a => Eq (Down a) where
+    Down x == Down y = x == y
+
 instance Ord a => Ord (Down a) where
     compare (Down x) (Down y) = y `compare` x
