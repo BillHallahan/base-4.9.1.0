@@ -114,7 +114,7 @@ last ys =
     in
     case typeIndex# ys `adjStr` ys of
         1# -> strLast ys
-        _ -> last ys
+        _ -> last' ys
 -- #else
 -- -- Use foldl to make last a good consumer.
 -- -- This will compile to good code for the actual GHC.List.last.
