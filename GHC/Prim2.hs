@@ -464,6 +464,10 @@ strSubstr# = strSubstr#
 strEq# :: [a] -> [a] -> Bool
 strEq# = strEq#
 
+{-# NOINLINE strIndexOf# #-}
+strIndexOf# :: [a] -> [a] -> Int# -> Int#
+strIndexOf# = strIndexOf#
+
 infixl 5 `adjStr`
 
 -- Note [adjStr]

@@ -868,7 +868,13 @@ all p                   =  and . map p
 -- -- equal to @x@ found at a finite index of a finite or infinite list.
 elem                    :: (Eq a) => a -> [a] -> Bool
 -- #ifdef USE_REPORT_PRELUDE
-elem x                  =  any (== x)
+-- elem x                  =  any (== x)
+elem x xs = let
+                elem' x = any (== x)
+                strElem x xs = let !pos = strIndexOf# xs (x:[]) 0# in pos $/=# (-1#)
+            in case typeIndex# xs `adjStr` xs of
+                1# -> strElem x xs
+                _ -> elem' x xs  
 -- #else
 -- elem _ []       = False
 -- elem x (y:ys)   = x==y || elem x ys
@@ -882,7 +888,13 @@ elem x                  =  any (== x)
 -- -- | 'notElem' is the negation of 'elem'.
 notElem                 :: (Eq a) => a -> [a] -> Bool
 -- #ifdef USE_REPORT_PRELUDE
-notElem x               =  all (/= x)
+-- notElem x               =  all (/= x)
+notElem x xs = let
+                notElem' x = all (/= x)
+                strNotElem x xs = let !pos = strIndexOf# xs (x:[]) 0# in pos $==# (-1#)
+            in case typeIndex# xs `adjStr` xs of
+                1# -> strNotElem x xs
+                _ -> notElem' x xs  
 -- #else
 -- notElem _ []    =  True
 -- notElem x (y:ys)=  x /= y && notElem x ys
