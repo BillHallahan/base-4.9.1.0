@@ -33,14 +33,14 @@ module Data.OldList
    , reverse
 -- 
    , intersperse
---    , intercalate
+   , intercalate
    , transpose
--- 
---    , subsequences
---    , permutations
--- 
---    -- * Reducing lists (folds)
--- 
+
+   , subsequences
+   , permutations
+
+   -- * Reducing lists (folds)
+
    , foldl
    , foldl'
    , foldl1
@@ -95,22 +95,22 @@ module Data.OldList
    , dropWhileEnd
    , span
    , break
--- 
---    , stripPrefix
--- 
---    , group
--- 
-   -- , inits
+
+   , stripPrefix
+
+   , group
+
+   , inits
    , tails
--- 
---    -- ** Predicates
---    , isPrefixOf
---    , isSuffixOf
---    , isInfixOf
--- 
---    -- * Searching lists
--- 
---    -- ** Searching by equality
+
+   -- ** Predicates
+   , isPrefixOf
+   , isSuffixOf
+   , isInfixOf
+
+   -- * Searching lists
+
+   -- ** Searching by equality
    , elem
    , notElem
    , lookup
@@ -125,26 +125,23 @@ module Data.OldList
 --    -- with indices ranging from 0 to @'length' xs - 1@.
 -- 
    , (!!)
--- 
---    , elemIndex
---    , elemIndices
--- 
---    , findIndex
---    , findIndices
--- 
+
+   , elemIndex
+   , elemIndices
+
+   , findIndex
+   , findIndices
+
 --    -- * Zipping and unzipping lists
 -- 
    , zip
-   , zip3
---    , zip4, zip5, zip6, zip7
+   , zip3, zip4, zip5, zip6, zip7
 -- 
    , zipWith
-   , zipWith3
---    , zipWith4, zipWith5, zipWith6, zipWith7
+   , zipWith3, zipWith4, zipWith5, zipWith6, zipWith7
 -- 
    , unzip
-   , unzip3
---    , unzip4, unzip5, unzip6, unzip7
+   , unzip3, unzip4, unzip5, unzip6, unzip7
 -- 
 --    -- * Special lists
 -- 
@@ -166,56 +163,56 @@ module Data.OldList
 -- 
 --    -- ** Ordered lists
    , sort
---    , sortOn
+   , sortOn
    , insert
--- 
---    -- * Generalized functions
--- 
---    -- ** The \"@By@\" operations
---    -- | By convention, overloaded functions have a non-overloaded
---    -- counterpart whose name is suffixed with \`@By@\'.
---    --
---    -- It is often convenient to use these functions together with
---    -- 'Data.Function.on', for instance @'sortBy' ('compare'
---    -- \`on\` 'fst')@.
--- 
---    -- *** User-supplied equality (replacing an @Eq@ context)
---    -- | The predicate is assumed to define an equivalence.
+
+   -- * Generalized functions
+
+   -- ** The \"@By@\" operations
+   -- | By convention, overloaded functions have a non-overloaded
+   -- counterpart whose name is suffixed with \`@By@\'.
+   --
+   -- It is often convenient to use these functions together with
+   -- 'Data.Function.on', for instance @'sortBy' ('compare'
+   -- \`on\` 'fst')@.
+
+   -- *** User-supplied equality (replacing an @Eq@ context)
+   -- | The predicate is assumed to define an equivalence.
    , nubBy
    , deleteBy
    , deleteFirstsBy
    , unionBy
    , intersectBy
---    , groupBy
--- 
---    -- *** User-supplied comparison (replacing an @Ord@ context)
---    -- | The function is assumed to define a total ordering.
+   , groupBy
+
+   -- *** User-supplied comparison (replacing an @Ord@ context)
+   -- | The function is assumed to define a total ordering.
    , sortBy
    , insertBy
---    , maximumBy
+   , maximumBy
    , minimumBy
--- 
---    -- ** The \"@generic@\" operations
---    -- | The prefix \`@generic@\' indicates an overloaded function that
---    -- is a generalized version of a "Prelude" function.
--- 
+
+   -- ** The \"@generic@\" operations
+   -- | The prefix \`@generic@\' indicates an overloaded function that
+   -- is a generalized version of a "Prelude" function.
+
    , genericLength
---    , genericTake
---    , genericDrop
---    , genericSplitAt
---    , genericIndex
---    , genericReplicate
--- 
+   , genericTake
+   , genericDrop
+   , genericSplitAt
+   , genericIndex
+   , genericReplicate
+
    ) where
 -- 
 import Data.Maybe
 -- import Data.Bits        ( (.&.) )
 import Data.Char        ( isSpace )
--- import Data.Ord         ( comparing )
--- import Data.Tuple       ( fst, snd )
--- 
+import Data.Ord         ( comparing )
+import Data.Tuple       ( fst, snd )
+
 import GHC.Num
--- import GHC.Real
+import GHC.Real
 import GHC.List
 import GHC.Base
 -- 
@@ -234,110 +231,110 @@ infix 5 \\ -- comment to fool cpp: https://www.haskell.org/ghc/docs/latest/html/
 -- -- @since 4.5.0.0
 dropWhileEnd :: (a -> Bool) -> [a] -> [a]
 dropWhileEnd p = foldr (\x xs -> if p x && null xs then [] else x : xs) []
--- 
--- -- | The 'stripPrefix' function drops the given prefix from a list.
--- -- It returns 'Nothing' if the list did not start with the prefix
--- -- given, or 'Just' the list after the prefix, if it does.
--- --
--- -- > stripPrefix "foo" "foobar" == Just "bar"
--- -- > stripPrefix "foo" "foo" == Just ""
--- -- > stripPrefix "foo" "barfoo" == Nothing
--- -- > stripPrefix "foo" "barfoobaz" == Nothing
--- stripPrefix :: Eq a => [a] -> [a] -> Maybe [a]
--- stripPrefix [] ys = Just ys
--- stripPrefix (x:xs) (y:ys)
---  | x == y = stripPrefix xs ys
--- stripPrefix _ _ = Nothing
--- 
--- -- | The 'elemIndex' function returns the index of the first element
--- -- in the given list which is equal (by '==') to the query element,
--- -- or 'Nothing' if there is no such element.
--- elemIndex       :: Eq a => a -> [a] -> Maybe Int
--- elemIndex x     = findIndex (x==)
--- 
--- -- | The 'elemIndices' function extends 'elemIndex', by returning the
--- -- indices of all elements equal to the query element, in ascending order.
--- elemIndices     :: Eq a => a -> [a] -> [Int]
--- elemIndices x   = findIndices (x==)
--- 
--- -- | The 'find' function takes a predicate and a list and returns the
--- -- first element in the list matching the predicate, or 'Nothing' if
--- -- there is no such element.
+
+-- | The 'stripPrefix' function drops the given prefix from a list.
+-- It returns 'Nothing' if the list did not start with the prefix
+-- given, or 'Just' the list after the prefix, if it does.
+--
+-- > stripPrefix "foo" "foobar" == Just "bar"
+-- > stripPrefix "foo" "foo" == Just ""
+-- > stripPrefix "foo" "barfoo" == Nothing
+-- > stripPrefix "foo" "barfoobaz" == Nothing
+stripPrefix :: Eq a => [a] -> [a] -> Maybe [a]
+stripPrefix [] ys = Just ys
+stripPrefix (x:xs) (y:ys)
+ | x == y = stripPrefix xs ys
+stripPrefix _ _ = Nothing
+
+-- | The 'elemIndex' function returns the index of the first element
+-- in the given list which is equal (by '==') to the query element,
+-- or 'Nothing' if there is no such element.
+elemIndex       :: Eq a => a -> [a] -> Maybe Int
+elemIndex x     = findIndex (x==)
+
+-- | The 'elemIndices' function extends 'elemIndex', by returning the
+-- indices of all elements equal to the query element, in ascending order.
+elemIndices     :: Eq a => a -> [a] -> [Int]
+elemIndices x   = findIndices (x==)
+
+-- | The 'find' function takes a predicate and a list and returns the
+-- first element in the list matching the predicate, or 'Nothing' if
+-- there is no such element.
 find            :: (a -> Bool) -> [a] -> Maybe a
 find p          = listToMaybe . filter p
--- 
--- -- | The 'findIndex' function takes a predicate and a list and returns
--- -- the index of the first element in the list satisfying the predicate,
--- -- or 'Nothing' if there is no such element.
--- findIndex       :: (a -> Bool) -> [a] -> Maybe Int
--- findIndex p     = listToMaybe . findIndices p
--- 
--- -- | The 'findIndices' function extends 'findIndex', by returning the
--- -- indices of all elements satisfying the predicate, in ascending order.
--- findIndices      :: (a -> Bool) -> [a] -> [Int]
+
+-- | The 'findIndex' function takes a predicate and a list and returns
+-- the index of the first element in the list satisfying the predicate,
+-- or 'Nothing' if there is no such element.
+findIndex       :: (a -> Bool) -> [a] -> Maybe Int
+findIndex p     = listToMaybe . findIndices p
+
+-- | The 'findIndices' function extends 'findIndex', by returning the
+-- indices of all elements satisfying the predicate, in ascending order.
+findIndices      :: (a -> Bool) -> [a] -> [Int]
 -- #ifdef USE_REPORT_PRELUDE
--- findIndices p xs = [ i | (x,i) <- zip xs [0..], p x]
+findIndices p xs = [ i | (x,i) <- zip xs [0..], p x]
 -- #else
--- -- Efficient definition, adapted from Data.Sequence
+-- Efficient definition, adapted from Data.Sequence
 -- {-# INLINE findIndices #-}
 -- findIndices p ls = build $ \c n ->
 --   let go x r k | p x       = I# k `c` r (k +# 1#)
 --                | otherwise = r (k +# 1#)
 --   in foldr go (\_ -> n) ls 0#
 -- #endif  /* USE_REPORT_PRELUDE */
--- 
--- -- | The 'isPrefixOf' function takes two lists and returns 'True'
--- -- iff the first list is a prefix of the second.
--- isPrefixOf              :: (Eq a) => [a] -> [a] -> Bool
--- isPrefixOf [] _         =  True
--- isPrefixOf _  []        =  False
--- isPrefixOf (x:xs) (y:ys)=  x == y && isPrefixOf xs ys
--- 
--- -- | The 'isSuffixOf' function takes two lists and returns 'True' iff
--- -- the first list is a suffix of the second. The second list must be
--- -- finite.
--- isSuffixOf              :: (Eq a) => [a] -> [a] -> Bool
--- ns `isSuffixOf` hs      = maybe False id $ do
---       delta <- dropLengthMaybe ns hs
---       return $ ns == dropLength delta hs
---       -- Since dropLengthMaybe ns hs succeeded, we know that (if hs is finite)
---       -- length ns + length delta = length hs
---       -- so dropping the length of delta from hs will yield a suffix exactly
---       -- the length of ns.
--- 
--- -- A version of drop that drops the length of the first argument from the
--- -- second argument. If xs is longer than ys, xs will not be traversed in its
--- -- entirety.  dropLength is also generally faster than (drop . length)
--- -- Both this and dropLengthMaybe could be written as folds over their first
--- -- arguments, but this reduces clarity with no benefit to isSuffixOf.
--- dropLength :: [a] -> [b] -> [b]
--- dropLength [] y = y
--- dropLength _ [] = []
--- dropLength (_:x') (_:y') = dropLength x' y'
--- 
--- -- A version of dropLength that returns Nothing if the second list runs out of
--- -- elements before the first.
--- dropLengthMaybe :: [a] -> [b] -> Maybe [b]
--- dropLengthMaybe [] y = Just y
--- dropLengthMaybe _ [] = Nothing
--- dropLengthMaybe (_:x') (_:y') = dropLengthMaybe x' y'
--- 
--- -- | The 'isInfixOf' function takes two lists and returns 'True'
--- -- iff the first list is contained, wholly and intact,
--- -- anywhere within the second.
--- --
--- -- Example:
--- --
--- -- >isInfixOf "Haskell" "I really like Haskell." == True
--- -- >isInfixOf "Ial" "I really like Haskell." == False
--- isInfixOf               :: (Eq a) => [a] -> [a] -> Bool
--- isInfixOf needle haystack = any (isPrefixOf needle) (tails haystack)
--- 
--- -- | /O(n^2)/. The 'nub' function removes duplicate elements from a list.
--- -- In particular, it keeps only the first occurrence of each element.
--- -- (The name 'nub' means \`essence\'.)
--- -- It is a special case of 'nubBy', which allows the programmer to supply
--- -- their own equality test.
+
+-- | The 'isPrefixOf' function takes two lists and returns 'True'
+-- iff the first list is a prefix of the second.
+isPrefixOf              :: (Eq a) => [a] -> [a] -> Bool
+isPrefixOf [] _         =  True
+isPrefixOf _  []        =  False
+isPrefixOf (x:xs) (y:ys)=  x == y && isPrefixOf xs ys
+
+-- | The 'isSuffixOf' function takes two lists and returns 'True' iff
+-- the first list is a suffix of the second. The second list must be
+-- finite.
+isSuffixOf              :: (Eq a) => [a] -> [a] -> Bool
+ns `isSuffixOf` hs      = maybe False id $ do
+      delta <- dropLengthMaybe ns hs
+      return $ ns == dropLength delta hs
+      -- Since dropLengthMaybe ns hs succeeded, we know that (if hs is finite)
+      -- length ns + length delta = length hs
+      -- so dropping the length of delta from hs will yield a suffix exactly
+      -- the length of ns.
+
+-- A version of drop that drops the length of the first argument from the
+-- second argument. If xs is longer than ys, xs will not be traversed in its
+-- entirety.  dropLength is also generally faster than (drop . length)
+-- Both this and dropLengthMaybe could be written as folds over their first
+-- arguments, but this reduces clarity with no benefit to isSuffixOf.
+dropLength :: [a] -> [b] -> [b]
+dropLength [] y = y
+dropLength _ [] = []
+dropLength (_:x') (_:y') = dropLength x' y'
+
+-- A version of dropLength that returns Nothing if the second list runs out of
+-- elements before the first.
+dropLengthMaybe :: [a] -> [b] -> Maybe [b]
+dropLengthMaybe [] y = Just y
+dropLengthMaybe _ [] = Nothing
+dropLengthMaybe (_:x') (_:y') = dropLengthMaybe x' y'
+
+-- | The 'isInfixOf' function takes two lists and returns 'True'
+-- iff the first list is contained, wholly and intact,
+-- anywhere within the second.
+--
+-- Example:
+--
+-- >isInfixOf "Haskell" "I really like Haskell." == True
+-- >isInfixOf "Ial" "I really like Haskell." == False
+isInfixOf               :: (Eq a) => [a] -> [a] -> Bool
+isInfixOf needle haystack = any (isPrefixOf needle) (tails haystack)
+
+-- | /O(n^2)/. The 'nub' function removes duplicate elements from a list.
+-- In particular, it keeps only the first occurrence of each element.
+-- (The name 'nub' means \`essence\'.)
+-- It is a special case of 'nubBy', which allows the programmer to supply
+-- their own equality test.
 nub                     :: (Eq a) => [a] -> [a]
 nub                     =  nubBy (==)
 -- 
@@ -558,21 +555,21 @@ insertBy cmp x ys@(y:ys')
  = case cmp x y of
      GT -> y : insertBy cmp x ys'
      _  -> x : ys
--- 
--- -- | The 'maximumBy' function takes a comparison function and a list
--- -- and returns the greatest element of the list by the comparison function.
--- -- The list must be finite and non-empty.
--- maximumBy               :: (a -> a -> Ordering) -> [a] -> a
--- maximumBy _ []          =  errorWithoutStackTrace "List.maximumBy: empty list"
--- maximumBy cmp xs        =  foldl1 maxBy xs
---                         where
---                            maxBy x y = case cmp x y of
---                                        GT -> x
---                                        _  -> y
--- 
--- -- | The 'minimumBy' function takes a comparison function and a list
--- -- and returns the least element of the list by the comparison function.
--- -- The list must be finite and non-empty.
+
+-- | The 'maximumBy' function takes a comparison function and a list
+-- and returns the greatest element of the list by the comparison function.
+-- The list must be finite and non-empty.
+maximumBy               :: (a -> a -> Ordering) -> [a] -> a
+maximumBy _ []          =  errorWithoutStackTrace "List.maximumBy: empty list"
+maximumBy cmp xs        =  foldl1 maxBy xs
+                        where
+                           maxBy x y = case cmp x y of
+                                       GT -> x
+                                       _  -> y
+
+-- | The 'minimumBy' function takes a comparison function and a list
+-- and returns the least element of the list by the comparison function.
+-- The list must be finite and non-empty.
 minimumBy               :: (a -> a -> Ordering) -> [a] -> a
 minimumBy _ []          =  errorWithoutStackTrace "List.minimumBy: empty list"
 minimumBy cmp xs        =  foldl1 minBy xs
@@ -599,128 +596,128 @@ genericLength (_:l)     =  fromInteger (Z# 1#) + genericLength l
 --                         where
 --                            gl [] a     = a
 --                            gl (_:xs) a = let a' = a + 1 in a' `seq` gl xs a'
--- 
--- -- | The 'genericTake' function is an overloaded version of 'take', which
--- -- accepts any 'Integral' value as the number of elements to take.
--- genericTake             :: (Integral i) => i -> [a] -> [a]
--- genericTake n _ | n <= 0 = []
--- genericTake _ []        =  []
--- genericTake n (x:xs)    =  x : genericTake (n-1) xs
--- 
--- -- | The 'genericDrop' function is an overloaded version of 'drop', which
--- -- accepts any 'Integral' value as the number of elements to drop.
--- genericDrop             :: (Integral i) => i -> [a] -> [a]
--- genericDrop n xs | n <= 0 = xs
--- genericDrop _ []        =  []
--- genericDrop n (_:xs)    =  genericDrop (n-1) xs
--- 
--- 
--- -- | The 'genericSplitAt' function is an overloaded version of 'splitAt', which
--- -- accepts any 'Integral' value as the position at which to split.
--- genericSplitAt          :: (Integral i) => i -> [a] -> ([a], [a])
--- genericSplitAt n xs | n <= 0 =  ([],xs)
--- genericSplitAt _ []     =  ([],[])
--- genericSplitAt n (x:xs) =  (x:xs',xs'') where
---     (xs',xs'') = genericSplitAt (n-1) xs
--- 
--- -- | The 'genericIndex' function is an overloaded version of '!!', which
--- -- accepts any 'Integral' value as the index.
--- genericIndex :: (Integral i) => [a] -> i -> a
--- genericIndex (x:_)  0 = x
--- genericIndex (_:xs) n
---  | n > 0     = genericIndex xs (n-1)
---  | otherwise = errorWithoutStackTrace "List.genericIndex: negative argument."
--- genericIndex _ _      = errorWithoutStackTrace "List.genericIndex: index too large."
--- 
--- -- | The 'genericReplicate' function is an overloaded version of 'replicate',
--- -- which accepts any 'Integral' value as the number of repetitions to make.
--- genericReplicate        :: (Integral i) => i -> a -> [a]
--- genericReplicate n x    =  genericTake n (repeat x)
--- 
--- -- | The 'zip4' function takes four lists and returns a list of
--- -- quadruples, analogous to 'zip'.
--- zip4                    :: [a] -> [b] -> [c] -> [d] -> [(a,b,c,d)]
--- zip4                    =  zipWith4 (,,,)
--- 
--- -- | The 'zip5' function takes five lists and returns a list of
--- -- five-tuples, analogous to 'zip'.
--- zip5                    :: [a] -> [b] -> [c] -> [d] -> [e] -> [(a,b,c,d,e)]
--- zip5                    =  zipWith5 (,,,,)
--- 
--- -- | The 'zip6' function takes six lists and returns a list of six-tuples,
--- -- analogous to 'zip'.
--- zip6                    :: [a] -> [b] -> [c] -> [d] -> [e] -> [f] ->
---                               [(a,b,c,d,e,f)]
--- zip6                    =  zipWith6 (,,,,,)
--- 
--- -- | The 'zip7' function takes seven lists and returns a list of
--- -- seven-tuples, analogous to 'zip'.
--- zip7                    :: [a] -> [b] -> [c] -> [d] -> [e] -> [f] ->
---                               [g] -> [(a,b,c,d,e,f,g)]
--- zip7                    =  zipWith7 (,,,,,,)
--- 
--- -- | The 'zipWith4' function takes a function which combines four
--- -- elements, as well as four lists and returns a list of their point-wise
--- -- combination, analogous to 'zipWith'.
--- zipWith4                :: (a->b->c->d->e) -> [a]->[b]->[c]->[d]->[e]
--- zipWith4 z (a:as) (b:bs) (c:cs) (d:ds)
---                         =  z a b c d : zipWith4 z as bs cs ds
--- zipWith4 _ _ _ _ _      =  []
--- 
--- -- | The 'zipWith5' function takes a function which combines five
--- -- elements, as well as five lists and returns a list of their point-wise
--- -- combination, analogous to 'zipWith'.
--- zipWith5                :: (a->b->c->d->e->f) ->
---                            [a]->[b]->[c]->[d]->[e]->[f]
--- zipWith5 z (a:as) (b:bs) (c:cs) (d:ds) (e:es)
---                         =  z a b c d e : zipWith5 z as bs cs ds es
--- zipWith5 _ _ _ _ _ _    = []
--- 
--- -- | The 'zipWith6' function takes a function which combines six
--- -- elements, as well as six lists and returns a list of their point-wise
--- -- combination, analogous to 'zipWith'.
--- zipWith6                :: (a->b->c->d->e->f->g) ->
---                            [a]->[b]->[c]->[d]->[e]->[f]->[g]
--- zipWith6 z (a:as) (b:bs) (c:cs) (d:ds) (e:es) (f:fs)
---                         =  z a b c d e f : zipWith6 z as bs cs ds es fs
--- zipWith6 _ _ _ _ _ _ _  = []
--- 
--- -- | The 'zipWith7' function takes a function which combines seven
--- -- elements, as well as seven lists and returns a list of their point-wise
--- -- combination, analogous to 'zipWith'.
--- zipWith7                :: (a->b->c->d->e->f->g->h) ->
---                            [a]->[b]->[c]->[d]->[e]->[f]->[g]->[h]
--- zipWith7 z (a:as) (b:bs) (c:cs) (d:ds) (e:es) (f:fs) (g:gs)
---                    =  z a b c d e f g : zipWith7 z as bs cs ds es fs gs
--- zipWith7 _ _ _ _ _ _ _ _ = []
--- 
--- -- | The 'unzip4' function takes a list of quadruples and returns four
--- -- lists, analogous to 'unzip'.
--- unzip4                  :: [(a,b,c,d)] -> ([a],[b],[c],[d])
--- unzip4                  =  foldr (\(a,b,c,d) ~(as,bs,cs,ds) ->
---                                         (a:as,b:bs,c:cs,d:ds))
---                                  ([],[],[],[])
--- 
--- -- | The 'unzip5' function takes a list of five-tuples and returns five
--- -- lists, analogous to 'unzip'.
--- unzip5                  :: [(a,b,c,d,e)] -> ([a],[b],[c],[d],[e])
--- unzip5                  =  foldr (\(a,b,c,d,e) ~(as,bs,cs,ds,es) ->
---                                         (a:as,b:bs,c:cs,d:ds,e:es))
---                                  ([],[],[],[],[])
--- 
--- -- | The 'unzip6' function takes a list of six-tuples and returns six
--- -- lists, analogous to 'unzip'.
--- unzip6                  :: [(a,b,c,d,e,f)] -> ([a],[b],[c],[d],[e],[f])
--- unzip6                  =  foldr (\(a,b,c,d,e,f) ~(as,bs,cs,ds,es,fs) ->
---                                         (a:as,b:bs,c:cs,d:ds,e:es,f:fs))
---                                  ([],[],[],[],[],[])
--- 
--- -- | The 'unzip7' function takes a list of seven-tuples and returns
--- -- seven lists, analogous to 'unzip'.
--- unzip7          :: [(a,b,c,d,e,f,g)] -> ([a],[b],[c],[d],[e],[f],[g])
--- unzip7          =  foldr (\(a,b,c,d,e,f,g) ~(as,bs,cs,ds,es,fs,gs) ->
---                                 (a:as,b:bs,c:cs,d:ds,e:es,f:fs,g:gs))
---                          ([],[],[],[],[],[],[])
+
+-- | The 'genericTake' function is an overloaded version of 'take', which
+-- accepts any 'Integral' value as the number of elements to take.
+genericTake             :: (Integral i) => i -> [a] -> [a]
+genericTake n _ | n <= fromInteger (Z# 0#) = []
+genericTake _ []        =  []
+genericTake n (x:xs)    =  x : genericTake (n-fromInteger (Z# 1#)) xs
+
+-- | The 'genericDrop' function is an overloaded version of 'drop', which
+-- accepts any 'Integral' value as the number of elements to drop.
+genericDrop             :: (Integral i) => i -> [a] -> [a]
+genericDrop n xs | n <= fromInteger (Z# 0#) = xs
+genericDrop _ []        =  []
+genericDrop n (_:xs)    =  genericDrop (n-fromInteger (Z# 1#)) xs
+
+
+-- | The 'genericSplitAt' function is an overloaded version of 'splitAt', which
+-- accepts any 'Integral' value as the position at which to split.
+genericSplitAt          :: (Integral i) => i -> [a] -> ([a], [a])
+genericSplitAt n xs | n <= fromInteger (Z# 0#) =  ([],xs)
+genericSplitAt _ []     =  ([],[])
+genericSplitAt n (x:xs) =  (x:xs',xs'') where
+    (xs',xs'') = genericSplitAt (n-fromInteger (Z# 1#)) xs
+
+-- | The 'genericIndex' function is an overloaded version of '!!', which
+-- accepts any 'Integral' value as the index.
+genericIndex :: (Integral i) => [a] -> i -> a
+genericIndex (x:_)  n | n == fromInteger (Z# 0#) = x
+genericIndex (_:xs) n
+ | n > fromInteger (Z# 0#)     = genericIndex xs (n-fromInteger (Z# 1#))
+ | otherwise = errorWithoutStackTrace "List.genericIndex: negative argument."
+genericIndex _ _      = errorWithoutStackTrace "List.genericIndex: index too large."
+
+-- | The 'genericReplicate' function is an overloaded version of 'replicate',
+-- which accepts any 'Integral' value as the number of repetitions to make.
+genericReplicate        :: (Integral i) => i -> a -> [a]
+genericReplicate n x    =  genericTake n (repeat x)
+
+-- | The 'zip4' function takes four lists and returns a list of
+-- quadruples, analogous to 'zip'.
+zip4                    :: [a] -> [b] -> [c] -> [d] -> [(a,b,c,d)]
+zip4                    =  zipWith4 (,,,)
+
+-- | The 'zip5' function takes five lists and returns a list of
+-- five-tuples, analogous to 'zip'.
+zip5                    :: [a] -> [b] -> [c] -> [d] -> [e] -> [(a,b,c,d,e)]
+zip5                    =  zipWith5 (,,,,)
+
+-- | The 'zip6' function takes six lists and returns a list of six-tuples,
+-- analogous to 'zip'.
+zip6                    :: [a] -> [b] -> [c] -> [d] -> [e] -> [f] ->
+                              [(a,b,c,d,e,f)]
+zip6                    =  zipWith6 (,,,,,)
+
+-- | The 'zip7' function takes seven lists and returns a list of
+-- seven-tuples, analogous to 'zip'.
+zip7                    :: [a] -> [b] -> [c] -> [d] -> [e] -> [f] ->
+                              [g] -> [(a,b,c,d,e,f,g)]
+zip7                    =  zipWith7 (,,,,,,)
+
+-- | The 'zipWith4' function takes a function which combines four
+-- elements, as well as four lists and returns a list of their point-wise
+-- combination, analogous to 'zipWith'.
+zipWith4                :: (a->b->c->d->e) -> [a]->[b]->[c]->[d]->[e]
+zipWith4 z (a:as) (b:bs) (c:cs) (d:ds)
+                        =  z a b c d : zipWith4 z as bs cs ds
+zipWith4 _ _ _ _ _      =  []
+
+-- | The 'zipWith5' function takes a function which combines five
+-- elements, as well as five lists and returns a list of their point-wise
+-- combination, analogous to 'zipWith'.
+zipWith5                :: (a->b->c->d->e->f) ->
+                           [a]->[b]->[c]->[d]->[e]->[f]
+zipWith5 z (a:as) (b:bs) (c:cs) (d:ds) (e:es)
+                        =  z a b c d e : zipWith5 z as bs cs ds es
+zipWith5 _ _ _ _ _ _    = []
+
+-- | The 'zipWith6' function takes a function which combines six
+-- elements, as well as six lists and returns a list of their point-wise
+-- combination, analogous to 'zipWith'.
+zipWith6                :: (a->b->c->d->e->f->g) ->
+                           [a]->[b]->[c]->[d]->[e]->[f]->[g]
+zipWith6 z (a:as) (b:bs) (c:cs) (d:ds) (e:es) (f:fs)
+                        =  z a b c d e f : zipWith6 z as bs cs ds es fs
+zipWith6 _ _ _ _ _ _ _  = []
+
+-- | The 'zipWith7' function takes a function which combines seven
+-- elements, as well as seven lists and returns a list of their point-wise
+-- combination, analogous to 'zipWith'.
+zipWith7                :: (a->b->c->d->e->f->g->h) ->
+                           [a]->[b]->[c]->[d]->[e]->[f]->[g]->[h]
+zipWith7 z (a:as) (b:bs) (c:cs) (d:ds) (e:es) (f:fs) (g:gs)
+                   =  z a b c d e f g : zipWith7 z as bs cs ds es fs gs
+zipWith7 _ _ _ _ _ _ _ _ = []
+
+-- | The 'unzip4' function takes a list of quadruples and returns four
+-- lists, analogous to 'unzip'.
+unzip4                  :: [(a,b,c,d)] -> ([a],[b],[c],[d])
+unzip4                  =  foldr (\(a,b,c,d) ~(as,bs,cs,ds) ->
+                                        (a:as,b:bs,c:cs,d:ds))
+                                 ([],[],[],[])
+
+-- | The 'unzip5' function takes a list of five-tuples and returns five
+-- lists, analogous to 'unzip'.
+unzip5                  :: [(a,b,c,d,e)] -> ([a],[b],[c],[d],[e])
+unzip5                  =  foldr (\(a,b,c,d,e) ~(as,bs,cs,ds,es) ->
+                                        (a:as,b:bs,c:cs,d:ds,e:es))
+                                 ([],[],[],[],[])
+
+-- | The 'unzip6' function takes a list of six-tuples and returns six
+-- lists, analogous to 'unzip'.
+unzip6                  :: [(a,b,c,d,e,f)] -> ([a],[b],[c],[d],[e],[f])
+unzip6                  =  foldr (\(a,b,c,d,e,f) ~(as,bs,cs,ds,es,fs) ->
+                                        (a:as,b:bs,c:cs,d:ds,e:es,f:fs))
+                                 ([],[],[],[],[],[])
+
+-- | The 'unzip7' function takes a list of seven-tuples and returns
+-- seven lists, analogous to 'unzip'.
+unzip7          :: [(a,b,c,d,e,f,g)] -> ([a],[b],[c],[d],[e],[f],[g])
+unzip7          =  foldr (\(a,b,c,d,e,f,g) ~(as,bs,cs,ds,es,fs,gs) ->
+                                (a:as,b:bs,c:cs,d:ds,e:es,f:fs,g:gs))
+                         ([],[],[],[],[],[],[])
 
 
 -- | The 'deleteFirstsBy' function takes a predicate and two lists and
@@ -729,23 +726,23 @@ genericLength (_:l)     =  fromInteger (Z# 1#) + genericLength l
 deleteFirstsBy          :: (a -> a -> Bool) -> [a] -> [a] -> [a]
 deleteFirstsBy eq       =  foldl (flip (deleteBy eq))
 
--- -- | The 'group' function takes a list and returns a list of lists such
--- -- that the concatenation of the result is equal to the argument.  Moreover,
--- -- each sublist in the result contains only equal elements.  For example,
--- --
--- -- > group "Mississippi" = ["M","i","ss","i","ss","i","pp","i"]
--- --
--- -- It is a special case of 'groupBy', which allows the programmer to supply
--- -- their own equality test.
--- group                   :: Eq a => [a] -> [[a]]
--- group                   =  groupBy (==)
--- 
--- -- | The 'groupBy' function is the non-overloaded version of 'group'.
--- groupBy                 :: (a -> a -> Bool) -> [a] -> [[a]]
--- groupBy _  []           =  []
--- groupBy eq (x:xs)       =  (x:ys) : groupBy eq zs
---                            where (ys,zs) = span (eq x) xs
--- 
+-- | The 'group' function takes a list and returns a list of lists such
+-- that the concatenation of the result is equal to the argument.  Moreover,
+-- each sublist in the result contains only equal elements.  For example,
+--
+-- > group "Mississippi" = ["M","i","ss","i","ss","i","pp","i"]
+--
+-- It is a special case of 'groupBy', which allows the programmer to supply
+-- their own equality test.
+group                   :: Eq a => [a] -> [[a]]
+group                   =  groupBy (==)
+
+-- | The 'groupBy' function is the non-overloaded version of 'group'.
+groupBy                 :: (a -> a -> Bool) -> [a] -> [[a]]
+groupBy _  []           =  []
+groupBy eq (x:xs)       =  (x:ys) : groupBy eq zs
+                           where (ys,zs) = span (eq x) xs
+
 -- | The 'inits' function returns all initial segments of the argument,
 -- shortest first.  For example,
 --
@@ -756,9 +753,9 @@ deleteFirstsBy eq       =  foldl (flip (deleteBy eq))
 --
 -- In particular,
 -- @inits _|_ = [] : _|_@
--- inits                   :: [a] -> [[a]]
--- inits                   = map toListSB . scanl' snocSB emptySB
--- {-# NOINLINE inits #-}
+inits                   :: [a] -> [[a]]
+inits                   = map toListSB . scanl' snocSB emptySB
+{-# NOINLINE inits #-}
 
 -- We do not allow inits to inline, because it plays havoc with Call Arity
 -- if it fuses with a consumer, and it would generally lead to serious
@@ -778,43 +775,43 @@ tails lst               =  build (\c n ->
                              []      -> n
                              _ : xs' -> tailsGo xs'
   in tailsGo lst)
--- 
--- -- | The 'subsequences' function returns the list of all subsequences of the argument.
--- --
--- -- > subsequences "abc" == ["","a","b","ab","c","ac","bc","abc"]
--- subsequences            :: [a] -> [[a]]
--- subsequences xs         =  [] : nonEmptySubsequences xs
--- 
--- -- | The 'nonEmptySubsequences' function returns the list of all subsequences of the argument,
--- --   except for the empty list.
--- --
--- -- > nonEmptySubsequences "abc" == ["a","b","ab","c","ac","bc","abc"]
--- nonEmptySubsequences         :: [a] -> [[a]]
--- nonEmptySubsequences []      =  []
--- nonEmptySubsequences (x:xs)  =  [x] : foldr f [] (nonEmptySubsequences xs)
---   where f ys r = ys : (x : ys) : r
--- 
--- 
--- -- | The 'permutations' function returns the list of all permutations of the argument.
--- --
--- -- > permutations "abc" == ["abc","bac","cba","bca","cab","acb"]
--- permutations            :: [a] -> [[a]]
--- permutations xs0        =  xs0 : perms xs0 []
---   where
---     perms []     _  = []
---     perms (t:ts) is = foldr interleave (perms ts (t:is)) (permutations is)
---       where interleave    xs     r = let (_,zs) = interleave' id xs r in zs
---             interleave' _ []     r = (ts, r)
---             interleave' f (y:ys) r = let (us,zs) = interleave' (f . (y:)) ys r
---                                      in  (y:us, f (t:y:us) : zs)
--- 
--- 
--- ------------------------------------------------------------------------------
--- -- Quick Sort algorithm taken from HBC's QSort library.
--- 
--- -- | The 'sort' function implements a stable sorting algorithm.
--- -- It is a special case of 'sortBy', which allows the programmer to supply
--- -- their own comparison function.
+
+-- | The 'subsequences' function returns the list of all subsequences of the argument.
+--
+-- > subsequences "abc" == ["","a","b","ab","c","ac","bc","abc"]
+subsequences            :: [a] -> [[a]]
+subsequences xs         =  [] : nonEmptySubsequences xs
+
+-- | The 'nonEmptySubsequences' function returns the list of all subsequences of the argument,
+--   except for the empty list.
+--
+-- > nonEmptySubsequences "abc" == ["a","b","ab","c","ac","bc","abc"]
+nonEmptySubsequences         :: [a] -> [[a]]
+nonEmptySubsequences []      =  []
+nonEmptySubsequences (x:xs)  =  [x] : foldr f [] (nonEmptySubsequences xs)
+  where f ys r = ys : (x : ys) : r
+
+
+-- | The 'permutations' function returns the list of all permutations of the argument.
+--
+-- > permutations "abc" == ["abc","bac","cba","bca","cab","acb"]
+permutations            :: [a] -> [[a]]
+permutations xs0        =  xs0 : perms xs0 []
+  where
+    perms []     _  = []
+    perms (t:ts) is = foldr interleave (perms ts (t:is)) (permutations is)
+      where interleave    xs     r = let (_,zs) = interleave' id xs r in zs
+            interleave' _ []     r = (ts, r)
+            interleave' f (y:ys) r = let (us,zs) = interleave' (f . (y:)) ys r
+                                     in  (y:us, f (t:y:us) : zs)
+
+
+------------------------------------------------------------------------------
+-- Quick Sort algorithm taken from HBC's QSort library.
+
+-- | The 'sort' function implements a stable sorting algorithm.
+-- It is a special case of 'sortBy', which allows the programmer to supply
+-- their own comparison function.
 sort :: (Ord a) => [a] -> [a]
 -- 
 -- -- | The 'sortBy' function is the non-overloaded version of 'sort'.
@@ -971,17 +968,17 @@ sortBy cmp = foldr (insertBy cmp) []
 -- -}
 -- 
 -- #endif /* USE_REPORT_PRELUDE */
--- 
--- -- | Sort a list by comparing the results of a key function applied to each
--- -- element.  @sortOn f@ is equivalent to @sortBy (comparing f)@, but has the
--- -- performance advantage of only evaluating @f@ once for each element in the
--- -- input list.  This is called the decorate-sort-undecorate paradigm, or
--- -- Schwartzian transform.
--- --
--- -- @since 4.8.0.0
--- sortOn :: Ord b => (a -> b) -> [a] -> [a]
--- sortOn f =
---   map snd . sortBy (comparing fst) . map (\x -> let y = f x in y `seq` (y, x))
+
+-- | Sort a list by comparing the results of a key function applied to each
+-- element.  @sortOn f@ is equivalent to @sortBy (comparing f)@, but has the
+-- performance advantage of only evaluating @f@ once for each element in the
+-- input list.  This is called the decorate-sort-undecorate paradigm, or
+-- Schwartzian transform.
+--
+-- @since 4.8.0.0
+sortOn :: Ord b => (a -> b) -> [a] -> [a]
+sortOn f =
+  map snd . sortBy (comparing fst) . map (\x -> let y = f x in y `seq` (y, x))
 -- 
 -- -- | The 'unfoldr' function is a \`dual\' to 'foldr': while 'foldr'
 -- -- reduces a list to a summary value, 'unfoldr' builds a list from
@@ -1151,50 +1148,51 @@ unwords ws              =  foldr1 (\w s -> w ++ (C# ' '#):s) ws
 -- unwordsFB w r           = ' ' : w ++ r
 -- #endif
 -- 
--- {- A "SnocBuilder" is a version of Chris Okasaki's banker's queue that supports
--- toListSB instead of uncons. In single-threaded use, its performance
--- characteristics are similar to John Hughes's functional difference lists, but
--- likely somewhat worse. In heavily persistent settings, however, it does much
--- better, because it takes advantage of sharing. The banker's queue guarantees
--- (amortized) O(1) snoc and O(1) uncons, meaning that we can think of toListSB as
--- an O(1) conversion to a list-like structure a constant factor slower than
--- normal lists--we pay the O(n) cost incrementally as we consume the list. Using
--- functional difference lists, on the other hand, we would have to pay the whole
--- cost up front for each output list. -}
--- 
--- {- We store a front list, a rear list, and the length of the queue.  Because we
--- only snoc onto the queue and never uncons, we know it's time to rotate when the
--- length of the queue plus 1 is a power of 2. Note that we rely on the value of
--- the length field only for performance.  In the unlikely event of overflow, the
--- performance will suffer but the semantics will remain correct.  -}
--- 
--- data SnocBuilder a = SnocBuilder {-# UNPACK #-} !Word [a] [a]
--- 
--- {- Smart constructor that rotates the builder when lp is one minus a power of
--- 2. Does not rotate very small builders because doing so is not worth the
--- trouble. The lp < 255 test goes first because the power-of-2 test gives awful
--- branch prediction for very small n (there are 5 powers of 2 between 1 and
--- 16). Putting the well-predicted lp < 255 test first avoids branching on the
--- power-of-2 test until powers of 2 have become sufficiently rare to be predicted
--- well. -}
--- 
--- {-# INLINE sb #-}
--- sb :: Word -> [a] -> [a] -> SnocBuilder a
--- sb lp f r
+{- A "SnocBuilder" is a version of Chris Okasaki's banker's queue that supports
+toListSB instead of uncons. In single-threaded use, its performance
+characteristics are similar to John Hughes's functional difference lists, but
+likely somewhat worse. In heavily persistent settings, however, it does much
+better, because it takes advantage of sharing. The banker's queue guarantees
+(amortized) O(1) snoc and O(1) uncons, meaning that we can think of toListSB as
+an O(1) conversion to a list-like structure a constant factor slower than
+normal lists--we pay the O(n) cost incrementally as we consume the list. Using
+functional difference lists, on the other hand, we would have to pay the whole
+cost up front for each output list. -}
+
+{- We store a front list, a rear list, and the length of the queue.  Because we
+only snoc onto the queue and never uncons, we know it's time to rotate when the
+length of the queue plus 1 is a power of 2. Note that we rely on the value of
+the length field only for performance.  In the unlikely event of overflow, the
+performance will suffer but the semantics will remain correct.  -}
+
+data SnocBuilder a = SnocBuilder {-# UNPACK #-} !Word [a] [a]
+
+{- Smart constructor that rotates the builder when lp is one minus a power of
+2. Does not rotate very small builders because doing so is not worth the
+trouble. The lp < 255 test goes first because the power-of-2 test gives awful
+branch prediction for very small n (there are 5 powers of 2 between 1 and
+16). Putting the well-predicted lp < 255 test first avoids branching on the
+power-of-2 test until powers of 2 have become sufficiently rare to be predicted
+well. -}
+
+{-# INLINE sb #-}
+sb :: Word -> [a] -> [a] -> SnocBuilder a
+sb lp f r
+   = SnocBuilder lp f r
 --   | lp < 255 || (lp .&. (lp + 1)) /= 0 = SnocBuilder lp f r
 --   | otherwise                          = SnocBuilder lp (f ++ reverse r) []
--- 
--- -- The empty builder
--- 
--- emptySB :: SnocBuilder a
--- emptySB = SnocBuilder 0 [] []
--- 
--- -- Add an element to the end of a queue.
--- 
--- snocSB :: SnocBuilder a -> a -> SnocBuilder a
--- snocSB (SnocBuilder lp f r) x = sb (lp + 1) f (x:r)
--- 
--- -- Convert a builder to a list
--- 
--- toListSB :: SnocBuilder a -> [a]
--- toListSB (SnocBuilder _ f r) = f ++ reverse r
+
+-- The empty builder
+
+emptySB :: SnocBuilder a
+emptySB = SnocBuilder (fromInteger (Z# 0#)) [] []
+
+-- Add an element to the end of a queue.
+
+snocSB :: SnocBuilder a -> a -> SnocBuilder a
+snocSB (SnocBuilder lp f r) x = sb (lp + fromInteger (Z# 1#)) f (x:r)
+
+-- Convert a builder to a list
+
+toListSB :: SnocBuilder a -> [a]
+toListSB (SnocBuilder _ f r) = f ++ reverse r
