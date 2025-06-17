@@ -330,7 +330,7 @@ dropLengthMaybe (_:x') (_:y') = dropLengthMaybe x' y'
 isInfixOf               :: (Eq a) => [a] -> [a] -> Bool
 -- isInfixOf needle haystack = any (isPrefixOf needle) (tails haystack)
 isInfixOf needle haystack = let isInfixOf' n h = any (isPrefixOf n) (tails h)
-                                strInfixOf n h = let !pos = (strIndexOf# h n 0#)
+                                strInfixOf n h = let !pos = strIndexOf# h n 0#
                                                  in pos $/=# (-1#)
                             in case typeIndex# haystack `adjStr` haystack of
                                 1# -> strInfixOf needle haystack

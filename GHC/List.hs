@@ -871,7 +871,8 @@ elem                    :: (Eq a) => a -> [a] -> Bool
 -- elem x                  =  any (== x)
 elem x xs = let
                 elem' x = any (== x)
-                strElem x xs = let !pos = strIndexOf# xs (x:[]) 0# in pos $/=# (-1#)
+                strElem x xs = let !pos = strIndexOf# xs [l | l <- [x]] 0# 
+                               in pos $/=# (-1#)
             in case typeIndex# xs `adjStr` xs of
                 1# -> strElem x xs
                 _ -> elem' x xs  
