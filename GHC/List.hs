@@ -871,7 +871,9 @@ elem                    :: (Eq a) => a -> [a] -> Bool
 -- elem x                  =  any (== x)
 elem x xs = let
                 elem' x = any (== x)
-                strElem x xs = let !pos = strIndexOf# xs [l | l <- [x]] 0# 
+                strElem x xs = let !x' = x
+                                   !x_as_list = [x']
+                                   !pos = strIndexOf# xs x_as_list 0# 
                                in pos $/=# (-1#)
             in case typeIndex# xs `adjStr` xs of
                 1# -> strElem x xs
@@ -892,10 +894,13 @@ notElem                 :: (Eq a) => a -> [a] -> Bool
 -- notElem x               =  all (/= x)
 notElem x xs = let
                 notElem' x = all (/= x)
-                strNotElem x xs = let !pos = strIndexOf# xs (x:[]) 0# in pos $==# (-1#)
+                strNotElem x xs = let !x' = x
+                                      !x_as_list = [x']
+                                      !pos = strIndexOf# xs x_as_list 0# 
+                                  in pos $==# (-1#)
             in case typeIndex# xs `adjStr` xs of
                 1# -> strNotElem x xs
-                _ -> notElem' x xs  
+                _ -> notElem' x xs
 -- #else
 -- notElem _ []    =  True
 -- notElem x (y:ys)=  x /= y && notElem x ys
