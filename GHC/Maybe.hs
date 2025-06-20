@@ -36,6 +36,8 @@ data  Maybe a  =  Nothing | Just a
 instance (Eq a) => Eq (Maybe a) where
     Nothing == Nothing = True
     Just x  == Just y  = x == y
+    Nothing == Just _ = False
+    Just _ == Nothing = False
 
 instance (Ord a) => Ord (Maybe a) where
     Nothing <= Nothing = True
