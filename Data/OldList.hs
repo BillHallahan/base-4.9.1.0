@@ -251,11 +251,11 @@ stripPrefix _ _ = Nothing
 -- or 'Nothing' if there is no such element.
 -- elemIndex x = findIndex (x==) 
 elemIndex x xs  = let elemIndex' x xs = findIndex (x==) xs
-                      !x' = x
-                      !x_as_list = [x']
                       strElemIndex x xs | pos $/=# (-1#) = Just (I# pos)
                                         | otherwise = Nothing
-                                   where !pos = strIndexOf# xs x_as_list 0#
+                                   where !x' = x
+                                         !x_as_list = [x']
+                                         !pos = strIndexOf# xs x_as_list 0#
                   in case typeIndex# xs `adjStr` xs of
                         1# -> strElemIndex x xs
                         _ -> elemIndex' x xs
