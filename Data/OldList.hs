@@ -1,5 +1,5 @@
 {-# LANGUAGE Trustworthy #-}
-{-# LANGUAGE CPP, NoImplicitPrelude, ScopedTypeVariables, MagicHash #-}
+{-# LANGUAGE CPP, NoImplicitPrelude, ScopedTypeVariables, MagicHash, BangPatterns #-}
 -- 
 -- -----------------------------------------------------------------------------
 -- -- |
@@ -249,8 +249,16 @@ stripPrefix _ _ = Nothing
 -- | The 'elemIndex' function returns the index of the first element
 -- in the given list which is equal (by '==') to the query element,
 -- or 'Nothing' if there is no such element.
-elemIndex       :: Eq a => a -> [a] -> Maybe Int
-elemIndex x     = findIndex (x==)
+-- elemIndex x = findIndex (x==) 
+elemIndex x xs  = let elemIndex' x xs = findIndex (x==) xs
+                      strElemIndex x xs | pos $/=# (-1#) = Just (I# pos)
+                                        | otherwise = Nothing
+                                   where !x' = x
+                                         !x_as_list = [x']
+                                         !pos = strIndexOf# xs x_as_list 0#
+                  in case typeIndex# xs `adjStr` xs of
+                        1# -> strElemIndex x xs
+                        _ -> elemIndex' x xs
 
 -- | The 'elemIndices' function extends 'elemIndex', by returning the
 -- indices of all elements equal to the query element, in ascending order.
@@ -328,7 +336,13 @@ dropLengthMaybe (_:x') (_:y') = dropLengthMaybe x' y'
 -- >isInfixOf "Haskell" "I really like Haskell." == True
 -- >isInfixOf "Ial" "I really like Haskell." == False
 isInfixOf               :: (Eq a) => [a] -> [a] -> Bool
-isInfixOf needle haystack = any (isPrefixOf needle) (tails haystack)
+-- isInfixOf needle haystack = any (isPrefixOf needle) (tails haystack)
+isInfixOf needle haystack = let isInfixOf' n h = any (isPrefixOf n) (tails h)
+                                strInfixOf n h = let !pos = strIndexOf# h n 0#
+                                                 in pos $/=# (-1#)
+                            in case typeIndex# haystack `adjStr` haystack `adjStr` needle of
+                                1# -> strInfixOf needle haystack
+                                _ -> isInfixOf' needle haystack
 
 -- | /O(n^2)/. The 'nub' function removes duplicate elements from a list.
 -- In particular, it keeps only the first occurrence of each element.
