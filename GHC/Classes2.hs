@@ -300,6 +300,13 @@ instance (Ord a) => Ord [a] where
                 1# -> x `strLt#` y
                 _ -> not (y <= x)
 
+    max x y = case typeIndex# x `adjStr` x `adjStr` y of
+                1# -> ite (x `strLe#` y) y x
+                _ -> if x <= y then y else x
+    min x y = case typeIndex# x `adjStr` x `adjStr` y of
+                1# -> ite (x `strLe#` y) x y
+                _ -> if x <= y then x else y
+
 instance Ord Bool where
     False <= False = True
     False <= True  = True
