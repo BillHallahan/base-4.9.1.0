@@ -390,7 +390,10 @@ nubBy eq (x:xs)         =  x : nubBy eq (filter (\ y -> not (eq x y)) xs)
 -- -- supply their own equality test.
 -- 
 delete                  :: (Eq a) => a -> [a] -> [a]
-delete                  =  deleteBy (==)
+delete x xs                  = 
+   case typeIndex# xs `adjStr` xs of
+      1# -> let !x' = x; !x_list = [x'] in strReplace# xs x_list []
+      _ -> deleteBy (==) x xs
 -- 
 -- -- | The 'deleteBy' function behaves like 'delete', but takes a
 -- -- user-supplied equality predicate.

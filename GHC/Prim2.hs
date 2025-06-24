@@ -468,6 +468,10 @@ strEq# = strEq#
 strIndexOf# :: [a] -> [a] -> Int# -> Int#
 strIndexOf# = strIndexOf#
 
+{-# NOINLINE strReplace# #-}
+strReplace# :: [a] -> [a] -> [a] -> [a]
+strReplace# = strReplace#
+
 infixl 5 `adjStr`
 
 -- Note [adjStr]
