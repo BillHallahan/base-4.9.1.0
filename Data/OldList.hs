@@ -241,10 +241,17 @@ dropWhileEnd p = foldr (\x xs -> if p x && null xs then [] else x : xs) []
 -- > stripPrefix "foo" "barfoo" == Nothing
 -- > stripPrefix "foo" "barfoobaz" == Nothing
 stripPrefix :: Eq a => [a] -> [a] -> Maybe [a]
-stripPrefix [] ys = Just ys
-stripPrefix (x:xs) (y:ys)
- | x == y = stripPrefix xs ys
-stripPrefix _ _ = Nothing
+stripPrefix pre zs =
+   let
+      stripPrefix' [] ys = Just ys
+      stripPrefix' (x:xs) (y:ys)
+         | x == y = stripPrefix' xs ys
+      stripPrefix' _ _ = Nothing
+   in
+   case typeIndex# pre `adjStr` pre `adjStr` zs of
+      1# -> let !ind = strIndexOf# zs pre 0# in
+            if ind $==# 0# then Just (strReplace# zs pre []) else Nothing
+      _ -> stripPrefix' pre zs
 
 -- | The 'elemIndex' function returns the index of the first element
 -- in the given list which is equal (by '==') to the query element,
