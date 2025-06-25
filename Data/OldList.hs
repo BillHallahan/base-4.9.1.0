@@ -241,10 +241,17 @@ dropWhileEnd p = foldr (\x xs -> if p x && null xs then [] else x : xs) []
 -- > stripPrefix "foo" "barfoo" == Nothing
 -- > stripPrefix "foo" "barfoobaz" == Nothing
 stripPrefix :: Eq a => [a] -> [a] -> Maybe [a]
-stripPrefix [] ys = Just ys
-stripPrefix (x:xs) (y:ys)
- | x == y = stripPrefix xs ys
-stripPrefix _ _ = Nothing
+stripPrefix pre zs =
+   let
+      stripPrefix' [] ys = Just ys
+      stripPrefix' (x:xs) (y:ys)
+         | x == y = stripPrefix' xs ys
+      stripPrefix' _ _ = Nothing
+   in
+   case typeIndex# pre `adjStr` pre `adjStr` zs of
+      1# -> let !ind = strIndexOf# zs pre 0# in
+            if ind $==# 0# then Just (strReplace# zs pre []) else Nothing
+      _ -> stripPrefix' pre zs
 
 -- | The 'elemIndex' function returns the index of the first element
 -- in the given list which is equal (by '==') to the query element,
@@ -390,7 +397,10 @@ nubBy eq (x:xs)         =  x : nubBy eq (filter (\ y -> not (eq x y)) xs)
 -- -- supply their own equality test.
 -- 
 delete                  :: (Eq a) => a -> [a] -> [a]
-delete                  =  deleteBy (==)
+delete x xs                  = 
+   case typeIndex# xs `adjStr` xs of
+      1# -> let !x' = x; !x_list = [x'] in strReplace# xs x_list []
+      _ -> deleteBy (==) x xs
 -- 
 -- -- | The 'deleteBy' function behaves like 'delete', but takes a
 -- -- user-supplied equality predicate.
