@@ -265,12 +265,48 @@ instance (Ord a) => Ord [a] where
     {-# SPECIALISE instance Ord [[Char]] #-}
     {-# SPECIALISE instance Ord [Char] #-}
     {-# SPECIALISE instance Ord [Int] #-}
-    compare []     []     = EQ
-    compare []     (_:_)  = LT
-    compare (_:_)  []     = GT
-    compare (x:xs) (y:ys) = case compare x y of
-                                EQ    -> compare xs ys
-                                other -> other
+
+    compare a b =
+        let
+            strCompare x y =
+                case strEq# x y of
+                    True -> EQ
+                    False -> case strLt# x y of
+                                True -> LT
+                                False -> GT
+
+            compare' []     []     = EQ
+            compare' []     (_:_)  = LT
+            compare' (_:_)  []     = GT
+            compare' (x:xs) (y:ys) = case compare x y of
+                                        EQ    -> compare' xs ys
+                                        other -> other
+        in
+        case typeIndex# a `adjStr` a `adjStr` b of
+            1# -> strCompare a b
+            _ -> compare' a b
+
+    x <= y = case typeIndex# x `adjStr` x `adjStr` y of
+                1# -> x `strLe#` y
+                _ -> case compare x y of { GT -> False; _ -> True }
+
+    x >= y = case typeIndex# x `adjStr` x `adjStr` y of
+                1# -> x `strGe#` y
+                _ -> y <= x
+    x > y = case typeIndex# x `adjStr` x `adjStr` y of
+                1# -> x `strGt#` y
+                _ -> not (x <= y)
+    x < y = case typeIndex# x `adjStr` x `adjStr` y of
+                1# -> x `strLt#` y
+                _ -> not (y <= x)
+
+    max x y = case typeIndex# x `adjStr` x `adjStr` y of
+                1# -> ite (x `strLe#` y) y x
+                _ -> if x <= y then y else x
+    min x y = case typeIndex# x `adjStr` x `adjStr` y of
+                1# -> ite (x `strLe#` y) x y
+                _ -> if x <= y then x else y
+
 instance Ord Bool where
     False <= False = True
     False <= True  = True

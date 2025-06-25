@@ -464,6 +464,26 @@ strSubstr# = strSubstr#
 strEq# :: [a] -> [a] -> Bool
 strEq# = strEq#
 
+{-# NOINLINE strLt# #-}
+strLt# :: [a] -> [a] -> Bool
+strLt# = strLt#
+
+{-# NOINLINE strLe# #-}
+strLe# :: [a] -> [a] -> Bool
+strLe# = strLe#
+
+{-# NOINLINE strGt# #-}
+strGt# :: [a] -> [a] -> Bool
+strGt# = strGt#
+
+{-# NOINLINE strGe# #-}
+strGe# :: [a] -> [a] -> Bool
+strGe# = strGe#
+
+{-# NOINLINE ite #-}
+ite :: Bool -> a -> a -> a
+ite = ite
+
 {-# NOINLINE strIndexOf# #-}
 strIndexOf# :: [a] -> [a] -> Int# -> Int#
 strIndexOf# = strIndexOf#
