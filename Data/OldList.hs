@@ -607,8 +607,13 @@ minimumBy cmp xs        =  foldl1 minBy xs
 -- an instance of 'Num'.  It is, however, less efficient than 'length'.
 genericLength           :: (Num i) => [a] -> i
 {-# NOINLINE [1] genericLength #-}
-genericLength []        =  fromInteger (Z# 0#)
-genericLength (_:l)     =  fromInteger (Z# 1#) + genericLength l
+genericLength xs = let
+                     genericLength' []        =  fromInteger (Z# 0#)
+                     genericLength' (_:l)     =  fromInteger (Z# 1#) + genericLength l
+                   in
+                     case typeIndex# xs `adjStr` xs of
+                        1# -> fromInteger $ Z# (strLen# xs)
+                        _ -> genericLength' xs
 -- 
 -- {-# RULES
 --   "genericLengthInt"     genericLength = (strictGenericLength :: [a] -> Int);
