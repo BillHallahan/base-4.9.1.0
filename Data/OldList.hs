@@ -629,34 +629,59 @@ genericLength xs = let
 -- | The 'genericTake' function is an overloaded version of 'take', which
 -- accepts any 'Integral' value as the number of elements to take.
 genericTake             :: (Integral i) => i -> [a] -> [a]
-genericTake n _ | n <= fromInteger (Z# 0#) = []
-genericTake _ []        =  []
-genericTake n (x:xs)    =  x : genericTake (n-fromInteger (Z# 1#)) xs
+genericTake n xs = let
+                     genericTake' n _ | n <= fromInteger (Z# 0#) = []
+                     genericTake' _ []        =  []
+                     genericTake' n (x:xs)    =  x : genericTake' (n-fromInteger (Z# 1#)) xs
+
+                     I# n' = fromIntegral n
+                   in case typeIndex# xs `adjStr` xs of
+                     1# -> strSubstr# xs 0# n'
+                     _ -> genericTake' n xs
 
 -- | The 'genericDrop' function is an overloaded version of 'drop', which
 -- accepts any 'Integral' value as the number of elements to drop.
 genericDrop             :: (Integral i) => i -> [a] -> [a]
-genericDrop n xs | n <= fromInteger (Z# 0#) = xs
-genericDrop _ []        =  []
-genericDrop n (_:xs)    =  genericDrop (n-fromInteger (Z# 1#)) xs
+genericDrop n xs = let
+                     genericDrop' n xs | n <= fromInteger (Z# 0#) = xs
+                     genericDrop' _ []        =  []
+                     genericDrop' n (_:xs)    =  genericDrop' (n-fromInteger (Z# 1#)) xs
+
+                     I# n' = fromIntegral n
+                   in case typeIndex# xs `adjStr` xs of
+                     1# -> let !len = strLen# xs in strSubstr# xs n' len
+                     _ -> genericDrop' n xs
+
 
 
 -- | The 'genericSplitAt' function is an overloaded version of 'splitAt', which
 -- accepts any 'Integral' value as the position at which to split.
 genericSplitAt          :: (Integral i) => i -> [a] -> ([a], [a])
-genericSplitAt n xs | n <= fromInteger (Z# 0#) =  ([],xs)
-genericSplitAt _ []     =  ([],[])
-genericSplitAt n (x:xs) =  (x:xs',xs'') where
-    (xs',xs'') = genericSplitAt (n-fromInteger (Z# 1#)) xs
+genericSplitAt n xs = (genericTake n xs, genericDrop n xs)
+-- genericSplitAt n xs | n <= fromInteger (Z# 0#) =  ([],xs)
+-- genericSplitAt _ []     =  ([],[])
+-- genericSplitAt n (x:xs) =  (x:xs',xs'') where
+--     (xs',xs'') = genericSplitAt (n-fromInteger (Z# 1#)) xs
 
 -- | The 'genericIndex' function is an overloaded version of '!!', which
 -- accepts any 'Integral' value as the index.
 genericIndex :: (Integral i) => [a] -> i -> a
-genericIndex (x:_)  n | n == fromInteger (Z# 0#) = x
-genericIndex (_:xs) n
- | n > fromInteger (Z# 0#)     = genericIndex xs (n-fromInteger (Z# 1#))
- | otherwise = errorWithoutStackTrace "List.genericIndex: negative argument."
-genericIndex _ _      = errorWithoutStackTrace "List.genericIndex: index too large."
+genericIndex xs m = let
+                        genericIndex' (x:_)  n | n == fromInteger (Z# 0#) = x
+                        genericIndex' (_:xs) n
+                           | n > fromInteger (Z# 0#)     = genericIndex' xs (n-fromInteger (Z# 1#))
+                           | otherwise = errorWithoutStackTrace "List.genericIndex: negative argument."
+                        genericIndex' _ _      = errorWithoutStackTrace "List.genericIndex: index too large."
+
+                        strGenericIndex xs n
+                           -- | n < fromInteger (Z# 0#) = errorWithoutStackTrace "SMT String List.genericIndex: negative argument."
+                           | (h:_) <- i = h
+                           | otherwise  = errorWithoutStackTrace "SMT String List.genericIndex: error with smtlib str.at"
+                           where I# n' = fromIntegral n
+                                 i = strAt# xs n'
+                    in case typeIndex# xs `adjStr` xs of
+                        1# -> strGenericIndex xs m
+                        _ -> genericIndex' xs m
 
 -- | The 'genericReplicate' function is an overloaded version of 'replicate',
 -- which accepts any 'Integral' value as the number of repetitions to make.
