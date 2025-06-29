@@ -249,8 +249,8 @@ stripPrefix pre zs =
       stripPrefix' _ _ = Nothing
    in
    case typeIndex# pre `adjStr` pre `adjStr` zs of
-      1# -> let !ind = strIndexOf# zs pre 0# in
-            if ind $==# 0# then Just (strReplace# zs pre []) else Nothing
+      1# -> let !is_pre = strPrefixOf# pre zs in
+            if is_pre then Just (strReplace# zs pre []) else Nothing
       _ -> stripPrefix' pre zs
 
 -- | The 'elemIndex' function returns the index of the first element
@@ -301,21 +301,33 @@ findIndices p xs = [ i | (x,i) <- zip xs [0..], p x]
 -- | The 'isPrefixOf' function takes two lists and returns 'True'
 -- iff the first list is a prefix of the second.
 isPrefixOf              :: (Eq a) => [a] -> [a] -> Bool
-isPrefixOf [] _         =  True
-isPrefixOf _  []        =  False
-isPrefixOf (x:xs) (y:ys)=  x == y && isPrefixOf xs ys
+isPrefixOf as bs =
+   let
+      isPrefixOf' [] _         =  True
+      isPrefixOf' _  []        =  False
+      isPrefixOf' (x:xs) (y:ys)=  x == y && isPrefixOf' xs ys
+   in
+   case typeIndex# as `adjStr` as `adjStr` bs of
+      1# -> strPrefixOf# as bs
+      _ -> isPrefixOf' as bs
 
 -- | The 'isSuffixOf' function takes two lists and returns 'True' iff
 -- the first list is a suffix of the second. The second list must be
 -- finite.
 isSuffixOf              :: (Eq a) => [a] -> [a] -> Bool
-ns `isSuffixOf` hs      = maybe False id $ do
-      delta <- dropLengthMaybe ns hs
-      return $ ns == dropLength delta hs
+xs `isSuffixOf` ys      = 
+   let
+      isSuffixOf' ns hs = maybe False id $ do
+         delta <- dropLengthMaybe ns hs
+         return $ ns == dropLength delta hs
       -- Since dropLengthMaybe ns hs succeeded, we know that (if hs is finite)
       -- length ns + length delta = length hs
       -- so dropping the length of delta from hs will yield a suffix exactly
       -- the length of ns.
+   in
+   case typeIndex# xs `adjStr` xs `adjStr` ys of
+      1# -> strSuffixOf# xs ys
+      _ -> isSuffixOf' xs ys
 
 -- A version of drop that drops the length of the first argument from the
 -- second argument. If xs is longer than ys, xs will not be traversed in its

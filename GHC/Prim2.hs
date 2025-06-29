@@ -488,6 +488,14 @@ ite = ite
 strIndexOf# :: [a] -> [a] -> Int# -> Int#
 strIndexOf# = strIndexOf#
 
+{-# NOINLINE strPrefixOf# #-}
+strPrefixOf# :: [a] -> [a] -> Bool
+strPrefixOf# = strPrefixOf#
+
+{-# NOINLINE strSuffixOf# #-}
+strSuffixOf# :: [a] -> [a] -> Bool
+strSuffixOf# = strSuffixOf#
+
 {-# NOINLINE strReplace# #-}
 strReplace# :: [a] -> [a] -> [a] -> [a]
 strReplace# = strReplace#
