@@ -621,7 +621,7 @@ genericLength           :: (Num i) => [a] -> i
 {-# NOINLINE [1] genericLength #-}
 genericLength xs = let
                      genericLength' []        =  fromInteger (Z# 0#)
-                     genericLength' (_:l)     =  fromInteger (Z# 1#) + genericLength l
+                     genericLength' (_:l)     =  fromInteger (Z# 1#) + genericLength' l
                    in
                      case typeIndex# xs `adjStr` xs of
                         1# -> fromInteger $ Z# (strLen# xs)
@@ -699,13 +699,17 @@ genericIndex xs m = let
 -- which accepts any 'Integral' value as the number of repetitions to make.
 genericReplicate        :: (Integral i) => i -> a -> [a]
 genericReplicate n x = let
-                        potential_str = (x:[])
-                        rep n x = genericTake n (repeat x)
-                        -- SMT Strings do not handle infinite computation well
-                        smt_rep n x = map (const x) [1..(fromIntegral n) :: Int]
+                            potential_str = (x:[])
+
+                            rep n x = genericTake n (repeat x)
+                            -- Non-infinite version for SMT Strings
+                            -- Not an optimization- needed to prevent infinite computation,
+                            -- otherwise genericTake will try to fully evaluate `repeat x`
+                            smt_rep n x = map (const x) [1..(fromIntegral n) :: Int]
+
                        in case typeIndex# potential_str `adjStr` potential_str of
-                        1# -> smt_rep n x
-                        _ -> rep n x
+                            1# -> smt_rep n x
+                            _ -> rep n x
 
 -- | The 'zip4' function takes four lists and returns a list of
 -- quadruples, analogous to 'zip'.
