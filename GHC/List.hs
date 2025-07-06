@@ -21,7 +21,7 @@ module GHC.List (
 --    -- [] (..),          -- built-in syntax; can't be used in export list
 -- 
    map, (++), filter, concat,
-   head, last, tail, init, uncons, null, length, (!!),
+   head, last, tail, init, uncons, unsnoc, null, length, (!!),
    foldl, foldl', foldl1, foldl1', scanl, scanl1, scanl', foldr, foldr1,
    scanr, scanr1, iterate, repeat, replicate, cycle,
    take, drop, sum, product, maximum, minimum, splitAt, takeWhile, dropWhile,
@@ -81,6 +81,36 @@ uncons                  :: [a] -> Maybe (a, [a])
 uncons []               = Nothing
 uncons (x:xs)           = Just (x, xs)
 -- 
+-- Decompose a list into 'init' and 'last'.
+--
+-- * If the list is empty, returns 'Nothing'.
+-- * If the list is non-empty, returns @'Just' (xs, x)@,
+-- where @xs@ is the 'init'ial part of the list and @x@ is its 'last' element.
+--
+--
+-- 'unsnoc' is dual to 'uncons': for a finite list @xs@
+--
+-- > unsnoc xs = (\(hd, tl) -> (reverse tl, hd)) <$> uncons (reverse xs)
+--
+unsnoc :: [a] -> Maybe ([a], a)
+-- The lazy pattern ~(a, b) is important to be productive on infinite lists
+-- and not to be prone to stack overflows.
+-- Expressing the recursion via 'foldr' provides for list fusion.
+unsnoc xs = let
+                unsnoc' = foldr (\x -> Just . maybe ([], x) (\(~(a, b)) -> (x : a, b))) Nothing
+                strUnsnoc xs = let !len = strLen# xs
+                                   !end = len -# 1#
+                                   !end_lst = strAt# xs end
+                               in
+                               case end_lst of
+                                   (x:_) -> Just (strSubstr# xs 0# end, x)
+                                   _ -> Nothing
+            in
+            case typeIndex# xs `adjStr` xs of
+                1# -> strUnsnoc xs
+                _ -> unsnoc' xs
+{-# INLINABLE unsnoc #-}
+
 -- -- | Extract the elements after the head of a list, which must be non-empty.
 #if MIN_VERSION_GLASGOW_HASKELL(9,4,0,0)
 tail                    :: HasCallStack => [a] -> [a]
