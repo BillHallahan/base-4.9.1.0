@@ -21,7 +21,7 @@ module GHC.List (
 --    -- [] (..),          -- built-in syntax; can't be used in export list
 -- 
    map, (++), filter, concat,
-   head, last, tail, init, uncons, unsnoc, null, length, (!!),
+   head, last, tail, init, uncons, unsnoc, null, length, (!!), (!?),
    foldl, foldl', foldl1, foldl1', scanl, scanl1, scanl', foldr, foldr1,
    scanr, scanr1, iterate, repeat, replicate, cycle,
    take, drop, sum, product, maximum, minimum, splitAt, takeWhile, dropWhile,
@@ -42,7 +42,7 @@ import GHC.Prim2
 
 import GHC.Stack.Types
 -- 
-infixl 9  !!
+infixl 9  !!, !?
 infix  4 `elem`, `notElem`
 -- 
 -- --------------------------------------------------------------
@@ -1024,7 +1024,30 @@ xs !! n =
 --                                    0 -> x
 --                                    _ -> r (k-1)) tooLarge xs n
 -- #endif
--- 
+--
+-- | List index (subscript) operator, starting from 0. Returns 'Nothing'
+-- if the index is out of bounds
+--
+-- This is the total variant of the partial '!!' operator.
+--
+(!?) :: [a] -> Int -> Maybe a
+
+{-# INLINABLE (!?) #-}
+xs !? n = let
+              totalIndex xs n
+                  | n < 0     = Nothing
+                  | otherwise = foldr (\x r k -> case k of
+                                                   0 -> Just x
+                                                   _ -> r (k-1)) (const Nothing) xs n
+              strTotalIndex xs n
+                  | (h:_) <- i = Just h
+                  | otherwise = Nothing
+                  where I# n' = n
+                        i = strAt# xs n'
+          in case typeIndex# xs `adjStr` xs of
+              1# -> strTotalIndex xs n
+              _ -> totalIndex xs n
+--
 -- --------------------------------------------------------------
 -- -- The zip family
 -- --------------------------------------------------------------
