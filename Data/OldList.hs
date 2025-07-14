@@ -269,8 +269,17 @@ elemIndex x xs  = let elemIndex' x xs = findIndex (x==) xs
 
 -- | The 'elemIndices' function extends 'elemIndex', by returning the
 -- indices of all elements equal to the query element, in ascending order.
-elemIndices     :: Eq a => a -> [a] -> [Int]
-elemIndices x   = findIndices (x==)
+elemIndices      :: Eq a => a -> [a] -> [Int]
+elemIndices x xs = let strElemIndices start y ys
+                           | pos $/=# (-1#) = (I# pos) : (strElemIndices (pos +# 1#) y ys)
+                           | otherwise = []
+                           where
+                               !y' = y
+                               !y_lst = [y']
+                               !pos = strIndexOf# ys y_lst start
+                   in case typeIndex# xs `adjStr` xs of
+                       1# -> strElemIndices 0# x xs
+                       _ -> findIndices (x==) xs
 
 -- | The 'find' function takes a predicate and a list and returns the
 -- first element in the list matching the predicate, or 'Nothing' if
@@ -1133,19 +1142,34 @@ unfoldr f b0 = build (\c n ->
 -- --
 -- -- Thus @'lines' s@ contains at least as many elements as newlines in @s@.
 lines                   :: String -> [String]
+lines s = let
+          strLines str start = let !next_nl = strIndexOf# str "\n" start
+                               in if next_nl $/=# (-1#)
+                                    then (strSubstr# str start next_nl) : (strLines str (next_nl +# 1#))
+                                    else [strSubstr# str start (strLen# str)]
+          regLines [] = []
+          regLines str = cons (case break (== (C# '\n'#)) str of
+                                          (l, s') -> (l, case s' of
+                                                            [] -> []
+                                                            _:s''-> regLines s''))
+              where
+                  cons ~(h, t) = h : t
+          in case typeIndex# s `adjStr` s of
+              1# -> strLines s 0#
+              _ -> regLines s
 -- lines ""                =  []
-lines [] = []
+-- lines [] = []
 -- -- Somehow GHC doesn't detect the selector thunks in the below code,
 -- -- so s' keeps a reference to the first line via the pair and we have
 -- -- a space leak (cf. #4334).
 -- -- So we need to make GHC see the selector thunks with a trick.
 -- lines s                 =  cons (case break (== '\n') s of
-lines s                 =  cons (case break (== (C# '\n'#)) s of
-                                    (l, s') -> (l, case s' of
-                                                    []      -> []
-                                                    _:s''   -> lines s''))
-  where
-    cons ~(h, t)        =  h : t
+-- lines s                 =  cons (case break (== (C# '\n'#)) s of
+--                                     (l, s') -> (l, case s' of
+--                                                     []      -> []
+--                                                     _:s''   -> lines s''))
+--   where
+--     cons ~(h, t)        =  h : t
 -- 
 -- -- | 'unlines' is an inverse operation to 'lines'.
 -- -- It joins lines, after appending a terminating newline to each.
