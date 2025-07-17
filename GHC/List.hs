@@ -809,9 +809,23 @@ break p                 =  span (not . p)
 -- 
 -- -- | 'reverse' @xs@ returns the elements of @xs@ in reverse order.
 -- -- @xs@ must be finite.
-reverse                 :: [a] -> [a]
+reverse                 :: forall a . [a] -> [a]
 -- #ifdef USE_REPORT_PRELUDE
-reverse                 =  foldl (flip (:)) []
+reverse               xs  =
+  let
+    strRev =
+      let !ys = symgen @[a]
+          !sl_xs = strLen# xs
+          !sl_ys = strLen# ys
+          rev_prop1 = sl_xs $==# sl_ys
+          rev_prop2 i =
+            0# $<=# i &&# i $<# strLen# xs ==> strAt# xs i `strEq#` strAt# ys ((strLen# xs -# 1#) -# i)
+      in
+      assume rev_prop1 (assume (forAllInt# rev_prop2) ys)
+  in
+  case typeIndex# xs `adjStr` xs of
+      1# -> strRev
+      _ -> foldl (flip (:)) [] xs
 -- #else
 -- reverse l =  rev l []
 --   where
