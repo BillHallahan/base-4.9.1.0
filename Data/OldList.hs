@@ -1143,10 +1143,26 @@ unfoldr f b0 = build (\c n ->
 -- -- Thus @'lines' s@ contains at least as many elements as newlines in @s@.
 lines                   :: String -> [String]
 lines s = let
-          strLines str start = let !next_nl = strIndexOf# str "\n" start
-                               in if next_nl $/=# (-1#)
-                                    then (strSubstr# str start next_nl) : (strLines str (next_nl +# 1#))
-                                    else [strSubstr# str start (strLen# str)]
+          -- strLines str start = let !next_nl = strIndexOf# str "\n" start
+          --                      in if next_nl $/=# (-1#)
+          --                           then let !next_start = next_nl +# 1#
+          --                                    h = (strSubstr# str start next_nl)
+          --                                    t = (strLines str next_start)
+          --                                    in (h : t)
+          --                           else let !len = strLen# str
+          --                                    !substr = strSubstr# str start len
+          --                                    !sub_lst = [substr]
+          --                                    in sub_lst
+          strLines [] = []
+          strLines str = let !next_nl = strIndexOf# str "\n" 0#
+                         in case next_nl of
+                            (-1#) -> [str]
+                            idx -> let len = strLen# str
+                                       substr = strSubstr# str 0# idx
+                                       next_start = idx +# 1#
+                                       tail = strSubstr# str next_start len
+                                       tail_lst = strLines tail
+                                   in (substr : tail_lst)
           regLines [] = []
           regLines str = cons (case break (== (C# '\n'#)) str of
                                           (l, s') -> (l, case s' of
@@ -1155,7 +1171,7 @@ lines s = let
               where
                   cons ~(h, t) = h : t
           in case typeIndex# s `adjStr` s of
-              1# -> strLines s 0#
+              1# -> strLines s
               _ -> regLines s
 -- lines ""                =  []
 -- lines [] = []
