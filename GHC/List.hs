@@ -823,7 +823,7 @@ reverse               xs  =
       in
       assume rev_prop1 (assume (forAllInt# rev_prop2) ys)
   in
-  case typeIndex# xs `adjStr` xs of
+  case strQuantifiers (typeIndex# xs `adjStr` xs) of
       1# -> strRev
       _ -> foldl (flip (:)) [] xs
 -- #else

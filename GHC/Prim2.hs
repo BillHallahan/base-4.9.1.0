@@ -569,3 +569,7 @@ adjStr x xs = case x of 1# -> go xs; _ -> x
     go !xs | isSMTRep# xs = x
     go [] = x
     go (x:xs) = go xs
+
+{-# NOINLINE strQuantifiers #-}
+strQuantifiers :: Int# -> Int#
+strQuantifiers x = x
