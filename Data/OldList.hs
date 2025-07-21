@@ -1,5 +1,5 @@
 {-# LANGUAGE Trustworthy #-}
-{-# LANGUAGE CPP, NoImplicitPrelude, ScopedTypeVariables, MagicHash, BangPatterns #-}
+{-# LANGUAGE CPP, NoImplicitPrelude, ScopedTypeVariables, TypeApplications, MagicHash, BangPatterns #-}
 -- 
 -- -----------------------------------------------------------------------------
 -- -- |
