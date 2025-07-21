@@ -697,18 +697,31 @@ genericIndex xs m = let
 
 -- | The 'genericReplicate' function is an overloaded version of 'replicate',
 -- which accepts any 'Integral' value as the number of repetitions to make.
-genericReplicate        :: (Integral i) => i -> a -> [a]
+genericReplicate        :: forall i a . (Integral i) => i -> a -> [a]
 genericReplicate n x = let
                             potential_str = (x:[])
 
                             rep n x = genericTake n (repeat x)
+
+                            smt_rep_quant =
+                              let
+                                 I# len = fromIntegral n
+                                 !xs = symgen @[a]
+
+                                 !sl_xs = strLen# xs
+                                 rep_prop1 = sl_xs $==# len
+                                 rep_prop2 i = 0# $<=# i &&# i $<# sl_xs ==> strAt# xs i `strEq#`potential_str
+                              in
+                              assume rep_prop1 (assume (forAllInt# rep_prop2) xs)
                             -- Non-infinite version for SMT Strings
                             -- Not an optimization- needed to prevent infinite computation,
                             -- otherwise genericTake will try to fully evaluate `repeat x`
                             smt_rep n x = map (const x) [1..(fromIntegral n) :: Int]
 
                        in case typeIndex# potential_str `adjStr` potential_str of
-                            1# -> smt_rep n x
+                            1# -> case strQuantifiers 1# of
+                                    1# -> smt_rep_quant
+                                    _ -> smt_rep n x
                             _ -> rep n x
 
 -- | The 'zip4' function takes four lists and returns a list of
