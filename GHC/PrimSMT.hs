@@ -29,17 +29,25 @@ isSMTRep# = isSMTRep#
 ($>#) :: Int# -> Int# -> Bool
 ($>#) = ($>#)
 
+infix 4 $>#
+
 {-# NOINLINE ($>=#) #-}
 ($>=#) :: Int# -> Int# -> Bool
 ($>=#) = ($>=#)
+
+infix 4 $>=#
 
 {-# NOINLINE ($<#) #-}
 ($<#) :: Int# -> Int# -> Bool
 ($<#) = ($<#)
 
+infix 4 $<#
+
 {-# NOINLINE ($<=#) #-}
 ($<=#) :: Int# -> Int# -> Bool
 ($<=#) = ($<=#)
+
+infix 4 $<=#
 
 {-# NOINLINE ($==##) #-}
 ($==##) :: Double# -> Double# -> Bool

@@ -464,6 +464,8 @@ strSubstr# = strSubstr#
 strEq# :: [a] -> [a] -> Bool
 strEq# = strEq#
 
+infix 4 `strEq#`
+
 {-# NOINLINE strLt# #-}
 strLt# :: [a] -> [a] -> Bool
 strLt# = strLt#
@@ -499,6 +501,32 @@ strSuffixOf# = strSuffixOf#
 {-# NOINLINE strReplace# #-}
 strReplace# :: [a] -> [a] -> [a] -> [a]
 strReplace# = strReplace#
+
+-- The definition of (&&#) gets overwritten by an SMT construct in G2
+{-# NOINLINE (&&#)  #-}
+(&&#) :: Bool -> Bool -> Bool
+_ &&# _ = True
+
+infix 2 &&#
+
+-- The definition of (==>) gets overwritten by an SMT construct in G2
+{-# NOINLINE (==>)  #-}
+(==>) :: Bool -> Bool -> Bool
+_ ==> _ = True
+
+infix 1 ==>
+
+{-# NOINLINE forAllInt#  #-}
+forAllInt# :: (Int# -> Bool) -> Bool
+forAllInt#  _ = True
+
+{-# NOINLINE assume #-}
+assume :: Bool -> a -> a
+assume b x = x
+
+{-# NOINLINE symgen #-}
+symgen :: a
+symgen = symgen
 
 infixl 5 `adjStr`
 
@@ -541,3 +569,7 @@ adjStr x xs = case x of 1# -> go xs; _ -> x
     go !xs | isSMTRep# xs = x
     go [] = x
     go (x:xs) = go xs
+
+{-# NOINLINE strQuantifiers #-}
+strQuantifiers :: Int# -> Int#
+strQuantifiers x = x
