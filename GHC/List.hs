@@ -559,8 +559,34 @@ repeatFB c x = xs where xs = x `c` xs
 -- -- It is an instance of the more general 'Data.List.genericReplicate',
 -- -- in which @n@ may be of any integral type.
 {-# INLINE replicate #-}
-replicate               :: Int -> a -> [a]
-replicate n x           =  take n (repeat x)
+replicate               :: forall a . Int -> a -> [a]
+replicate n x           =
+    let
+      potential_str = (x:[])
+
+      rep n x = take n (repeat x)
+
+      smt_rep_quant =
+          let
+              I# len = n
+              !xs = symgen @[a]
+
+              !sl_xs = strLen# xs
+              rep_prop1 = sl_xs $==# len
+              rep_prop2 i = 0# $<=# i &&# i $<# sl_xs ==> strAt# xs i `strEq#`potential_str
+          in
+          assume rep_prop1 (assume (forAllInt# rep_prop2) xs)
+
+      -- Non-infinite version for SMT Strings
+      -- Not an optimization- needed to prevent infinite computation,
+      -- otherwise genericTake will try to fully evaluate `repeat x`
+      smt_rep n x = map (const x) [1..n]
+    in
+    case typeIndex# potential_str `adjStr` potential_str of
+        1# -> case strQuantifiers 1# of
+                1# -> smt_rep_quant
+                _ -> smt_rep n x
+        _ -> rep n x
 -- 
 -- -- | 'cycle' ties a finite list into a circular one, or equivalently,
 -- -- the infinite repetition of the original list.  It is the identity
