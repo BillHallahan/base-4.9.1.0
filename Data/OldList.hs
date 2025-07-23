@@ -478,9 +478,36 @@ intersectBy eq xs ys    =  [x | x <- xs, any (eq x) ys]
 --
 -- > intersperse ',' "abcde" == "a,b,c,d,e"
 
-intersperse             :: a -> [a] -> [a]
-intersperse _   []      = []
-intersperse sep (x:xs)  = x : prependToAll sep xs
+intersperse             :: forall a . a -> [a] -> [a]
+intersperse s xs =
+   let
+         strIntersperse =
+            let
+               !ys = symgen @[a]
+               !s' = s
+               s_str = [s']
+
+               !sl_xs = strLen# xs
+               !sl_ys = strLen# ys
+
+               !len_two_xs = 2# *# sl_xs
+               !len_two_xs_m = len_two_xs -# 1#
+               !len_prop = ite (sl_xs $==# 0#) (sl_ys $==# 0#) (len_two_xs_m $==# sl_ys)
+
+               copy_prop i =
+                  0# $<=# i &&# i $<# strLen# xs ==> strAt# xs i `strEq#` strAt# ys (2# *# i)
+
+               inter_prop i = 
+                  0# $<=# i &&# i $<# (strLen# xs -# 1#) ==> s_str `strEq#` strAt# ys ((2# *# i) +# 1#)
+            in
+            assume len_prop . assume (forAllInt# copy_prop) . assume (forAllInt# inter_prop) $ ys
+
+         intersperse' _   []      = []
+         intersperse' sep (x:xs')  = x : prependToAll sep xs'
+   in
+   case strQuantifiers (typeIndex# xs `adjStr` xs) of
+      1# -> strIntersperse
+      _ -> intersperse' s xs
 -- 
 -- 
 -- Not exported:
@@ -581,8 +608,49 @@ mapAccumR f s (x:xs)    =  (s'', y:ys)
 -- -- is sorted before the call, the result will also be sorted.
 -- -- It is a special case of 'insertBy', which allows the programmer to
 -- -- supply their own comparison function.
-insert :: Ord a => a -> [a] -> [a]
-insert e ls = insertBy (compare) e ls
+insert :: forall a . Ord a => a -> [a] -> [a]
+insert e ls =
+   let
+      strInsert =
+         let
+            !e' = e
+            e_ls = [e']
+
+            -- Inserting makes the list one longer
+            !sl_ls = strLen# ls
+            !sl_ys = strLen# ys
+            ins_prop_len = sl_ls +# 1# $==# sl_ys
+
+            -- ins_pos is the position to insert at
+            I# ins_pos = symgen @Int
+
+            -- All elements less than ins_pos must be < e
+            ins_prop_bound1 i =
+               0# $<=# i &&# i $<# ins_pos ==> strAt# ls i `strLt#` e_ls
+
+            -- e must be the last list element or <= to the elements at ins_pos + 1
+            !str_at1 = strAt# ls ins_pos
+            !e_le_next = e_ls `strLe#` str_at1
+            !e_last = ins_pos $==# sl_ls
+            !ins_prop_bound2 = e_last ||# e_le_next
+
+            -- All elements less than ins_pos get copied directly from ls to xs
+            -- All elements greater than or equal to ins_pos get copied from their position in ls to that position + 1 in xs
+            !ls_pre = strSubstr# ls 0# ins_pos
+            !ls_pos = strSubstr# ls ins_pos sl_ls
+            
+            !inter1 = ls_pre `strAppend#` e_ls
+            !ys = inter1 `strAppend#` ls_pos
+         in
+           assume ins_prop_len
+         . assume (forAllInt# ins_prop_bound1)
+         . assume ins_prop_bound2
+         $ ys
+
+   in
+   case strQuantifiers (typeIndex# ls `adjStr` ls) of
+      1# -> strInsert
+      _ ->insertBy (compare) e ls
 -- 
 -- -- | The non-overloaded version of 'insert'.
 insertBy :: (a -> a -> Ordering) -> a -> [a] -> [a]
