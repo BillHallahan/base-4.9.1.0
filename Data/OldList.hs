@@ -668,8 +668,8 @@ insert e ls =
             -- e must be the last list element or <= to the elements at ins_pos + 1
             !str_at1 = strAt# ls ins_pos
             !e_le_next = e_ls `strLe#` str_at1
-            !e_last = ins_pos $==# sl_ls
-            !ins_prop_bound2 = e_last ||# e_le_next
+            !not_e_last = ins_pos $<# sl_ls
+            !ins_prop_bound2 = not_e_last ==> e_le_next
 
             -- All elements less than ins_pos get copied directly from ls to xs
             -- All elements greater than or equal to ins_pos get copied from their position in ls to that position + 1 in xs
