@@ -1252,18 +1252,53 @@ unfoldr f b0 = build (\c n ->
 -- -- Thus @'lines' s@ contains at least as many elements as newlines in @s@.
 lines                   :: String -> [String]
 -- lines ""                =  []
-lines [] = []
--- -- Somehow GHC doesn't detect the selector thunks in the below code,
--- -- so s' keeps a reference to the first line via the pair and we have
--- -- a space leak (cf. #4334).
--- -- So we need to make GHC see the selector thunks with a trick.
--- lines s                 =  cons (case break (== '\n') s of
-lines s                 =  cons (case break (== (C# '\n'#)) s of
-                                    (l, s') -> (l, case s' of
-                                                    []      -> []
-                                                    _:s''   -> lines s''))
-  where
-    cons ~(h, t)        =  h : t
+lines xs =
+   let
+      smtLines ys =
+         let
+            end_ln = ['\n']
+            !end = symgen @Bool
+         in
+         case end of
+            True ->
+                  let
+                     !ys_index_x = strIndexOf# ys end_ln 0#
+                     !ys_no_x = ys_index_x $==# -1#
+                  in
+                  case ys == "" of
+                     False -> assume (ys_no_x) [ys]
+                     True -> []
+            False ->
+                  let
+                     !as = symgen @String
+                     !bs = symgen @String
+                  
+                     !as_index_x = strIndexOf# as end_ln 0# 
+                     !as_no_x = as_index_x $==# -1#
+
+                     !as_x_app = as `strAppend#` end_ln
+                     !full_list = as_x_app `strAppend#` bs
+                     !ys_eq_fl = ys `strEq#` full_list
+                  in
+                  assume as_no_x . assume ys_eq_fl $ as:smtLines bs
+
+      lines' [] = []
+      -- -- Somehow GHC doesn't detect the selector thunks in the below code,
+      -- -- so s' keeps a reference to the first line via the pair and we have
+      -- -- a space leak (cf. #4334).
+      -- -- So we need to make GHC see the selector thunks with a trick.
+      -- lines s                 =  cons (case break (== '\n') s of
+      lines' s                 =  cons (case break (== (C# '\n'#)) s of
+                                          (l, s') -> (l, case s' of
+                                                         []      -> []
+                                                         _:s''   -> lines' s''))
+            where
+               cons ~(h, t)        =  h : t
+   in
+   case typeIndex# xs `adjStr` xs of
+      1# -> smtLines xs
+      _ -> lines' xs
+   
 -- 
 -- -- | 'unlines' is an inverse operation to 'lines'.
 -- -- It joins lines, after appending a terminating newline to each.
