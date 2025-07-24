@@ -269,8 +269,45 @@ elemIndex x xs  = let elemIndex' x xs = findIndex (x==) xs
 
 -- | The 'elemIndices' function extends 'elemIndex', by returning the
 -- indices of all elements equal to the query element, in ascending order.
-elemIndices     :: Eq a => a -> [a] -> [Int]
-elemIndices x   = findIndices (x==)
+elemIndices     :: forall a . Eq a => a -> [a] -> [Int]
+elemIndices x xs  =
+   let
+      strElemIndices n@(I# n') ys =
+         let
+            !end = symgen @Bool
+         in
+         case end of
+            True ->
+                  let
+                     x_list = [x]
+
+                     !ys_index_x = strIndexOf# ys x_list 0#
+                     !ys_no_x = ys_index_x $==# -1#
+                  in
+                  assume (ys_no_x) []
+            False ->
+                  let
+                     x_list = [x]
+
+                     !as = symgen @[a]
+                     !bs = symgen @[a]
+
+                     !sl_as = strLen# as
+                  
+                     !as_index_x = strIndexOf# as x_list 0# 
+                     !as_no_x = as_index_x $==# -1#
+
+                     !as_x_app = as `strAppend#` x_list
+                     !full_list = as_x_app `strAppend#` bs
+                     !ys_eq_fl = ys `strEq#` full_list
+
+                     !pos = n' +# sl_as
+                  in
+                  assume as_no_x . assume ys_eq_fl $ I# pos:strElemIndices (I# pos + 1) bs
+   in
+   case typeIndex# xs `adjStr` xs of
+         1# -> strElemIndices 0 xs
+         _ -> findIndices (x==) xs
 
 -- | The 'find' function takes a predicate and a list and returns the
 -- first element in the list matching the predicate, or 'Nothing' if

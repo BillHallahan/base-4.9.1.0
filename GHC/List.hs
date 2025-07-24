@@ -492,11 +492,29 @@ scanr1 f (x:xs)         =  f x q : qs
 -- -- which must be non-empty, finite, and of an ordered type.
 -- -- It is a special case of 'Data.List.maximumBy', which allows the
 -- -- programmer to supply their own comparison function.
-maximum                 :: (Ord a) => [a] -> a
 {-# INLINEABLE maximum #-}
--- maximum []              =  errorEmptyList "maximum"
-maximum []              =  errorEmptyList "maximum"
-maximum xs              =  foldl1 max xs
+maximum                 :: forall a . (Ord a) => [a] -> a
+maximum xs =
+    let
+        strMaximum =
+            let
+                !y = symgen @a
+                y_list = [y]
+                !index_y = strIndexOf# xs y_list 0#
+                !index_non_neg = index_y $>=# 0#
+
+                !sl_xs = strLen# xs
+                y_is_min i = 0# $<=# i &&# i $<# sl_xs ==> y_list `strGe#` strAt# xs i
+            in
+            assume (index_non_neg) . assume (forAllInt# y_is_min) $ y
+
+        maximum' []              =  errorEmptyList "maximum"
+        maximum' xs'              =  foldl1 max xs'
+    in
+    case strQuantifiers (typeIndex# xs `adjStr` xs) of
+        1# -> strMaximum
+        _ -> maximum' xs
+
 -- 
 -- -- We want this to be specialized so that with a strict max function, GHC
 -- -- produces good code. Note that to see if this is happending, one has to
@@ -508,11 +526,28 @@ maximum xs              =  foldl1 max xs
 -- -- which must be non-empty, finite, and of an ordered type.
 -- -- It is a special case of 'Data.List.minimumBy', which allows the
 -- -- programmer to supply their own comparison function.
-minimum                 :: (Ord a) => [a] -> a
 {-# INLINEABLE minimum #-}
--- minimum []              =  errorEmptyList "minimum"
-minimum []              =  errorEmptyList "minimum"
-minimum xs              =  foldl1 min xs
+minimum                 :: forall a . (Ord a) => [a] -> a
+minimum xs =
+    let
+        strMinimum =
+            let
+                !y = symgen @a
+                y_list = [y]
+                !index_y = strIndexOf# xs y_list 0#
+                !index_non_neg = index_y $>=# 0#
+
+                !sl_xs = strLen# xs
+                y_is_min i = 0# $<=# i &&# i $<# sl_xs ==> y_list `strLe#` strAt# xs i
+            in
+            assume (index_non_neg) . assume (forAllInt# y_is_min) $ y
+            
+        minimum' []              =  errorEmptyList "minimum"
+        minimum' xs'              =  foldl1 min xs'
+    in
+    case strQuantifiers (typeIndex# xs `adjStr` xs) of
+        1# -> strMinimum
+        _ -> minimum' xs
 -- 
 {-# SPECIALIZE  minimum :: [Int] -> Int #-}
 -- {-# SPECIALIZE  minimum :: [Integer] -> Integer #-}
