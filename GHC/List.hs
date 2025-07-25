@@ -212,7 +212,7 @@ length' xs               = lenAcc xs (fromInteger zeroInteger)
 lenAcc          :: [a] -> Int -> Int
 lenAcc []     n = n
 -- lenAcc (_:ys) n = lenAcc ys (n+1)
-lenAcc (_:ys) n = lenAcc ys (n+(fromInteger oneInteger))
+lenAcc (_:ys) !n = lenAcc ys (n+(fromInteger (Z# 1#)))
 -- 
 {-# RULES
 -- "length" [~1] forall xs . length xs = foldr lengthFB idLength xs 0
