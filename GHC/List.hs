@@ -874,7 +874,7 @@ reverse                 :: forall a . [a] -> [a]
 -- #ifdef USE_REPORT_PRELUDE
 reverse               xs  =
   let
-    strRev =
+    strRevQuant =
       let !ys = symgen @[a]
           !sl_xs = strLen# xs
           !sl_ys = strLen# ys
@@ -883,9 +883,30 @@ reverse               xs  =
             0# $<=# i &&# i $<# strLen# xs ==> strAt# xs i `strEq#` strAt# ys ((strLen# xs -# 1#) -# i)
       in
       assume rev_prop1 (assume (forAllInt# rev_prop2) ys)
+
+    strRev _ _ [] = []
+    strRev sl_xs i (y:ys) = 
+      let
+        !pos = sl_xs -# i
+        !xs_at_pos = strAt# xs pos
+
+        rev_prop = [y] `strEq#` xs_at_pos
+        
+        !i_plus_one = i +# 1#
+      in
+      assume rev_prop (y:strRev sl_xs i_plus_one ys)
   in
-  case strQuantifiers (typeIndex# xs `adjStr` xs) of
-      1# -> strRev
+  case typeIndex# xs `adjStr` xs of
+      1# -> case strQuantifiers 1# of
+                1# -> strRevQuant
+                _ ->
+                  let
+                      !ys = symgen @[a]
+                      !sl_xs = strLen# xs
+                      !sl_ys = strLen# ys
+                      rev_prop = sl_xs $==# sl_ys
+                  in
+                  assume rev_prop (strRev sl_xs 1# ys)
       _ -> foldl (flip (:)) [] xs
 -- #else
 -- reverse l =  rev l []
