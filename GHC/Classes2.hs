@@ -329,6 +329,15 @@ instance Ord Char where
     (C# c1) >= (C# c2) = c1 `geChar#` c2
     (C# c1) <= (C# c2) = c1 `leChar#` c2
     (C# c1) <  (C# c2) = c1 `ltChar#` c2
+
+    max x y = case typeIndex# [x] `adjStr` [x] `adjStr` [y] of
+                1# -> ite ([x] `strLe#` [y]) y x
+                _ -> if x <= y then y else x
+
+    min x y = case typeIndex# [x] `adjStr` [x] `adjStr` [y] of
+                1# -> ite ([x] `strLe#` [y]) x y
+                _ -> if x <= y then x else y
+
 -- 
 instance Ord Float where
     (F# x) `compare` (F# y)

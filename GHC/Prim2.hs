@@ -509,6 +509,13 @@ _ &&# _ = True
 
 infix 2 &&#
 
+-- The definition of (||#) gets overwritten by an SMT construct in G2
+{-# NOINLINE (||#)  #-}
+(||#) :: Bool -> Bool -> Bool
+_ ||# _ = True
+
+infix 2 ||#
+
 -- The definition of (==>) gets overwritten by an SMT construct in G2
 {-# NOINLINE (==>)  #-}
 (==>) :: Bool -> Bool -> Bool

@@ -212,7 +212,7 @@ length' xs               = lenAcc xs (fromInteger zeroInteger)
 lenAcc          :: [a] -> Int -> Int
 lenAcc []     n = n
 -- lenAcc (_:ys) n = lenAcc ys (n+1)
-lenAcc (_:ys) n = lenAcc ys (n+(fromInteger oneInteger))
+lenAcc (_:ys) !n = lenAcc ys (n+(fromInteger (Z# 1#)))
 -- 
 {-# RULES
 -- "length" [~1] forall xs . length xs = foldr lengthFB idLength xs 0
@@ -492,11 +492,29 @@ scanr1 f (x:xs)         =  f x q : qs
 -- -- which must be non-empty, finite, and of an ordered type.
 -- -- It is a special case of 'Data.List.maximumBy', which allows the
 -- -- programmer to supply their own comparison function.
-maximum                 :: (Ord a) => [a] -> a
 {-# INLINEABLE maximum #-}
--- maximum []              =  errorEmptyList "maximum"
-maximum []              =  errorEmptyList "maximum"
-maximum xs              =  foldl1 max xs
+maximum                 :: forall a . (Ord a) => [a] -> a
+maximum xs =
+    let
+        strMaximum =
+            let
+                !y = symgen @a
+                y_list = [y]
+                !index_y = strIndexOf# xs y_list 0#
+                !index_non_neg = index_y $>=# 0#
+
+                !sl_xs = strLen# xs
+                y_is_min i = 0# $<=# i &&# i $<# sl_xs ==> y_list `strGe#` strAt# xs i
+            in
+            assume (index_non_neg) . assume (forAllInt# y_is_min) $ y
+
+        maximum' []              =  errorEmptyList "maximum"
+        maximum' xs'              =  foldl1 max xs'
+    in
+    case strQuantifiers (typeIndex# xs `adjStr` xs) of
+        1# -> strMaximum
+        _ -> maximum' xs
+
 -- 
 -- -- We want this to be specialized so that with a strict max function, GHC
 -- -- produces good code. Note that to see if this is happending, one has to
@@ -508,11 +526,28 @@ maximum xs              =  foldl1 max xs
 -- -- which must be non-empty, finite, and of an ordered type.
 -- -- It is a special case of 'Data.List.minimumBy', which allows the
 -- -- programmer to supply their own comparison function.
-minimum                 :: (Ord a) => [a] -> a
 {-# INLINEABLE minimum #-}
--- minimum []              =  errorEmptyList "minimum"
-minimum []              =  errorEmptyList "minimum"
-minimum xs              =  foldl1 min xs
+minimum                 :: forall a . (Ord a) => [a] -> a
+minimum xs =
+    let
+        strMinimum =
+            let
+                !y = symgen @a
+                y_list = [y]
+                !index_y = strIndexOf# xs y_list 0#
+                !index_non_neg = index_y $>=# 0#
+
+                !sl_xs = strLen# xs
+                y_is_min i = 0# $<=# i &&# i $<# sl_xs ==> y_list `strLe#` strAt# xs i
+            in
+            assume (index_non_neg) . assume (forAllInt# y_is_min) $ y
+            
+        minimum' []              =  errorEmptyList "minimum"
+        minimum' xs'              =  foldl1 min xs'
+    in
+    case strQuantifiers (typeIndex# xs `adjStr` xs) of
+        1# -> strMinimum
+        _ -> minimum' xs
 -- 
 {-# SPECIALIZE  minimum :: [Int] -> Int #-}
 -- {-# SPECIALIZE  minimum :: [Integer] -> Integer #-}
@@ -559,8 +594,34 @@ repeatFB c x = xs where xs = x `c` xs
 -- -- It is an instance of the more general 'Data.List.genericReplicate',
 -- -- in which @n@ may be of any integral type.
 {-# INLINE replicate #-}
-replicate               :: Int -> a -> [a]
-replicate n x           =  take n (repeat x)
+replicate               :: forall a . Int -> a -> [a]
+replicate n x           =
+    let
+      potential_str = (x:[])
+
+      rep n x = take n (repeat x)
+
+      smt_rep_quant =
+          let
+              I# len = n
+              !xs = symgen @[a]
+
+              !sl_xs = strLen# xs
+              rep_prop1 = sl_xs $==# len
+              rep_prop2 i = 0# $<=# i &&# i $<# sl_xs ==> strAt# xs i `strEq#`potential_str
+          in
+          assume rep_prop1 (assume (forAllInt# rep_prop2) xs)
+
+      -- Non-infinite version for SMT Strings
+      -- Not an optimization- needed to prevent infinite computation,
+      -- otherwise genericTake will try to fully evaluate `repeat x`
+      smt_rep n x = map (const x) [1..n]
+    in
+    case typeIndex# potential_str `adjStr` potential_str of
+        1# -> case strQuantifiers 1# of
+                1# -> smt_rep_quant
+                _ -> smt_rep n x
+        _ -> rep n x
 -- 
 -- -- | 'cycle' ties a finite list into a circular one, or equivalently,
 -- -- the infinite repetition of the original list.  It is the identity
@@ -813,7 +874,7 @@ reverse                 :: forall a . [a] -> [a]
 -- #ifdef USE_REPORT_PRELUDE
 reverse               xs  =
   let
-    strRev =
+    strRevQuant =
       let !ys = symgen @[a]
           !sl_xs = strLen# xs
           !sl_ys = strLen# ys
@@ -822,9 +883,30 @@ reverse               xs  =
             0# $<=# i &&# i $<# strLen# xs ==> strAt# xs i `strEq#` strAt# ys ((strLen# xs -# 1#) -# i)
       in
       assume rev_prop1 (assume (forAllInt# rev_prop2) ys)
+
+    strRev _ _ [] = []
+    strRev sl_xs i (y:ys) = 
+      let
+        !pos = sl_xs -# i
+        !xs_at_pos = strAt# xs pos
+
+        rev_prop = [y] `strEq#` xs_at_pos
+        
+        !i_plus_one = i +# 1#
+      in
+      assume rev_prop (y:strRev sl_xs i_plus_one ys)
   in
-  case strQuantifiers (typeIndex# xs `adjStr` xs) of
-      1# -> strRev
+  case typeIndex# xs `adjStr` xs of
+      1# -> case strQuantifiers 1# of
+                1# -> strRevQuant
+                _ ->
+                  let
+                      !ys = symgen @[a]
+                      !sl_xs = strLen# xs
+                      !sl_ys = strLen# ys
+                      rev_prop = sl_xs $==# sl_ys
+                  in
+                  assume rev_prop (strRev sl_xs 1# ys)
       _ -> foldl (flip (:)) [] xs
 -- #else
 -- reverse l =  rev l []
