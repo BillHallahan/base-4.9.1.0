@@ -486,6 +486,10 @@ strGe# = strGe#
 ite :: Bool -> a -> a -> a
 ite = ite
 
+{-# NOINLINE iteInt# #-}
+iteInt# :: Bool -> Int# -> Int# -> Int#
+iteInt# = iteInt#
+
 {-# NOINLINE strIndexOf# #-}
 strIndexOf# :: [a] -> [a] -> Int# -> Int#
 strIndexOf# = strIndexOf#
