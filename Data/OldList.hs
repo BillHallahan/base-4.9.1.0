@@ -707,10 +707,13 @@ insert e ls =
 
             !set_y = ite cond_comp y_eq_e y_eq_pos
             !pos_ls_next = iteInt# cond_comp pos_ls pos_ls_plus_one
+            I# (pos_ls_next_var) = symgen @Int
 
             !pos_ys_plus_one = pos_ys +# 1#
          in
-         assume set_y $ y:strInsert e_ls pos_ls_next pos_ys_plus_one ys
+           assume set_y
+         . assume (pos_ls_next_var $==# pos_ls_next)
+         $ y:strInsert e_ls pos_ls_next_var pos_ys_plus_one ys
    in
    case typeIndex# ls `adjStr` ls of
       1# -> case strQuantifiers 1# of
