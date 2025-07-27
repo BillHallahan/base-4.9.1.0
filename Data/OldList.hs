@@ -648,7 +648,7 @@ mapAccumR f s (x:xs)    =  (s'', y:ys)
 insert :: forall a . Ord a => a -> [a] -> [a]
 insert e ls =
    let
-      strInsert =
+      strInsertQuant =
          let
             !e' = e
             e_ls = [e']
@@ -656,7 +656,8 @@ insert e ls =
             -- Inserting makes the list one longer
             !sl_ls = strLen# ls
             !sl_ys = strLen# ys
-            ins_prop_len = sl_ls +# 1# $==# sl_ys
+            !sl_ls_plus_one = sl_ls +# 1#
+            ins_prop_len = sl_ls_plus_one $==# sl_ys
 
             -- ins_pos is the position to insert at
             I# ins_pos = symgen @Int
@@ -683,11 +684,54 @@ insert e ls =
          . assume (forAllInt# ins_prop_bound1)
          . assume ins_prop_bound2
          $ ys
+      
+      -- Copies values from ls to ys.
+      -- pos_ys is updated on each step
+      -- pos_ls is updated on each step EXCEPT the step where we insert e 
+      strInsert e_ls pos_ls pos_ys [] = ite (pos_ls $==# pos_ys) e_ls []
+      strInsert e_ls pos_ls pos_ys (y:ys) =
+         let
+            !ls_at_pos = strAt# ls pos_ls
 
+            !pos_ls_plus_one = pos_ls +# 1#
+
+            !comp_char = e_ls `strLe#` ls_at_pos
+            !cond_pos = pos_ls $==# pos_ys
+
+            -- Is e is less the next character in ls, and pos_ys == pos_ls (indicating that a
+            -- character has not been inserted.)
+            !cond_comp = comp_char &&# cond_pos
+
+            !y_eq_e = [y] `strEq#` e_ls
+            !y_eq_pos = [y] `strEq#` ls_at_pos
+
+            !set_y = ite cond_comp y_eq_e y_eq_pos
+            !pos_ls_next = iteInt# cond_comp pos_ls pos_ls_plus_one
+            I# (pos_ls_next_var) = symgen @Int
+
+            !pos_ys_plus_one = pos_ys +# 1#
+         in
+           assume set_y
+         . assume (pos_ls_next_var $==# pos_ls_next)
+         $ y:strInsert e_ls pos_ls_next_var pos_ys_plus_one ys
    in
-   case strQuantifiers (typeIndex# ls `adjStr` ls) of
-      1# -> strInsert
-      _ ->insertBy (compare) e ls
+   case typeIndex# ls `adjStr` ls of
+      1# -> case strQuantifiers 1# of
+               1# -> strInsertQuant
+               _ ->
+                  let
+                     !e' = e
+                     e_ls = [e']
+
+                     !ys = symgen @[a]
+                     !sl_ls = strLen# ls
+                     !sl_ys = strLen# ys
+                     !sl_ls_plus_one = sl_ls +# 1#
+                     ins_prop = sl_ls_plus_one $==# sl_ys
+                  in
+                  assume ins_prop $ strInsert e_ls 0# 0# ys
+      _ -> insertBy (compare) e ls
+
 -- 
 -- -- | The non-overloaded version of 'insert'.
 insertBy :: (a -> a -> Ordering) -> a -> [a] -> [a]
