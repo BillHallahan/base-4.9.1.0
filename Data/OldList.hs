@@ -689,7 +689,11 @@ insert e ls =
       -- pos_ys is updated on each step
       -- pos_ls is updated on each step EXCEPT the step where we insert e 
       strInsert e_ls pos_ls pos_ys [] = []
-      strInsert e_ls pos_ls pos_ys [y] = ite (pos_ls $==# pos_ys) e_ls []
+      strInsert e_ls pos_ls pos_ys [y] =
+         let
+            !ls_at_pos = strAt# ls pos_ls
+         in
+         ite (pos_ls $==# pos_ys) e_ls ls_at_pos
       strInsert e_ls pos_ls pos_ys (y:ys) =
          let
             !ls_at_pos = strAt# ls pos_ls
