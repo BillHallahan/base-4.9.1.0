@@ -688,7 +688,8 @@ insert e ls =
       -- Copies values from ls to ys.
       -- pos_ys is updated on each step
       -- pos_ls is updated on each step EXCEPT the step where we insert e 
-      strInsert e_ls pos_ls pos_ys [] = ite (pos_ls $==# pos_ys) e_ls []
+      strInsert e_ls pos_ls pos_ys [] = []
+      strInsert e_ls pos_ls pos_ys [y] = ite (pos_ls $==# pos_ys) e_ls []
       strInsert e_ls pos_ls pos_ys (y:ys) =
          let
             !ls_at_pos = strAt# ls pos_ls
