@@ -279,7 +279,7 @@ elemIndices x xs  =
          case end of
             True ->
                   let
-                     x_list = [x]
+                     !x_list = [x]
 
                      !ys_index_x = strIndexOf# ys x_list 0#
                      !ys_no_x = ys_index_x $==# -1#
@@ -287,7 +287,7 @@ elemIndices x xs  =
                   assume (ys_no_x) []
             False ->
                   let
-                     x_list = [x]
+                     !x_list = [x]
 
                      !as = symgen @[a]
                      !bs = symgen @[a]
@@ -522,7 +522,7 @@ intersperse s xs =
             let
                !ys = symgen @[a]
                !s' = s
-               s_str = [s']
+               !s_str = [s']
 
                !sl_xs = strLen# xs
                !sl_ys = strLen# ys
@@ -651,7 +651,7 @@ insert e ls =
       strInsertQuant =
          let
             !e' = e
-            e_ls = [e']
+            !e_ls = [e']
 
             -- Inserting makes the list one longer
             !sl_ls = strLen# ls
@@ -721,7 +721,7 @@ insert e ls =
                _ ->
                   let
                      !e' = e
-                     e_ls = [e']
+                     !e_ls = [e']
 
                      !ys = symgen @[a]
                      !sl_ls = strLen# ls
@@ -1300,7 +1300,7 @@ lines xs =
    let
       smtLines ys =
          let
-            end_ln = ['\n']
+            !end_ln = ['\n']
             !end = symgen @Bool
          in
          case end of
