@@ -490,6 +490,10 @@ ite = ite
 iteInt# :: Bool -> Int# -> Int# -> Int#
 iteInt# = iteInt#
 
+{-# NOINLINE iteChar# #-}
+iteChar# :: Bool -> Char# -> Char# -> Char#
+iteChar# = iteChar#
+
 {-# NOINLINE strIndexOf# #-}
 strIndexOf# :: [a] -> [a] -> Int# -> Int#
 strIndexOf# = strIndexOf#
