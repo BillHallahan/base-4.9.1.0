@@ -1,49 +1,49 @@
--- {-# LANGUAGE DeriveGeneric          #-}
--- {-# LANGUAGE TypeOperators          #-}
--- {-# LANGUAGE GADTs                  #-}
--- {-# LANGUAGE FlexibleInstances      #-}
--- {-# LANGUAGE StandaloneDeriving     #-}
--- {-# LANGUAGE NoImplicitPrelude      #-}
--- {-# LANGUAGE PolyKinds              #-}
--- {-# LANGUAGE RankNTypes             #-}
--- {-# LANGUAGE DataKinds              #-}
--- {-# LANGUAGE TypeFamilies           #-}
--- {-# LANGUAGE UndecidableInstances   #-}
--- {-# LANGUAGE ExplicitNamespaces     #-}
--- {-# LANGUAGE MultiParamTypeClasses  #-}
--- {-# LANGUAGE FunctionalDependencies #-}
--- {-# LANGUAGE Trustworthy            #-}
+{-# LANGUAGE DeriveGeneric          #-}
+{-# LANGUAGE TypeOperators          #-}
+{-# LANGUAGE GADTs                  #-}
+{-# LANGUAGE FlexibleInstances      #-}
+{-# LANGUAGE StandaloneDeriving     #-}
+{-# LANGUAGE NoImplicitPrelude      #-}
+{-# LANGUAGE PolyKinds              #-}
+{-# LANGUAGE RankNTypes             #-}
+{-# LANGUAGE DataKinds              #-}
+{-# LANGUAGE TypeFamilies           #-}
+{-# LANGUAGE UndecidableInstances   #-}
+{-# LANGUAGE ExplicitNamespaces     #-}
+{-# LANGUAGE MultiParamTypeClasses  #-}
+{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE Trustworthy            #-}
+
+-----------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Type.Equality
+-- License     :  BSD-style (see the LICENSE file in the distribution)
+--
+-- Maintainer  :  libraries@haskell.org
+-- Stability   :  experimental
+-- Portability :  not portable
+--
+-- Definition of propositional equality @(:~:)@. Pattern-matching on a variable
+-- of type @(a :~: b)@ produces a proof that @a ~ b@.
+--
+-- @since 4.7.0.0
+-----------------------------------------------------------------------------
+
+
+
+module Data.Type.Equality (
+  -- * The equality types
+  (:~:)(..), -- type (~~),
 -- 
--- -----------------------------------------------------------------------------
--- -- |
--- -- Module      :  Data.Type.Equality
--- -- License     :  BSD-style (see the LICENSE file in the distribution)
--- --
--- -- Maintainer  :  libraries@haskell.org
--- -- Stability   :  experimental
--- -- Portability :  not portable
--- --
--- -- Definition of propositional equality @(:~:)@. Pattern-matching on a variable
--- -- of type @(a :~: b)@ produces a proof that @a ~ b@.
--- --
--- -- @since 4.7.0.0
--- -----------------------------------------------------------------------------
--- 
--- 
--- 
--- module Data.Type.Equality (
---   -- * The equality types
---   (:~:)(..), type (~~),
--- 
---   -- * Working with equality
---   sym, trans, castWith, gcastWith, apply, inner, outer,
+  -- * Working with equality
+  sym, trans, castWith, gcastWith, apply, inner, outer,
 -- 
 --   -- * Inferring equality from other types
 --   TestEquality(..),
 -- 
 --   -- * Boolean type-level equality
 --   type (==)
---   ) where
+  ) where
 -- 
 -- import Data.Maybe
 -- import GHC.Enum
@@ -71,49 +71,49 @@
 --   -- INCOHERENT because we want to use this instance eagerly, even when
 --   -- the tyvars are partially unknown.
 -- 
--- infix 4 :~:
--- 
--- -- | Propositional equality. If @a :~: b@ is inhabited by some terminating
--- -- value, then the type @a@ is the same as the type @b@. To use this equality
--- -- in practice, pattern-match on the @a :~: b@ to get out the @Refl@ constructor;
--- -- in the body of the pattern-match, the compiler knows that @a ~ b@.
--- --
--- -- @since 4.7.0.0
--- data a :~: b where  -- See Note [The equality types story] in TysPrim
---   Refl :: a :~: a
--- 
--- -- with credit to Conal Elliott for 'ty', Erik Hesselink & Martijn van
--- -- Steenbergen for 'type-equality', Edward Kmett for 'eq', and Gabor Greif
--- -- for 'type-eq'
--- 
--- -- | Symmetry of equality
--- sym :: (a :~: b) -> (b :~: a)
--- sym Refl = Refl
--- 
--- -- | Transitivity of equality
--- trans :: (a :~: b) -> (b :~: c) -> (a :~: c)
--- trans Refl Refl = Refl
--- 
--- -- | Type-safe cast, using propositional equality
--- castWith :: (a :~: b) -> a -> b
--- castWith Refl x = x
--- 
--- -- | Generalized form of type-safe cast using propositional equality
--- gcastWith :: (a :~: b) -> ((a ~ b) => r) -> r
--- gcastWith Refl x = x
--- 
--- -- | Apply one equality to another, respectively
--- apply :: (f :~: g) -> (a :~: b) -> (f a :~: g b)
--- apply Refl Refl = Refl
--- 
--- -- | Extract equality of the arguments from an equality of a applied types
--- inner :: (f a :~: g b) -> (a :~: b)
--- inner Refl = Refl
--- 
--- -- | Extract equality of type constructors from an equality of applied types
--- outer :: (f a :~: g b) -> (f :~: g)
--- outer Refl = Refl
--- 
+infix 4 :~:
+
+-- | Propositional equality. If @a :~: b@ is inhabited by some terminating
+-- value, then the type @a@ is the same as the type @b@. To use this equality
+-- in practice, pattern-match on the @a :~: b@ to get out the @Refl@ constructor;
+-- in the body of the pattern-match, the compiler knows that @a ~ b@.
+--
+-- @since 4.7.0.0
+data a :~: b where  -- See Note [The equality types story] in TysPrim
+  Refl :: a :~: a
+
+-- with credit to Conal Elliott for 'ty', Erik Hesselink & Martijn van
+-- Steenbergen for 'type-equality', Edward Kmett for 'eq', and Gabor Greif
+-- for 'type-eq'
+
+-- | Symmetry of equality
+sym :: (a :~: b) -> (b :~: a)
+sym Refl = Refl
+
+-- | Transitivity of equality
+trans :: (a :~: b) -> (b :~: c) -> (a :~: c)
+trans Refl Refl = Refl
+
+-- | Type-safe cast, using propositional equality
+castWith :: (a :~: b) -> a -> b
+castWith Refl x = x
+
+-- | Generalized form of type-safe cast using propositional equality
+gcastWith :: (a :~: b) -> ((a ~ b) => r) -> r
+gcastWith Refl x = x
+
+-- | Apply one equality to another, respectively
+apply :: (f :~: g) -> (a :~: b) -> (f a :~: g b)
+apply Refl Refl = Refl
+
+-- | Extract equality of the arguments from an equality of a applied types
+inner :: (f a :~: g b) -> (a :~: b)
+inner Refl = Refl
+
+-- | Extract equality of type constructors from an equality of applied types
+outer :: (f a :~: g b) -> (f :~: g)
+outer Refl = Refl
+
 -- deriving instance Eq   (a :~: b)
 -- deriving instance Show (a :~: b)
 -- deriving instance Ord  (a :~: b)
