@@ -429,10 +429,10 @@ plusAddr# (Addr# x) y= Addr# (x +# y)
 minusAddr# :: Addr# -> Addr# -> Int# 
 minusAddr# (Addr# x) (Addr# y) = (x -# y)
 
-dataToTagSmall# :: a -> Int#
+dataToTagSmall# :: forall {l :: Levity} a . a -> Int#
 dataToTagSmall# !x = dataToTag## x
 
-dataToTagLarge# :: a -> Int#
+dataToTagLarge# :: forall {l :: Levity} a . a -> Int#
 dataToTagLarge# !x = dataToTag## x
 
 dataToTag# :: a -> Int#
