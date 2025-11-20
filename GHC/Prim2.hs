@@ -429,6 +429,14 @@ plusAddr# (Addr# x) y= Addr# (x +# y)
 minusAddr# :: Addr# -> Addr# -> Int# 
 minusAddr# (Addr# x) (Addr# y) = (x -# y)
 
+#if MIN_VERSION_GLASGOW_HASKELL(9,10,0,0)
+dataToTagSmall# :: forall {l :: Levity} a . a -> Int#
+dataToTagSmall# !x = dataToTag## x
+
+dataToTagLarge# :: forall {l :: Levity} a . a -> Int#
+dataToTagLarge# !x = dataToTag## x
+#endif
+
 dataToTag# :: a -> Int#
 dataToTag# !x = dataToTag## x
 
