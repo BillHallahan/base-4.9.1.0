@@ -534,10 +534,10 @@ intersperse s xs =
                copy_prop i =
                   0# $<=# i &&# i $<# strLen# xs ==> strAt# xs i `strEq#` strAt# ys (2# *# i)
 
-               inter_prop i = 
-                  0# $<=# i &&# i $<# (strLen# xs -# 1#) ==> s_str `strEq#` strAt# ys ((2# *# i) +# 1#)
+               sl_xs_min_1 = strLen# xs -# 1#
+               inter_prop i = s_str `strEq#` strAt# ys ((2# *# i) +# 1#)
             in
-            assume len_prop . assume (forAllInt# copy_prop) . assume (forAllInt# inter_prop) $ ys
+            assume len_prop . assume (forAllBoundInt# 0# sl_xs copy_prop) . assume (forAllBoundInt# 0# sl_xs_min_1 inter_prop) $ ys
 
          intersperse' _   []      = []
          intersperse' sep (x:xs')  = x : prependToAll sep xs'
@@ -663,8 +663,7 @@ insert e ls =
             I# ins_pos = symgen @Int
 
             -- All elements less than ins_pos must be < e
-            ins_prop_bound1 i =
-               0# $<=# i &&# i $<# ins_pos ==> strAt# ls i `strLt#` e_ls
+            ins_prop_bound1 i = strAt# ls i `strLt#` e_ls
 
             -- e must be the last list element or <= to the elements at ins_pos + 1
             !str_at1 = strAt# ls ins_pos
@@ -681,7 +680,7 @@ insert e ls =
             !ys = inter1 `strAppend#` ls_pos
          in
            assume ins_prop_len
-         . assume (forAllInt# ins_prop_bound1)
+         . assume (forAllBoundInt# 0# ins_pos ins_prop_bound1)
          . assume ins_prop_bound2
          $ ys
       
@@ -864,9 +863,9 @@ genericReplicate n x = let
 
                                  !sl_xs = strLen# xs
                                  rep_prop1 = sl_xs $==# len
-                                 rep_prop2 i = 0# $<=# i &&# i $<# sl_xs ==> strAt# xs i `strEq#`potential_str
+                                 rep_prop2 i = strAt# xs i `strEq#`potential_str
                               in
-                              assume rep_prop1 (assume (forAllInt# rep_prop2) xs)
+                              assume rep_prop1 (assume (forAllBoundInt# 0# sl_xs rep_prop2) xs)
                             -- Non-infinite version for SMT Strings
                             -- Not an optimization- needed to prevent infinite computation,
                             -- otherwise genericTake will try to fully evaluate `repeat x`

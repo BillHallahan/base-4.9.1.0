@@ -504,9 +504,9 @@ maximum xs =
                 !index_non_neg = index_y $>=# 0#
 
                 !sl_xs = strLen# xs
-                y_is_min i = 0# $<=# i &&# i $<# sl_xs ==> y_list `strGe#` strAt# xs i
+                y_is_min i = y_list `strGe#` strAt# xs i
             in
-            assume (index_non_neg) . assume (forAllInt# y_is_min) $ y
+            assume (index_non_neg) . assume (forAllBoundInt# 0# sl_xs y_is_min) $ y
 
         maximum' []              =  errorEmptyList "maximum"
         maximum' xs'              =  foldl1 max xs'
@@ -538,9 +538,9 @@ minimum xs =
                 !index_non_neg = index_y $>=# 0#
 
                 !sl_xs = strLen# xs
-                y_is_min i = 0# $<=# i &&# i $<# sl_xs ==> y_list `strLe#` strAt# xs i
+                y_is_min i = y_list `strLe#` strAt# xs i
             in
-            assume (index_non_neg) . assume (forAllInt# y_is_min) $ y
+            assume (index_non_neg) . assume (forAllBoundInt# 0# sl_xs y_is_min) $ y
             
         minimum' []              =  errorEmptyList "minimum"
         minimum' xs'              =  foldl1 min xs'
@@ -608,9 +608,9 @@ replicate n x           =
 
               !sl_xs = strLen# xs
               rep_prop1 = sl_xs $==# len
-              rep_prop2 i = 0# $<=# i &&# i $<# sl_xs ==> strAt# xs i `strEq#`potential_str
+              rep_prop2 i = strAt# xs i `strEq#`potential_str
           in
-          assume rep_prop1 (assume (forAllInt# rep_prop2) xs)
+          assume rep_prop1 (assume (forAllBoundInt# 0# sl_xs rep_prop2) xs)
 
       -- Non-infinite version for SMT Strings
       -- Not an optimization- needed to prevent infinite computation,
@@ -880,9 +880,9 @@ reverse               xs  =
           !sl_ys = strLen# ys
           rev_prop1 = sl_xs $==# sl_ys
           rev_prop2 i =
-            0# $<=# i &&# i $<# strLen# xs ==> strAt# xs i `strEq#` strAt# ys ((strLen# xs -# 1#) -# i)
+            strAt# xs i `strEq#` strAt# ys ((strLen# xs -# 1#) -# i)
       in
-      assume rev_prop1 (assume (forAllInt# rev_prop2) ys)
+      assume rev_prop1 (assume (forAllBoundInt# 0# sl_xs rev_prop2) ys)
 
     strRev _ _ [] = []
     strRev sl_xs i (y:ys) = 

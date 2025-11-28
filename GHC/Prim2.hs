@@ -539,9 +539,12 @@ _ ==> _ = True
 
 infix 1 ==>
 
-{-# NOINLINE forAllInt#  #-}
-forAllInt# :: (Int# -> Bool) -> Bool
-forAllInt#  _ = True
+{-# NOINLINE forAllBoundInt#  #-}
+forAllBoundInt# :: Int# -- ^ Lower bound
+                -> Int# -- ^ Upper bound
+                -> (Int# -> Bool) -- ^ Quantified expression
+                -> Bool
+forAllBoundInt# _ _ _ = True
 
 {-# NOINLINE assume #-}
 assume :: Bool -> a -> a
