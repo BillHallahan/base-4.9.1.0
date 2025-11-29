@@ -511,7 +511,7 @@ maximum xs =
         maximum' []              =  errorEmptyList "maximum"
         maximum' xs'              =  foldl1 max xs'
     in
-    case strQuantifiers (typeIndex# xs `adjStr` xs) of
+    case typeIndex# xs `adjStr` xs of
         1# -> strMaximum
         _ -> maximum' xs
 
@@ -545,7 +545,7 @@ minimum xs =
         minimum' []              =  errorEmptyList "minimum"
         minimum' xs'              =  foldl1 min xs'
     in
-    case strQuantifiers (typeIndex# xs `adjStr` xs) of
+    case typeIndex# xs `adjStr` xs of
         1# -> strMinimum
         _ -> minimum' xs
 -- 
@@ -611,16 +611,9 @@ replicate n x           =
               rep_prop2 i = strAt# xs i `strEq#`potential_str
           in
           assume rep_prop1 (assume (forAllBoundInt# 0# sl_xs rep_prop2) xs)
-
-      -- Non-infinite version for SMT Strings
-      -- Not an optimization- needed to prevent infinite computation,
-      -- otherwise genericTake will try to fully evaluate `repeat x`
-      smt_rep n x = map (const x) [1..n]
     in
     case typeIndex# potential_str `adjStr` potential_str of
-        1# -> case strQuantifiers 1# of
-                1# -> smt_rep_quant
-                _ -> smt_rep n x
+        1# -> smt_rep_quant
         _ -> rep n x
 -- 
 -- -- | 'cycle' ties a finite list into a circular one, or equivalently,
@@ -883,30 +876,9 @@ reverse               xs  =
             strAt# xs i `strEq#` strAt# ys ((strLen# xs -# 1#) -# i)
       in
       assume rev_prop1 (assume (forAllBoundInt# 0# sl_xs rev_prop2) ys)
-
-    strRev _ _ [] = []
-    strRev sl_xs i (y:ys) = 
-      let
-        !pos = sl_xs -# i
-        !xs_at_pos = strAt# xs pos
-
-        rev_prop = [y] `strEq#` xs_at_pos
-        
-        !i_plus_one = i +# 1#
-      in
-      assume rev_prop (y:strRev sl_xs i_plus_one ys)
   in
   case typeIndex# xs `adjStr` xs of
-      1# -> case strQuantifiers 1# of
-                1# -> strRevQuant
-                _ ->
-                  let
-                      !ys = symgen @[a]
-                      !sl_xs = strLen# xs
-                      !sl_ys = strLen# ys
-                      rev_prop = sl_xs $==# sl_ys
-                  in
-                  assume rev_prop (strRev sl_xs 1# ys)
+      1# -> strRevQuant
       _ -> foldl (flip (:)) [] xs
 -- #else
 -- reverse l =  rev l []

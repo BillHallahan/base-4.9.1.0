@@ -602,7 +602,3 @@ checkStrLazy :: forall a . Int# -> [a] -> Int#
 checkStrLazy x xs = case x of
                       1# | isSMTRep# xs -> x
                       _ -> 0#
-
-{-# NOINLINE strQuantifiers #-}
-strQuantifiers :: Int# -> Int#
-strQuantifiers x = x
