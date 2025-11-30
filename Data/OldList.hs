@@ -814,10 +814,11 @@ genericReplicate n x = let
                                  !xs = symgen @[a]
 
                                  !sl_xs = strLen# xs
+                                 !sl_xs_minus_1 = sl_xs -# 1#
                                  rep_prop1 = sl_xs $==# len
                                  rep_prop2 i = strAt# xs i `strEq#`potential_str
                               in
-                              assume rep_prop1 (assume (forAllBoundInt# 0# sl_xs rep_prop2) xs)
+                              assume rep_prop1 (assume (forAllBoundInt# 0# sl_xs_minus_1 rep_prop2) xs)
                        in case typeIndex# potential_str `adjStr` potential_str of
                             1# -> smt_rep_quant
                             _ -> rep n x
