@@ -531,13 +531,13 @@ intersperse s xs =
                !len_two_xs_m = len_two_xs -# 1#
                !len_prop = ite (sl_xs $==# 0#) (sl_ys $==# 0#) (len_two_xs_m $==# sl_ys)
 
-               copy_prop i =
-                  0# $<=# i &&# i $<# strLen# xs ==> strAt# xs i `strEq#` strAt# ys (2# *# i)
-
                sl_xs_min_1 = strLen# xs -# 1#
+               copy_prop i = strAt# xs i `strEq#` strAt# ys (2# *# i)
+
+               sl_xs_min_2 = strLen# xs -# 2#
                inter_prop i = s_str `strEq#` strAt# ys ((2# *# i) +# 1#)
             in
-            assume len_prop . assume (forAllBoundInt# 0# sl_xs copy_prop) . assume (forAllBoundInt# 0# sl_xs_min_1 inter_prop) $ ys
+            assume len_prop . assume (forAllBoundInt# 0# sl_xs_min_1 copy_prop) . assume (forAllBoundInt# 0# sl_xs_min_2 inter_prop) $ ys
 
          intersperse' _   []      = []
          intersperse' sep (x:xs')  = x : prependToAll sep xs'

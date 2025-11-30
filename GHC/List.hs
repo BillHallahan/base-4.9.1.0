@@ -504,9 +504,10 @@ maximum xs =
                 !index_non_neg = index_y $>=# 0#
 
                 !sl_xs = strLen# xs
+                !sl_xs_minus_1 = sl_xs -# 1#
                 y_is_min i = y_list `strGe#` strAt# xs i
             in
-            assume (index_non_neg) . assume (forAllBoundInt# 0# sl_xs y_is_min) $ y
+            assume (index_non_neg) . assume (forAllBoundInt# 0# sl_xs_minus_1 y_is_min) $ y
 
         maximum' []              =  errorEmptyList "maximum"
         maximum' xs'              =  foldl1 max xs'
@@ -538,9 +539,10 @@ minimum xs =
                 !index_non_neg = index_y $>=# 0#
 
                 !sl_xs = strLen# xs
+                !sl_xs_minus_1 = sl_xs -# 1#
                 y_is_min i = y_list `strLe#` strAt# xs i
             in
-            assume (index_non_neg) . assume (forAllBoundInt# 0# sl_xs y_is_min) $ y
+            assume (index_non_neg) . assume (forAllBoundInt# 0# sl_xs_minus_1 y_is_min) $ y
             
         minimum' []              =  errorEmptyList "minimum"
         minimum' xs'              =  foldl1 min xs'
