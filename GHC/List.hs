@@ -872,12 +872,13 @@ reverse               xs  =
     strRevQuant =
       let !ys = symgen @[a]
           !sl_xs = strLen# xs
+          !sl_xs_min_1 = sl_xs -# 1#
           !sl_ys = strLen# ys
           rev_prop1 = sl_xs $==# sl_ys
           rev_prop2 i =
             strAt# xs i `strEq#` strAt# ys ((strLen# xs -# 1#) -# i)
       in
-      assume rev_prop1 (assume (forAllBoundInt# 0# sl_xs rev_prop2) ys)
+      assume rev_prop1 (assume (forAllBoundInt# 0# sl_xs_min_1 rev_prop2) ys)
   in
   case typeIndex# xs `adjStr` xs of
       1# -> strRevQuant
