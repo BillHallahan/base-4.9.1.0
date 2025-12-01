@@ -533,11 +533,9 @@ intersperse s xs =
 
                sl_xs_min_1 = strLen# xs -# 1#
                copy_prop i = strAt# xs i `strEq#` strAt# ys (2# *# i)
-
-               sl_xs_min_2 = strLen# xs -# 2#
                inter_prop i = s_str `strEq#` strAt# ys ((2# *# i) +# 1#)
             in
-            assume len_prop . assume (forAllBoundInt# 0# sl_xs_min_1 copy_prop) . assume (forAllBoundInt# 0# sl_xs_min_2 inter_prop) $ ys
+            assume len_prop . assume (forAllBoundInt# 0# sl_xs copy_prop) . assume (forAllBoundInt# 0# sl_xs_min_1 inter_prop) $ ys
 
          intersperse' _   []      = []
          intersperse' sep (x:xs')  = x : prependToAll sep xs'
@@ -814,11 +812,10 @@ genericReplicate n x = let
                                  !xs = symgen @[a]
 
                                  !sl_xs = strLen# xs
-                                 !sl_xs_minus_1 = sl_xs -# 1#
                                  rep_prop1 = sl_xs $==# len
                                  rep_prop2 i = strAt# xs i `strEq#`potential_str
                               in
-                              assume rep_prop1 (assume (forAllBoundInt# 0# sl_xs_minus_1 rep_prop2) xs)
+                              assume rep_prop1 (assume (forAllBoundInt# 0# sl_xs rep_prop2) xs)
                        in case typeIndex# potential_str `adjStr` potential_str of
                             1# -> smt_rep_quant
                             _ -> rep n x

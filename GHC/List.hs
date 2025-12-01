@@ -504,10 +504,9 @@ maximum xs =
                 !index_non_neg = index_y $>=# 0#
 
                 !sl_xs = strLen# xs
-                !sl_xs_minus_1 = sl_xs -# 1#
                 y_is_min i = y_list `strGe#` strAt# xs i
             in
-            assume (index_non_neg) . assume (forAllBoundInt# 0# sl_xs_minus_1 y_is_min) $ y
+            assume (index_non_neg) . assume (forAllBoundInt# 0# sl_xs y_is_min) $ y
 
         maximum' []              =  errorEmptyList "maximum"
         maximum' xs'              =  foldl1 max xs'
@@ -539,10 +538,9 @@ minimum xs =
                 !index_non_neg = index_y $>=# 0#
 
                 !sl_xs = strLen# xs
-                !sl_xs_minus_1 = sl_xs -# 1#
                 y_is_min i = y_list `strLe#` strAt# xs i
             in
-            assume (index_non_neg) . assume (forAllBoundInt# 0# sl_xs_minus_1 y_is_min) $ y
+            assume (index_non_neg) . assume (forAllBoundInt# 0# sl_xs y_is_min) $ y
             
         minimum' []              =  errorEmptyList "minimum"
         minimum' xs'              =  foldl1 min xs'
@@ -872,13 +870,12 @@ reverse               xs  =
     strRevQuant =
       let !ys = symgen @[a]
           !sl_xs = strLen# xs
-          !sl_xs_min_1 = sl_xs -# 1#
           !sl_ys = strLen# ys
           rev_prop1 = sl_xs $==# sl_ys
           rev_prop2 i =
             strAt# xs i `strEq#` strAt# ys ((strLen# xs -# 1#) -# i)
       in
-      assume rev_prop1 (assume (forAllBoundInt# 0# sl_xs_min_1 rev_prop2) ys)
+      assume rev_prop1 (assume (forAllBoundInt# 0# sl_xs rev_prop2) ys)
   in
   case typeIndex# xs `adjStr` xs of
       1# -> strRevQuant
