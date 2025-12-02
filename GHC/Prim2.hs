@@ -593,6 +593,13 @@ adjStr x xs = case x of 1# -> go xs; _ -> x
     go [] = x
     go ((!x):xs) = go xs
 
+-- Check if a string can be used in the SMT solver, but do not force its evaluation
+{-# NOINLINE checkStrLazy #-}
+checkStrLazy :: forall a . Int# -> [a] -> Int#
+checkStrLazy x xs = case x of
+                      1# | isSMTRep# xs -> x
+                      _ -> 0#
+
 {-# NOINLINE strQuantifiers #-}
 strQuantifiers :: Int# -> Int#
 strQuantifiers x = x
