@@ -531,18 +531,16 @@ intersperse s xs =
                !len_two_xs_m = len_two_xs -# 1#
                !len_prop = ite (sl_xs $==# 0#) (sl_ys $==# 0#) (len_two_xs_m $==# sl_ys)
 
-               copy_prop i =
-                  0# $<=# i &&# i $<# strLen# xs ==> strAt# xs i `strEq#` strAt# ys (2# *# i)
-
-               inter_prop i = 
-                  0# $<=# i &&# i $<# (strLen# xs -# 1#) ==> s_str `strEq#` strAt# ys ((2# *# i) +# 1#)
+               sl_xs_min_1 = strLen# xs -# 1#
+               copy_prop i = strAt# xs i `strEq#` strAt# ys (2# *# i)
+               inter_prop i = s_str `strEq#` strAt# ys ((2# *# i) +# 1#)
             in
-            assume len_prop . assume (forAllInt# copy_prop) . assume (forAllInt# inter_prop) $ ys
+            assume len_prop . assume (forAllBoundInt# 0# sl_xs copy_prop) . assume (forAllBoundInt# 0# sl_xs_min_1 inter_prop) $ ys
 
          intersperse' _   []      = []
          intersperse' sep (x:xs')  = x : prependToAll sep xs'
    in
-   case strQuantifiers (typeIndex# xs `adjStr` xs) of
+   case typeIndex# xs `adjStr` xs of
       1# -> strIntersperse
       _ -> intersperse' s xs
 -- 
@@ -663,8 +661,7 @@ insert e ls =
             I# ins_pos = symgen @Int
 
             -- All elements less than ins_pos must be < e
-            ins_prop_bound1 i =
-               0# $<=# i &&# i $<# ins_pos ==> strAt# ls i `strLt#` e_ls
+            ins_prop_bound1 i = strAt# ls i `strLt#` e_ls
 
             -- e must be the last list element or <= to the elements at ins_pos + 1
             !str_at1 = strAt# ls ins_pos
@@ -681,60 +678,12 @@ insert e ls =
             !ys = inter1 `strAppend#` ls_pos
          in
            assume ins_prop_len
-         . assume (forAllInt# ins_prop_bound1)
+         . assume (forAllBoundInt# 0# ins_pos ins_prop_bound1)
          . assume ins_prop_bound2
          $ ys
-      
-      -- Copies values from ls to ys.
-      -- pos_ys is updated on each step
-      -- pos_ls is updated on each step EXCEPT the step where we insert e 
-      strInsert e_ls pos_ls pos_ys [] = []
-      strInsert e_ls pos_ls pos_ys [y] =
-         let
-            !ls_at_pos = strAt# ls pos_ls
          in
-         ite (pos_ls $==# pos_ys) e_ls ls_at_pos
-      strInsert e_ls pos_ls pos_ys (y:ys) =
-         let
-            !ls_at_pos = strAt# ls pos_ls
-
-            !pos_ls_plus_one = pos_ls +# 1#
-
-            !comp_char = e_ls `strLe#` ls_at_pos
-            !cond_pos = pos_ls $==# pos_ys
-
-            -- Is e is less the next character in ls, and pos_ys == pos_ls (indicating that a
-            -- character has not been inserted.)
-            !cond_comp = comp_char &&# cond_pos
-
-            !y_eq_e = [y] `strEq#` e_ls
-            !y_eq_pos = [y] `strEq#` ls_at_pos
-
-            !set_y = ite cond_comp y_eq_e y_eq_pos
-            !pos_ls_next = iteInt# cond_comp pos_ls pos_ls_plus_one
-            I# (pos_ls_next_var) = symgen @Int
-
-            !pos_ys_plus_one = pos_ys +# 1#
-         in
-           assume set_y
-         . assume (pos_ls_next_var $==# pos_ls_next)
-         $ y:strInsert e_ls pos_ls_next_var pos_ys_plus_one ys
-   in
    case typeIndex# ls `adjStr` ls of
-      1# -> case strQuantifiers 1# of
-               1# -> strInsertQuant
-               _ ->
-                  let
-                     !e' = e
-                     !e_ls = [e']
-
-                     !ys = symgen @[a]
-                     !sl_ls = strLen# ls
-                     !sl_ys = strLen# ys
-                     !sl_ls_plus_one = sl_ls +# 1#
-                     ins_prop = sl_ls_plus_one $==# sl_ys
-                  in
-                  assume ins_prop $ strInsert e_ls 0# 0# ys
+      1# -> strInsertQuant
       _ -> insertBy (compare) e ls
 
 -- 
@@ -864,18 +813,11 @@ genericReplicate n x = let
 
                                  !sl_xs = strLen# xs
                                  rep_prop1 = sl_xs $==# len
-                                 rep_prop2 i = 0# $<=# i &&# i $<# sl_xs ==> strAt# xs i `strEq#`potential_str
+                                 rep_prop2 i = strAt# xs i `strEq#`potential_str
                               in
-                              assume rep_prop1 (assume (forAllInt# rep_prop2) xs)
-                            -- Non-infinite version for SMT Strings
-                            -- Not an optimization- needed to prevent infinite computation,
-                            -- otherwise genericTake will try to fully evaluate `repeat x`
-                            smt_rep n x = map (const x) [1..(fromIntegral n) :: Int]
-
+                              assume rep_prop1 (assume (forAllBoundInt# 0# sl_xs rep_prop2) xs)
                        in case typeIndex# potential_str `adjStr` potential_str of
-                            1# -> case strQuantifiers 1# of
-                                    1# -> smt_rep_quant
-                                    _ -> smt_rep n x
+                            1# -> smt_rep_quant
                             _ -> rep n x
 
 -- | The 'zip4' function takes four lists and returns a list of
