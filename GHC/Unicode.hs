@@ -416,19 +416,19 @@ iswprint = iswprint
 -- 
 -- foreign import ccall unsafe "u_iswlower"
 iswlower :: Int -> Int
-iswlower = iswlower
+iswlower (I# i) = I# (iteInt# (97# $<=# i &&# i $<=# 122#) 1# 0#)
 -- 
 -- foreign import ccall unsafe "u_iswupper"
 iswupper :: Int -> Int
-iswupper = iswupper
+iswupper (I# i) = I# (iteInt# (65# $<=# i &&# i $<=# 90#) 1# 0#)
 -- 
 -- foreign import ccall unsafe "u_towlower"
 towlower :: Int -> Int
-towlower = towlower
+towlower (I# i) = I# (iteInt# (65# $<=# i &&# i $<=# 90#) (i +# 32#) i)
 -- 
 -- foreign import ccall unsafe "u_towupper"
 towupper :: Int -> Int
-towupper = towupper
+towupper (I# i) = I# (iteInt# (97# $<=# i &&# i $<=# 122#) (i -# 32#) i)
 -- 
 -- foreign import ccall unsafe "u_towtitle"
 towtitle :: Int -> Int
