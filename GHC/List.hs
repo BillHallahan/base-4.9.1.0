@@ -101,9 +101,10 @@ unsnoc xs = let
                 strUnsnoc xs = let !len = strLen# xs
                                    !end = len -# 1#
                                    !end_lst = strAt# xs end
+                                   !substr = strSubstr# xs 0# end
                                in
                                case end_lst of
-                                   (x:_) -> Just (strSubstr# xs 0# end, x)
+                                   (x:_) -> Just (substr, x)
                                    _ -> Nothing
             in
             case typeIndex# xs `adjStr` xs of
@@ -810,7 +811,10 @@ drop k ys =
 splitAt                :: Int -> [a] -> ([a],[a])
 -- 
 -- #ifdef USE_REPORT_PRELUDE
-splitAt n xs           =  (take n xs, drop n xs)
+splitAt n xs           =
+  case typeIndex# xs `adjStr` xs of
+    1# -> (take n xs, drop n xs)
+    _ -> (take n xs, drop n xs)
 -- #else
 -- splitAt n ls
 --   | n <= 0 = ([], ls)
