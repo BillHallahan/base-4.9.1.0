@@ -774,7 +774,10 @@ genericDrop n xs = let
 -- | The 'genericSplitAt' function is an overloaded version of 'splitAt', which
 -- accepts any 'Integral' value as the position at which to split.
 genericSplitAt          :: (Integral i) => i -> [a] -> ([a], [a])
-genericSplitAt n xs = (genericTake n xs, genericDrop n xs)
+genericSplitAt n xs =
+   case typeIndex# xs `adjStr` xs of
+      1# -> (genericTake n xs, genericDrop n xs)
+      _ -> (genericTake n xs, genericDrop n xs)
 -- genericSplitAt n xs | n <= fromInteger (Z# 0#) =  ([],xs)
 -- genericSplitAt _ []     =  ([],[])
 -- genericSplitAt n (x:xs) =  (x:xs',xs'') where
