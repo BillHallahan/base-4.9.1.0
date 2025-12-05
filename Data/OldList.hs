@@ -250,7 +250,9 @@ stripPrefix pre zs =
    in
    case typeIndex# pre `adjStr` pre `adjStr` zs of
       1# -> let !is_pre = strPrefixOf# pre zs in
-            if is_pre then Just (strReplace# zs pre []) else Nothing
+            if is_pre
+                  then let !rep = strReplace# zs pre [] in Just rep
+                  else Nothing
       _ -> stripPrefix' pre zs
 
 -- | The 'elemIndex' function returns the index of the first element
