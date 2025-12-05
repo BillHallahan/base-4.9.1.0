@@ -533,7 +533,7 @@ intersperse s xs =
                !len_two_xs_m = len_two_xs -# 1#
                !len_prop = ite (sl_xs $==# 0#) (sl_ys $==# 0#) (len_two_xs_m $==# sl_ys)
 
-               sl_xs_min_1 = strLen# xs -# 1#
+               !sl_xs_min_1 = sl_xs -# 1#
                copy_prop i = strAt# xs i `strEq#` strAt# ys (2# *# i)
                inter_prop i = s_str `strEq#` strAt# ys ((2# *# i) +# 1#)
             in
