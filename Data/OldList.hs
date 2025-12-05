@@ -250,7 +250,9 @@ stripPrefix pre zs =
    in
    case typeIndex# pre `adjStr` pre `adjStr` zs of
       1# -> let !is_pre = strPrefixOf# pre zs in
-            if is_pre then Just (strReplace# zs pre []) else Nothing
+            if is_pre
+                  then let !rep = strReplace# zs pre [] in Just rep
+                  else Nothing
       _ -> stripPrefix' pre zs
 
 -- | The 'elemIndex' function returns the index of the first element
@@ -531,7 +533,7 @@ intersperse s xs =
                !len_two_xs_m = len_two_xs -# 1#
                !len_prop = ite (sl_xs $==# 0#) (sl_ys $==# 0#) (len_two_xs_m $==# sl_ys)
 
-               sl_xs_min_1 = strLen# xs -# 1#
+               !sl_xs_min_1 = sl_xs -# 1#
                copy_prop i = strAt# xs i `strEq#` strAt# ys (2# *# i)
                inter_prop i = s_str `strEq#` strAt# ys ((2# *# i) +# 1#)
             in
@@ -772,7 +774,10 @@ genericDrop n xs = let
 -- | The 'genericSplitAt' function is an overloaded version of 'splitAt', which
 -- accepts any 'Integral' value as the position at which to split.
 genericSplitAt          :: (Integral i) => i -> [a] -> ([a], [a])
-genericSplitAt n xs = (genericTake n xs, genericDrop n xs)
+genericSplitAt n xs =
+   case typeIndex# xs `adjStr` xs of
+      1# -> (genericTake n xs, genericDrop n xs)
+      _ -> (genericTake n xs, genericDrop n xs)
 -- genericSplitAt n xs | n <= fromInteger (Z# 0#) =  ([],xs)
 -- genericSplitAt _ []     =  ([],[])
 -- genericSplitAt n (x:xs) =  (x:xs',xs'') where

@@ -588,7 +588,10 @@ infixl 5 `adjStr`
 -- returns 1# (indicating a String.)
 {-# NOINLINE adjStr #-}
 adjStr :: forall a . Int# -> [a] -> Int#
-adjStr x xs = case x of 1# -> go xs; _ -> x
+adjStr = adjStr'
+
+adjStr' :: forall a . Int# -> [a] -> Int#
+adjStr' x xs = case x of 1# -> go xs; _ -> x
   where
     -- See note [adjStr]
     go xs | isSMTRep# xs = x
@@ -601,4 +604,5 @@ adjStr x xs = case x of 1# -> go xs; _ -> x
 checkStrLazy :: forall a . Int# -> [a] -> Int#
 checkStrLazy x xs = case x of
                       1# | isSMTRep# xs -> x
+                         | evalsToSMTRep# xs -> adjStr' x xs
                       _ -> 0#
