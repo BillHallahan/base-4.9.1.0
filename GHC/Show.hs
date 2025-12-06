@@ -187,7 +187,8 @@ instance  Show Char  where
     showList cs = showChar '"' . showLitString cs . showChar '"'
 -- 
 instance Show Int where
-    show (I# x) = if x $>=# 0# then intToString# x else (C# '-'#):intToString# (negateInt# x)
+    show (I# x) =
+      if x $>=# 0# then intToString# x else let !neg_int = negateInt# x in (C# '-'#):intToString# neg_int
 --     showsPrec = showSignedInt
 -- 
 -- instance Show Word where
@@ -442,7 +443,8 @@ asciiTab = -- Using an array drags in the array module.  listArray ('\NUL', ' ')
 -- --------------------------------------------------------------
 -- 
 instance Show Integer where
-    show (Z# x) = if x $>=# 0# then intToString# x else (C# '-'#):intToString# (negateInt# x)
+    show (Z# x) =
+      if x $>=# 0# then intToString# x else let !neg_int = negateInt# x in (C# '-'#):intToString# neg_int
 --     showsPrec p n r
 --         | p > 6 && n < 0 = '(' : integerToString n (')' : r)
 --         -- Minor point: testing p first gives better code

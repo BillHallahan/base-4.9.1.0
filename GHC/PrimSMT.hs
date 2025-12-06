@@ -17,6 +17,11 @@ import GHC.Types
 isSMTRep# :: forall a . a -> Bool
 isSMTRep# = isSMTRep#
 
+-- Does the value evaluate to something representable in the SMT solver?
+{-# NOINLINE evalsToSMTRep# #-}
+evalsToSMTRep# :: forall a . a -> Bool
+evalsToSMTRep# = evalsToSMTRep#
+
 {-# NOINLINE ($==#) #-}
 ($==#) :: Int# -> Int# -> Bool
 ($==#) = ($==#)
