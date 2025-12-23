@@ -751,6 +751,7 @@ mapFB c f = \x ys -> c (f x) ys
         append (x:xs) ys = x : (append xs ys)
     in case typeIndex# xs `adjStr` xs `adjStr` ys of
         1# -> strAppend# xs ys
+        2# -> strAppend# xs ys
         _ -> append xs ys
 -- 
 -- (++) [] ys = ys
