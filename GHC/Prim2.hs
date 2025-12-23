@@ -606,3 +606,4 @@ checkStrLazy x xs = case x of
                       0# -> 0#
                       _ | isSMTRep# xs -> x
                         | evalsToSMTRep# xs -> adjStr' x xs
+                      _ -> 0#
