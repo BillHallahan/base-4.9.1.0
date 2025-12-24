@@ -591,7 +591,7 @@ adjStr :: forall a . Int# -> [a] -> Int#
 adjStr = adjStr'
 
 adjStr' :: forall a . Int# -> [a] -> Int#
-adjStr' x xs = case x of 1# -> go xs; _ -> x
+adjStr' x xs = case x of 0# -> x; _ -> go xs
   where
     -- See note [adjStr]
     go xs | isSMTRep# xs = x
@@ -603,6 +603,7 @@ adjStr' x xs = case x of 1# -> go xs; _ -> x
 {-# NOINLINE checkStrLazy #-}
 checkStrLazy :: forall a . Int# -> [a] -> Int#
 checkStrLazy x xs = case x of
-                      1# | isSMTRep# xs -> x
-                         | evalsToSMTRep# xs -> adjStr' x xs
+                      0# -> 0#
+                      _ | isSMTRep# xs -> x
+                        | evalsToSMTRep# xs -> adjStr' x xs
                       _ -> 0#
