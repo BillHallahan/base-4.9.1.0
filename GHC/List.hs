@@ -109,6 +109,7 @@ unsnoc xs = let
             in
             case typeIndex# xs `adjStr` xs of
                 1# -> strUnsnoc xs
+                2# -> strUnsnoc xs
                 _ -> unsnoc' xs
 {-# INLINABLE unsnoc #-}
 
@@ -1130,6 +1131,7 @@ xs !? n = let
                         i = strAt# xs n'
           in case typeIndex# xs `adjStr` xs of
               1# -> strTotalIndex xs n
+              2# -> strTotalIndex xs n
               _ -> totalIndex xs n
 --
 -- --------------------------------------------------------------

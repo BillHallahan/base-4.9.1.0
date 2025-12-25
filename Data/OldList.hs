@@ -253,6 +253,10 @@ stripPrefix pre zs =
             if is_pre
                   then let !rep = strReplace# zs pre [] in Just rep
                   else Nothing
+      2# -> let !is_pre = strPrefixOf# pre zs in
+            if is_pre
+                  then let !rep = strReplace# zs pre [] in Just rep
+                  else Nothing
       _ -> stripPrefix' pre zs
 
 -- | The 'elemIndex' function returns the index of the first element
@@ -349,6 +353,7 @@ isPrefixOf as bs =
    in
    case typeIndex# as `adjStr` as `adjStr` bs of
       1# -> strPrefixOf# as bs
+      2# -> strPrefixOf# as bs
       _ -> isPrefixOf' as bs
 
 -- | The 'isSuffixOf' function takes two lists and returns 'True' iff
@@ -367,6 +372,7 @@ xs `isSuffixOf` ys      =
    in
    case typeIndex# xs `adjStr` xs `adjStr` ys of
       1# -> strSuffixOf# xs ys
+      2# -> strSuffixOf# xs ys
       _ -> isSuffixOf' xs ys
 
 -- A version of drop that drops the length of the first argument from the
@@ -453,6 +459,7 @@ delete                  :: (Eq a) => a -> [a] -> [a]
 delete x xs                  = 
    case typeIndex# xs `adjStr` xs of
       1# -> let !x' = x; !x_list = [x'] in strReplace# xs x_list []
+      2# -> let !x' = x; !x_list = [x'] in strReplace# xs x_list []
       _ -> deleteBy (==) x xs
 -- 
 -- -- | The 'deleteBy' function behaves like 'delete', but takes a
