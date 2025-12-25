@@ -705,6 +705,7 @@ take n xs = let
                 I# n' = n
             in case typeIndex# xs `adjStr` xs of
                 1# -> strSubstr# xs 0# n'
+                2# -> strSubstr# xs 0# n'
                 _ -> take' n xs
             
 -- #ifdef USE_REPORT_PRELUDE
@@ -1086,6 +1087,7 @@ xs !! n =
 
     in case typeIndex# xs `adjStr` xs of
         1# -> str_idx xs n
+        2# -> str_idx xs n
         _ -> reg_idx xs n
 -- #else
 -- 
