@@ -145,6 +145,7 @@ last ys =
     in
     case typeIndex# ys `adjStr` ys of
         1# -> strLast ys
+        2# -> strLast ys
         _ -> last' ys
 -- #else
 -- -- Use foldl to make last a good consumer.
@@ -176,6 +177,10 @@ init ys =
           1# -> case ys of
                     [] -> errorEmptyList "init"
                     _ -> let !len = strLen# ys; !end = len -# 1# in strSubstr# ys 0# end
+          2# -> case ys of
+                    [] -> errorEmptyList "init"
+                    _ -> let !len = strLen# ys; !end = len -# 1# in strSubstr# ys 0# end
+
           _ -> init' ys
 -- #else
 -- -- eliminate repeated cases
@@ -194,6 +199,7 @@ null xs =
     in
     case typeIndex# xs `adjStr` xs of
         1# -> let !len = strLen# xs in len $==# 0#
+        2# -> let !len = strLen# xs in len $==# 0#
         _ -> null' xs
 -- 
 -- -- | /O(n)/. 'length' returns the length of a finite list as an 'Int'.
@@ -204,6 +210,7 @@ length :: [a] -> Int
 length xs =
     case typeIndex# xs `adjStr` xs of
         1# -> I# (strLen# xs)
+        2# -> I# (strLen# xs)
         _ -> length' xs
 
 length'                  :: [a] -> Int
@@ -778,6 +785,7 @@ drop k ys =
     in
     case typeIndex# ys `adjStr` ys of
         1# -> let !len = strLen# ys in strSubstr# ys k' len
+        2# -> let !len = strLen# ys in strSubstr# ys k' len
         _ -> drop' k ys
 -- #else /* hack away */
 -- {-# INLINE drop #-}
@@ -979,6 +987,7 @@ elem x xs = let
                                in pos $/=# (-1#)
             in case typeIndex# xs `adjStr` xs of
                 1# -> strElem x xs
+                2# -> strElem x xs
                 _ -> elem' x xs  
 -- #else
 -- elem _ []       = False
@@ -1002,6 +1011,7 @@ notElem x xs = let
                                   in pos $==# (-1#)
             in case typeIndex# xs `adjStr` xs of
                 1# -> strNotElem x xs
+                2# -> strNotElem x xs
                 _ -> notElem' x xs
 -- #else
 -- notElem _ []    =  True

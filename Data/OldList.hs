@@ -267,6 +267,7 @@ elemIndex x xs  = let elemIndex' x xs = findIndex (x==) xs
                                          !pos = strIndexOf# xs x_as_list 0#
                   in case typeIndex# xs `adjStr` xs of
                         1# -> strElemIndex x xs
+                        2# -> strElemIndex x xs
                         _ -> elemIndex' x xs
 
 -- | The 'elemIndices' function extends 'elemIndex', by returning the
@@ -400,6 +401,7 @@ isInfixOf needle haystack = let isInfixOf' n h = any (isPrefixOf n) (tails h)
                                                  in pos $/=# (-1#)
                             in case typeIndex# haystack `adjStr` haystack `adjStr` needle of
                                 1# -> strInfixOf needle haystack
+                                2# -> strInfixOf needle haystack
                                 _ -> isInfixOf' needle haystack
 
 -- | /O(n^2)/. The 'nub' function removes duplicate elements from a list.
