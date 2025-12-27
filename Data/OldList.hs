@@ -739,6 +739,7 @@ genericLength xs = let
                    in
                      case typeIndex# xs `adjStr` xs of
                         1# -> fromInteger $ Z# (strLen# xs)
+                        2# -> fromInteger $ Z# (strLen# xs)
                         _ -> genericLength' xs
 -- 
 -- {-# RULES
@@ -763,6 +764,7 @@ genericTake n xs = let
                      I# n' = fromIntegral n
                    in case typeIndex# xs `adjStr` xs of
                      1# -> strSubstr# xs 0# n'
+                     2# -> strSubstr# xs 0# n'
                      _ -> genericTake' n xs
 
 -- | The 'genericDrop' function is an overloaded version of 'drop', which
@@ -776,6 +778,7 @@ genericDrop n xs = let
                      I# n' = fromIntegral n
                    in case typeIndex# xs `adjStr` xs of
                      1# -> let !len = strLen# xs in strSubstr# xs n' len
+                     2# -> let !len = strLen# xs in strSubstr# xs n' len
                      _ -> genericDrop' n xs
 
 
@@ -786,6 +789,7 @@ genericSplitAt          :: (Integral i) => i -> [a] -> ([a], [a])
 genericSplitAt n xs =
    case typeIndex# xs `adjStr` xs of
       1# -> (genericTake n xs, genericDrop n xs)
+      2# -> (genericTake n xs, genericDrop n xs)
       _ -> (genericTake n xs, genericDrop n xs)
 -- genericSplitAt n xs | n <= fromInteger (Z# 0#) =  ([],xs)
 -- genericSplitAt _ []     =  ([],[])
@@ -810,6 +814,7 @@ genericIndex xs m = let
                                  i = strAt# xs n'
                     in case typeIndex# xs `adjStr` xs of
                         1# -> strGenericIndex xs m
+                        2# -> strGenericIndex xs m
                         _ -> genericIndex' xs m
 
 -- | The 'genericReplicate' function is an overloaded version of 'replicate',
@@ -832,6 +837,7 @@ genericReplicate n x = let
                               assume rep_prop1 (assume (forAllBoundInt# 0# sl_xs rep_prop2) xs)
                        in case typeIndex# potential_str `adjStr` potential_str of
                             1# -> smt_rep_quant
+                            2# -> smt_rep_quant
                             _ -> rep n x
 
 -- | The 'zip4' function takes four lists and returns a list of
