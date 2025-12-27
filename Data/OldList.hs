@@ -253,6 +253,10 @@ stripPrefix pre zs =
             if is_pre
                   then let !rep = strReplace# zs pre [] in Just rep
                   else Nothing
+      2# -> let !is_pre = strPrefixOf# pre zs in
+            if is_pre
+                  then let !rep = strReplace# zs pre [] in Just rep
+                  else Nothing
       _ -> stripPrefix' pre zs
 
 -- | The 'elemIndex' function returns the index of the first element
@@ -267,6 +271,7 @@ elemIndex x xs  = let elemIndex' x xs = findIndex (x==) xs
                                          !pos = strIndexOf# xs x_as_list 0#
                   in case typeIndex# xs `adjStr` xs of
                         1# -> strElemIndex x xs
+                        2# -> strElemIndex x xs
                         _ -> elemIndex' x xs
 
 -- | The 'elemIndices' function extends 'elemIndex', by returning the
@@ -348,6 +353,7 @@ isPrefixOf as bs =
    in
    case typeIndex# as `adjStr` as `adjStr` bs of
       1# -> strPrefixOf# as bs
+      2# -> strPrefixOf# as bs
       _ -> isPrefixOf' as bs
 
 -- | The 'isSuffixOf' function takes two lists and returns 'True' iff
@@ -366,6 +372,7 @@ xs `isSuffixOf` ys      =
    in
    case typeIndex# xs `adjStr` xs `adjStr` ys of
       1# -> strSuffixOf# xs ys
+      2# -> strSuffixOf# xs ys
       _ -> isSuffixOf' xs ys
 
 -- A version of drop that drops the length of the first argument from the
@@ -400,6 +407,7 @@ isInfixOf needle haystack = let isInfixOf' n h = any (isPrefixOf n) (tails h)
                                                  in pos $/=# (-1#)
                             in case typeIndex# haystack `adjStr` haystack `adjStr` needle of
                                 1# -> strInfixOf needle haystack
+                                2# -> strInfixOf needle haystack
                                 _ -> isInfixOf' needle haystack
 
 -- | /O(n^2)/. The 'nub' function removes duplicate elements from a list.
@@ -451,6 +459,7 @@ delete                  :: (Eq a) => a -> [a] -> [a]
 delete x xs                  = 
    case typeIndex# xs `adjStr` xs of
       1# -> let !x' = x; !x_list = [x'] in strReplace# xs x_list []
+      2# -> let !x' = x; !x_list = [x'] in strReplace# xs x_list []
       _ -> deleteBy (==) x xs
 -- 
 -- -- | The 'deleteBy' function behaves like 'delete', but takes a
@@ -544,6 +553,7 @@ intersperse s xs =
    in
    case typeIndex# xs `adjStr` xs of
       1# -> strIntersperse
+      2# -> strIntersperse
       _ -> intersperse' s xs
 -- 
 -- 
@@ -730,6 +740,7 @@ genericLength xs = let
                    in
                      case typeIndex# xs `adjStr` xs of
                         1# -> fromInteger $ Z# (strLen# xs)
+                        2# -> fromInteger $ Z# (strLen# xs)
                         _ -> genericLength' xs
 -- 
 -- {-# RULES
@@ -754,6 +765,7 @@ genericTake n xs = let
                      I# n' = fromIntegral n
                    in case typeIndex# xs `adjStr` xs of
                      1# -> strSubstr# xs 0# n'
+                     2# -> strSubstr# xs 0# n'
                      _ -> genericTake' n xs
 
 -- | The 'genericDrop' function is an overloaded version of 'drop', which
@@ -767,6 +779,7 @@ genericDrop n xs = let
                      I# n' = fromIntegral n
                    in case typeIndex# xs `adjStr` xs of
                      1# -> let !len = strLen# xs in strSubstr# xs n' len
+                     2# -> let !len = strLen# xs in strSubstr# xs n' len
                      _ -> genericDrop' n xs
 
 
@@ -777,6 +790,7 @@ genericSplitAt          :: (Integral i) => i -> [a] -> ([a], [a])
 genericSplitAt n xs =
    case typeIndex# xs `adjStr` xs of
       1# -> (genericTake n xs, genericDrop n xs)
+      2# -> (genericTake n xs, genericDrop n xs)
       _ -> (genericTake n xs, genericDrop n xs)
 -- genericSplitAt n xs | n <= fromInteger (Z# 0#) =  ([],xs)
 -- genericSplitAt _ []     =  ([],[])
@@ -801,6 +815,7 @@ genericIndex xs m = let
                                  i = strAt# xs n'
                     in case typeIndex# xs `adjStr` xs of
                         1# -> strGenericIndex xs m
+                        2# -> strGenericIndex xs m
                         _ -> genericIndex' xs m
 
 -- | The 'genericReplicate' function is an overloaded version of 'replicate',
@@ -823,6 +838,7 @@ genericReplicate n x = let
                               assume rep_prop1 (assume (forAllBoundInt# 0# sl_xs rep_prop2) xs)
                        in case typeIndex# potential_str `adjStr` potential_str of
                             1# -> smt_rep_quant
+                            2# -> smt_rep_quant
                             _ -> rep n x
 
 -- | The 'zip4' function takes four lists and returns a list of

@@ -100,6 +100,7 @@ instance (Eq a) => Eq [a] where
                 listEq _ _ = False 
             in case typeIndex# xs `adjStr` xs `adjStr` ys of
                 1# -> strEq# xs ys
+                2# -> strEq# xs ys
                 _ -> listEq xs ys
     -- []     == []     = True
     -- (x:xs) == (y:ys) = x == y && xs == ys
