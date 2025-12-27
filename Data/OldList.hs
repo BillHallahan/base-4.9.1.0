@@ -696,7 +696,6 @@ insert e ls =
          in
    case typeIndex# ls `adjStr` ls of
       1# -> strInsertQuant
-      2# -> strInsertQuant
       _ -> insertBy (compare) e ls
 
 -- 
