@@ -553,6 +553,7 @@ intersperse s xs =
    in
    case typeIndex# xs `adjStr` xs of
       1# -> strIntersperse
+      2# -> strIntersperse
       _ -> intersperse' s xs
 -- 
 -- 
@@ -695,6 +696,7 @@ insert e ls =
          in
    case typeIndex# ls `adjStr` ls of
       1# -> strInsertQuant
+      2# -> strInsertQuant
       _ -> insertBy (compare) e ls
 
 -- 
