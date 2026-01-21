@@ -19,8 +19,8 @@
 module Control.Exception.Base (
 -- 
 --         -- * The Exception type
---         SomeException(..),
---         Exception(..),
+        SomeException(..),
+        Exception(..),
 --         IOException,
 --         ArithException(..),
 --         ArrayException(..),
@@ -104,9 +104,9 @@ module Control.Exception.Base (
 import GHC.Base
 -- import GHC.IO hiding (bracket,finally,onException)
 import GHC.IO.Exception
--- import GHC.Exception
+import GHC.Exception
 -- import GHC.Show
--- -- import GHC.Exception hiding ( Exception )
+-- import GHC.Exception hiding ( Exception )
 -- import GHC.Conc.Sync
 -- 
 -- import Data.Either

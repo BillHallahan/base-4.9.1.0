@@ -47,12 +47,12 @@
 module Data.Typeable
     ( -- * The Typeable class
       Typeable
-    -- , typeOf
-    -- , typeRep
+    , typeOf
+    , typeRep
 
---       -- * Propositional equality
---     , (:~:)(Refl)
---     , (:~~:)(HRefl)
+      -- * Propositional equality
+    , (:~:)(Refl)
+    , (:~~:)(HRefl)
 
       -- * Type-safe cast
     , cast
@@ -103,7 +103,7 @@ import Data.Type.Equality
 
 -- import GHC.Internal.Data.Either
 import Data.Maybe
--- import GHC.Internal.Data.Proxy
+import Data.Proxy
 -- import GHC.Internal.Fingerprint.Type
 -- import GHC.Internal.Show
 import GHC.Base
@@ -111,16 +111,16 @@ import GHC.Base
 -- | A quantified type representation.
 type TypeRep = I.SomeTypeRep
 
--- -- | Observe a type representation for the type of a value.
--- typeOf :: forall a. Typeable a => a -> TypeRep
--- typeOf _ = I.someTypeRep (Proxy :: Proxy a)
+-- | Observe a type representation for the type of a value.
+typeOf :: forall a. Typeable a => a -> TypeRep
+typeOf _ = I.someTypeRep (Proxy :: Proxy a)
 
--- -- | Takes a value of type @a@ and returns a concrete representation
--- -- of that type.
--- --
--- -- @since base-4.7.0.0
--- typeRep :: forall proxy a. Typeable a => proxy a -> TypeRep
--- typeRep = I.someTypeRep
+-- | Takes a value of type @a@ and returns a concrete representation
+-- of that type.
+--
+-- @since base-4.7.0.0
+typeRep :: forall proxy a. Typeable a => proxy a -> TypeRep
+typeRep = I.someTypeRep
 
 -- -- | Show a type representation
 -- showsTypeRep :: TypeRep -> ShowS

@@ -49,7 +49,7 @@ import GHC.Base
 -- import GHC.IO
 -- import GHC.Show
 -- import GHC.Read
--- import GHC.Exception
+import GHC.Exception
 -- import GHC.IO.Handle.Types
 -- import GHC.OldList ( intercalate )
 -- import {-# SOURCE #-} GHC.Stack.CCS

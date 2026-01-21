@@ -48,8 +48,8 @@ module Data.Typeable.Internal (
 --     Module,  -- Abstract
 --     moduleName, modulePackage, rnfModule,
 
---     -- * TyCon
---     TyCon,   -- Abstract
+    -- * TyCon
+    TyCon,   -- Abstract
 --     tyConPackage, tyConModule, tyConName, tyConKindArgs, tyConKindRep,
 --     tyConFingerprint,
 --     KindRep(.., KindRepTypeLit), TypeLitSort(..),
@@ -69,7 +69,7 @@ module Data.Typeable.Internal (
 
     -- * SomeTypeRep
     SomeTypeRep(..),
---     someTypeRep,
+    someTypeRep,
 --     someTypeRepTyCon,
 --     someTypeRepFingerprint,
 --     rnfSomeTypeRep,
@@ -185,10 +185,10 @@ tyConFingerprint (TyCon hi lo _ _ _ _)
 -- 'TypeRep' supports reasonably efficient equality.
 type TypeRep :: k -> Type
 data TypeRep a where
-    TyC :: TyCon -> TypeRep a -- ^ Constructor
-    TyA :: forall k1 k2 (a :: k1 -> k2) (b :: k1). TypeRep a -> TypeRep b -> TypeRep (a b) -- ^ Application
+    TyC :: { trTyCon :: TyCon} -> TypeRep a -- ^ Constructor
+    TyA :: forall k1 k2 (a :: k1 -> k2) (b :: k1). { trAppFun :: TypeRep a, trAppArg :: TypeRep b } -> TypeRep (a b) -- ^ Application
     TyF :: forall (r1 :: RuntimeRep) (r2 :: RuntimeRep)
-                  (a :: TYPE r1) (b :: TYPE r2). TypeRep a -> TypeRep b -> TypeRep (a -> b) -- ^ Function
+                  (a :: TYPE r1) (b :: TYPE r2). { trFunRes :: TypeRep a, trFunArg :: TypeRep b} -> TypeRep (a -> b) -- ^ Function
 -- data TypeRep a where
 --     -- The TypeRep of Type. See Note [Kind caching], Wrinkle 2
 --     TrType :: TypeRep Type
@@ -319,11 +319,11 @@ instance Ord (TypeRep a) where
 data SomeTypeRep where
     SomeTypeRep :: forall k (a :: k). !(TypeRep a) -> SomeTypeRep
 
--- instance Eq SomeTypeRep where
---   SomeTypeRep a == SomeTypeRep b =
---       case a `eqTypeRep` b of
---           Just _  -> True
---           Nothing -> False
+instance Eq SomeTypeRep where
+  SomeTypeRep a == SomeTypeRep b =
+      case a `eqTypeRep` b of
+          Just _  -> True
+          Nothing -> False
 
 -- instance Ord SomeTypeRep where
 --   SomeTypeRep a `compare` SomeTypeRep b =
@@ -559,16 +559,16 @@ mkTrApp tr1 tr2 = TyA tr1 tr2
 
 -- ----------------- Observation ---------------------
 
--- -- | Observe the type constructor of a quantified type representation.
--- someTypeRepTyCon :: SomeTypeRep -> TyCon
--- someTypeRepTyCon (SomeTypeRep t) = typeRepTyCon t
+-- | Observe the type constructor of a quantified type representation.
+someTypeRepTyCon :: SomeTypeRep -> TyCon
+someTypeRepTyCon (SomeTypeRep t) = typeRepTyCon t
 
 -- | Observe the type constructor of a type representation
--- typeRepTyCon :: TypeRep a -> TyCon
+typeRepTyCon :: TypeRep a -> TyCon
 -- typeRepTyCon TrType = tyConTYPE
--- typeRepTyCon (TrTyCon {trTyCon = tc}) = tc
--- typeRepTyCon (TrApp {trAppFun = a})   = typeRepTyCon a
--- typeRepTyCon (TrFun {})               = typeRepTyCon $ typeRep @(->)
+typeRepTyCon (TyC {trTyCon = tc}) = tc
+typeRepTyCon (TyA {trAppFun = a})   = typeRepTyCon a
+-- typeRepTyCon (TyF {})               = typeRepTyCon $ typeRep @(->)
 
 -- | Type equality
 --
@@ -782,13 +782,13 @@ typeRep = typeRep#
 typeOf :: Typeable a => a -> TypeRep a
 typeOf _ = typeRep
 
--- -- | Takes a value of type @a@ and returns a concrete representation
--- -- of that type.
--- --
--- -- @since 4.7.0.0
--- someTypeRep :: forall proxy a. Typeable a => proxy a -> SomeTypeRep
--- someTypeRep _ = SomeTypeRep (typeRep :: TypeRep a)
--- {-# INLINE typeRep #-}
+-- | Takes a value of type @a@ and returns a concrete representation
+-- of that type.
+--
+-- @since 4.7.0.0
+someTypeRep :: forall proxy a. Typeable a => proxy a -> SomeTypeRep
+someTypeRep _ = SomeTypeRep (typeRep :: TypeRep a)
+{-# INLINE typeRep #-}
 
 -- someTypeRepFingerprint :: SomeTypeRep -> Fingerprint
 -- someTypeRepFingerprint (SomeTypeRep t) = typeRepFingerprint t
