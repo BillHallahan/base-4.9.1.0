@@ -21,6 +21,8 @@ module GHC.Types2
   , TrName (..)
   , TyCon (..)
   , KindRep (..)
+  , T.Type
+  , Multiplicity
   ) where
 
 import GHC.Prim2

@@ -83,7 +83,7 @@ module Data.Typeable.Internal (
 
 import GHC.Base
 import qualified GHC.Arr as A
-import GHC.Types ( Type, Multiplicity )
+import GHC.Types2 ( Type (..), Multiplicity )
 import Data.Type.Equality
 import GHC.List ( splitAt, foldl', elem )
 import GHC.Word
@@ -92,7 +92,7 @@ import GHC.Show
 -- import GHC.TypeNats ( KnownNat, natVal' )
 import Unsafe.Coerce ( unsafeCoerce )
 import GHC.Types
-  (RuntimeRep (..))
+  (TYPE, Type (..), RuntimeRep (..))
 
 import GHC.Fingerprint.Type
 import {-# SOURCE #-} GHC.Fingerprint
@@ -187,8 +187,13 @@ type TypeRep :: k -> Type
 data TypeRep a where
     TyC :: { trTyCon :: TyCon} -> TypeRep a -- ^ Constructor
     TyA :: forall k1 k2 (a :: k1 -> k2) (b :: k1). { trAppFun :: TypeRep a, trAppArg :: TypeRep b } -> TypeRep (a b) -- ^ Application
+#if __GLASGOW_HASKELL__ < 900
     TyF :: forall (r1 :: RuntimeRep) (r2 :: RuntimeRep)
                   (a :: TYPE r1) (b :: TYPE r2). { trFunRes :: TypeRep a, trFunArg :: TypeRep b} -> TypeRep (a -> b) -- ^ Function
+#else
+    TyF :: forall (r1 :: RuntimeRep) (r2 :: RuntimeRep)
+                  (a :: TYPE r1) (b :: TYPE r2). { trFunRes :: TypeRep a, trFunArg :: TypeRep b} -> TypeRep (a -> b) -- ^ Function
+#endif
 -- data TypeRep a where
 --     -- The TypeRep of Type. See Note [Kind caching], Wrinkle 2
 --     TrType :: TypeRep Type
@@ -1022,10 +1027,17 @@ someTypeRep _ = SomeTypeRep (typeRep :: TypeRep a)
 -- typeLitTypeRep nm kind_tycon = mkTrCon (mkTypeLitTyCon nm kind_tycon) []
 
 -- -- | For compiler use.
+#if __GLASGOW_HASKELL__ < 900
+mkTrFun :: forall (r1 :: RuntimeRep) (r2 :: RuntimeRep)
+                  (a :: TYPE r1) (b :: TYPE r2) .
+           TypeRep a -> TypeRep b -> TypeRep ((a -> b) :: Type)
+mkTrFun tr1 tr2 = TyF tr1 tr2
+#else
 mkTrFun :: forall (m :: Multiplicity) (r1 :: RuntimeRep) (r2 :: RuntimeRep)
-                  (a :: TYPE r1) (b :: TYPE r2).
+                  (a :: TYPE r1) (b :: TYPE r2) .
            TypeRep m -> TypeRep a -> TypeRep b -> TypeRep ((a -> b) :: Type)
 mkTrFun _ tr1 tr2 = TyF tr1 tr2
+#endif
 -- mkTrFun arg res = TrFun
 --     { trFunFingerprint = fpr
 --     , trFunArg = arg
