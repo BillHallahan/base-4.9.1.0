@@ -1,6 +1,6 @@
--- {-# LANGUAGE Trustworthy #-}
--- {-# LANGUAGE NoImplicitPrelude #-}
--- {-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE PolyKinds #-}
 -- 
 -- -----------------------------------------------------------------------------
 -- -- |
@@ -16,37 +16,38 @@
 -- -- @since 4.7.0.0
 -- -----------------------------------------------------------------------------
 -- 
--- module Data.Proxy
---   (
---         Proxy(..), asProxyTypeOf
---       , KProxy(..)
---   ) where
--- 
--- import GHC.Base
--- import GHC.Show
--- import GHC.Read
--- import GHC.Enum
--- import GHC.Arr
--- 
--- -- | A concrete, poly-kinded proxy type
--- data Proxy t = Proxy
--- 
--- -- | A concrete, promotable proxy type, for use at the kind level
--- -- There are no instances for this because it is intended at the kind level only
--- data KProxy (t :: *) = KProxy
--- 
--- -- It's common to use (undefined :: Proxy t) and (Proxy :: Proxy t)
--- -- interchangeably, so all of these instances are hand-written to be
--- -- lazy in Proxy arguments.
--- 
--- instance Eq (Proxy s) where
---   _ == _ = True
--- 
--- instance Ord (Proxy s) where
---   compare _ _ = EQ
--- 
--- instance Show (Proxy s) where
---   showsPrec _ _ = showString "Proxy"
+module Data.Proxy
+  (
+        Proxy(..), asProxyTypeOf
+      , KProxy(..)
+  ) where
+
+import GHC.Base
+import GHC.Show
+import GHC.Read
+import GHC.Enum
+import GHC.Arr
+import GHC.Types (Type)
+
+-- | A concrete, poly-kinded proxy type
+data Proxy t = Proxy
+
+-- | A concrete, promotable proxy type, for use at the kind level
+-- There are no instances for this because it is intended at the kind level only
+data KProxy (t :: Type) = KProxy
+
+-- It's common to use (undefined :: Proxy t) and (Proxy :: Proxy t)
+-- interchangeably, so all of these instances are hand-written to be
+-- lazy in Proxy arguments.
+
+instance Eq (Proxy s) where
+  _ == _ = True
+
+instance Ord (Proxy s) where
+  compare _ _ = EQ
+
+instance Show (Proxy s) where
+  showsPrec _ _ = showString "Proxy"
 -- 
 -- instance Read (Proxy s) where
 --   readsPrec d = readParen (d > 10) (\r -> [(Proxy, s) | ("Proxy",s) <- lex r ])
@@ -100,11 +101,11 @@
 --     {-# INLINE (>>=) #-}
 -- 
 -- instance MonadPlus Proxy
--- 
--- -- | 'asProxyTypeOf' is a type-restricted version of 'const'.
--- -- It is usually used as an infix operator, and its typing forces its first
--- -- argument (which is usually overloaded) to have the same type as the tag
--- -- of the second.
--- asProxyTypeOf :: a -> Proxy a -> a
--- asProxyTypeOf = const
--- {-# INLINE asProxyTypeOf #-}
+
+-- | 'asProxyTypeOf' is a type-restricted version of 'const'.
+-- It is usually used as an infix operator, and its typing forces its first
+-- argument (which is usually overloaded) to have the same type as the tag
+-- of the second.
+asProxyTypeOf :: a -> Proxy a -> a
+asProxyTypeOf = const
+{-# INLINE asProxyTypeOf #-}

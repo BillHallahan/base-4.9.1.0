@@ -1,5 +1,5 @@
--- {-# LANGUAGE Unsafe #-}
--- {-# LANGUAGE NoImplicitPrelude, MagicHash #-}
+{-# LANGUAGE Unsafe #-}
+{-# LANGUAGE NoImplicitPrelude, MagicHash #-}
 -- 
 -- -----------------------------------------------------------------------------
 -- -- |
@@ -29,7 +29,9 @@
 -- --
 -- -----------------------------------------------------------------------------
 -- 
--- module Unsafe.Coerce (unsafeCoerce) where
+module Unsafe.Coerce (unsafeCoerce) where
+
+import GHC.Prim2
 -- 
 -- import GHC.Integer () -- for build ordering
 -- import GHC.Prim (unsafeCoerce#)
@@ -55,7 +57,8 @@
 -- Sigh. This is horrible, but then so is unsafeCoerce.
 -- -}
 -- 
--- unsafeCoerce :: a -> b
+unsafeCoerce :: a -> b
+unsafeCoerce = unsafeCoerce#
 -- unsafeCoerce x = local_id (unsafeCoerce# x)
 --   -- See Note [Unsafe coerce magic] in basicTypes/MkId
 --   -- NB: Do not eta-reduce this definition, else the type checker 

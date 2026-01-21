@@ -1,25 +1,25 @@
--- {-# LANGUAGE Trustworthy #-}
--- {-# LANGUAGE CPP
---            , NoImplicitPrelude
---            , BangPatterns
---   #-}
--- 
--- -- ----------------------------------------------------------------------------
--- --
--- --  (c) The University of Glasgow 2006
--- --
--- -- Fingerprints for recompilation checking and ABI versioning, and
--- -- implementing fast comparison of Typeable.
--- --
--- -- ----------------------------------------------------------------------------
--- 
--- module GHC.Fingerprint (
---         Fingerprint(..), fingerprint0,
+{-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE CPP
+           , NoImplicitPrelude
+           , BangPatterns
+  #-}
+
+-- ----------------------------------------------------------------------------
+--
+--  (c) The University of Glasgow 2006
+--
+-- Fingerprints for recompilation checking and ABI versioning, and
+-- implementing fast comparison of Typeable.
+--
+-- ----------------------------------------------------------------------------
+
+module GHC.Fingerprint (
+        Fingerprint(..) --, fingerprint0,
 --         fingerprintData,
 --         fingerprintString,
 --         fingerprintFingerprints,
 --         getFileHash
---    ) where
+   ) where
 -- 
 -- import GHC.IO
 -- import GHC.Base
@@ -31,7 +31,7 @@
 -- import Foreign.C
 -- import System.IO
 -- 
--- import GHC.Fingerprint.Type
+import GHC.Fingerprint.Type
 -- 
 -- -- for SIZEOF_STRUCT_MD5CONTEXT:
 -- #include "HsBaseConfig.h"
