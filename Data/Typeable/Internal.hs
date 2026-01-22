@@ -76,7 +76,7 @@ module Data.Typeable.Internal (
 
     -- * Construction
     -- | These are for internal use only
-    {- mkTrType, -} mkTrCon, mkTrApp, {- mkTrAppChecked, -} mkTrFun,
+    {- mkTrType, -} mkTrCon, mkTrApp, mkTrAppChecked, mkTrFun,
 --     mkTyCon, mkTyCon#,
 --     typeSymbolTypeRep, typeNatTypeRep,
   ) where
@@ -427,13 +427,13 @@ mkTrApp tr1 tr2 = TyA tr1 tr2
 --     fpr_b = typeRepFingerprint b
 --     fpr   = fingerprintFingerprints [fpr_a, fpr_b]
 
--- -- | Construct a representation for a type application that
--- -- may be a saturated arrow type. This is renamed to mkTrApp in
--- -- Type.Reflection.Unsafe
--- mkTrAppChecked :: forall k1 k2 (a :: k1 -> k2) (b :: k1).
---                   TypeRep (a :: k1 -> k2)
---                -> TypeRep (b :: k1)
---                -> TypeRep (a b)
+-- | Construct a representation for a type application that
+-- may be a saturated arrow type. This is renamed to mkTrApp in
+-- Type.Reflection.Unsafe
+mkTrAppChecked :: forall k1 k2 (a :: k1 -> k2) (b :: k1).
+                  TypeRep (a :: k1 -> k2)
+               -> TypeRep (b :: k1)
+               -> TypeRep (a b)
 -- mkTrAppChecked rep@(TrApp {trAppFun = p, trAppArg = x :: TypeRep x})
 --                (y :: TypeRep y)
 --   | TrTyCon {trTyCon=con} <- p
@@ -443,7 +443,7 @@ mkTrApp tr1 tr2 = TyA tr1 tr2
 --   , Just HRefl <- withTypeable x $ withTypeable rx $ withTypeable ry
 --                   $ typeRep @((->) x :: TYPE ry -> Type) `eqTypeRep` rep
 --   = mkTrFun x y
--- mkTrAppChecked a b = mkTrApp a b
+mkTrAppChecked a b = mkTrApp a b
 
 -- -- | A type application.
 -- --
