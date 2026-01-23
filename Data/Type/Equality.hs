@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP          #-}
 {-# LANGUAGE DeriveGeneric          #-}
 {-# LANGUAGE TypeOperators          #-}
 {-# LANGUAGE GADTs                  #-}
@@ -34,6 +35,10 @@
 
 module Data.Type.Equality (
   -- * The equality types
+#if MIN_VERSION_GLASGOW_HASKELL(9,4,0,0)
+  type (~),
+  type (~~),
+#endif
   (:~:)(..), -- type (~~),
   (:~~:)(..),
 -- 
@@ -52,7 +57,11 @@ import GHC.Enum
 import GHC.Show
 import GHC.Read
 import GHC.Base
+#if MIN_VERSION_GLASGOW_HASKELL(9,4,0,0)
+import GHC.Types (Type, type (~), type (~~))
+#else
 import GHC.Types (Type)
+#endif
 -- import Data.Type.Bool
 -- 
 -- -- | Lifted, homogeneous equality. By lifted, we mean that it can be
