@@ -1,13 +1,13 @@
--- {-# LANGUAGE Trustworthy #-}
--- {-# LANGUAGE NoImplicitPrelude #-}
--- 
--- module GHC.Fingerprint (
+{-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE NoImplicitPrelude #-}
+
+module GHC.Fingerprint (
 --         fingerprintString,
 --         fingerprintFingerprints
---   ) where
+  ) where
 -- 
 -- import GHC.Base
--- import GHC.Fingerprint.Type
+import GHC.Fingerprint.Type
 -- 
 -- fingerprintFingerprints :: [Fingerprint] -> Fingerprint
 -- fingerprintString :: String -> Fingerprint

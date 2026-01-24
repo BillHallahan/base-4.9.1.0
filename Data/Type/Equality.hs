@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP          #-}
 {-# LANGUAGE DeriveGeneric          #-}
 {-# LANGUAGE TypeOperators          #-}
 {-# LANGUAGE GADTs                  #-}
@@ -13,6 +14,7 @@
 {-# LANGUAGE MultiParamTypeClasses  #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE Trustworthy            #-}
+{-# LANGUAGE StandaloneKindSignatures #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -33,7 +35,12 @@
 
 module Data.Type.Equality (
   -- * The equality types
+#if MIN_VERSION_GLASGOW_HASKELL(9,4,0,0)
+  type (~),
+  type (~~),
+#endif
   (:~:)(..), -- type (~~),
+  (:~~:)(..),
 -- 
   -- * Working with equality
   sym, trans, castWith, gcastWith, apply, inner, outer,
@@ -45,11 +52,16 @@ module Data.Type.Equality (
 --   type (==)
   ) where
 -- 
--- import Data.Maybe
--- import GHC.Enum
--- import GHC.Show
--- import GHC.Read
--- import GHC.Base
+import Data.Maybe
+import GHC.Enum
+import GHC.Show
+import GHC.Read
+import GHC.Base
+#if MIN_VERSION_GLASGOW_HASKELL(9,4,0,0)
+import GHC.Types (Type, type (~), type (~~))
+#else
+import GHC.Types (Type)
+#endif
 -- import Data.Type.Bool
 -- 
 -- -- | Lifted, homogeneous equality. By lifted, we mean that it can be
@@ -302,3 +314,11 @@ outer Refl = Refl
 -- type instance a == b = Eq13 a b
 -- type instance a == b = Eq14 a b
 -- type instance a == b = Eq15 a b
+
+-- | Kind heterogeneous propositional equality. Like ':~:', @a :~~: b@ is
+-- inhabited by a terminating value if and only if @a@ is the same type as @b@.
+--
+-- @since base-4.10.0.0
+type (:~~:) :: k1 -> k2 -> Type
+data a :~~: b where
+   HRefl :: a :~~: a

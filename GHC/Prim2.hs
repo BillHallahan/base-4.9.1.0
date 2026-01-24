@@ -394,6 +394,9 @@ ns !x y = y
 seq :: a -> b -> b
 seq !_ b = b
 
+unsafeCoerce# :: a -> b
+unsafeCoerce# = unsafeCoerce#
+
 -- Misc add-ons
 
 float2Double# :: Float# -> Double#

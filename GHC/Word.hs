@@ -20,7 +20,7 @@
 -- #include "MachDeps.h"
 
 module GHC.Word (
-    Word(..) -- , Word8(..), Word16(..), Word32(..), Word64(..),
+    Word(..), {- Word8(..), Word16(..), Word32(..), -} Word64(..) --,
 -- 
 --     -- * Shifts
 --     uncheckedShiftL64#,
@@ -638,6 +638,7 @@ import GHC.Base
 -- ------------------------------------------------------------------------
 -- -- type Word64
 -- ------------------------------------------------------------------------
+type Word64 = Word
 -- 
 -- #if WORD_SIZE_IN_BITS < 64
 -- 

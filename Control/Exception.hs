@@ -34,8 +34,8 @@
 module Control.Exception (
 -- 
 --         -- * The Exception type
---         SomeException(..),
---         Exception(..),          -- class
+        SomeException(..),
+        Exception(..),          -- class
 --         IOException,            -- instance Eq, Ord, Show, Typeable, Exception
 --         ArithException(..),     -- instance Eq, Ord, Show, Typeable, Exception
 --         ArrayException(..),     -- instance Eq, Ord, Show, Typeable, Exception
@@ -132,7 +132,7 @@ module Control.Exception (
 -- 
   ) where
 -- 
--- import Control.Exception.Base
+import Control.Exception.Base
 -- 
 import GHC.Base
 -- import GHC.IO (interruptible)
