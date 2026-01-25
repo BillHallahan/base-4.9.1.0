@@ -22,6 +22,14 @@ isSMTRep# = isSMTRep#
 evalsToSMTRep# :: forall a . a -> Bool
 evalsToSMTRep# = evalsToSMTRep#
 
+data LitTable = LitTable
+
+-- Build a mapping of path conditions to literals, and return a reference
+-- to the literal table that was built in G2's internal state
+{-# NOINLINE buildLitTable #-}
+buildLitTable :: forall a b. (a -> b) -> LitTable
+buildLitTable = buildLitTable
+
 {-# NOINLINE ($==#) #-}
 ($==#) :: Int# -> Int# -> Bool
 ($==#) = ($==#)
