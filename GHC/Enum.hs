@@ -33,7 +33,7 @@ import GHC.Char
 -- import GHC.Integer
 import GHC.Integer2
 import GHC.Num
--- import GHC.Show
+import GHC.Show
 default ()              -- Double isn't available yet
 -- 
 -- -- | The 'Bounded' class is used to name the upper and lower limits of a
@@ -131,32 +131,26 @@ boundedEnumFromThen = boundedEnumFromThen
 -- ------------------------------------------------------------------------
 -- 
 {-# NOINLINE toEnumError #-}
-toEnumError :: a
-toEnumError = toEnumError
--- toEnumError :: (Show a) => String -> Int -> (a,a) -> b
--- toEnumError inst_ty i bnds =
---     errorWithoutStackTrace $ "Enum.toEnum{" ++ inst_ty ++ "}: tag (" ++
---             show i ++
---             ") is outside of bounds " ++
---             show bnds
+toEnumError :: (Show a) => String -> Int -> (a,a) -> b
+toEnumError inst_ty i bnds =
+    errorWithoutStackTrace $ "Enum.toEnum{" ++ inst_ty ++ "}: tag (" ++
+            show i ++
+            ") is outside of bounds " ++
+            show bnds
 -- 
 {-# NOINLINE fromEnumError #-}
-fromEnumError :: a
-fromEnumError = fromEnumError
--- fromEnumError :: (Show a) => String -> a -> b
--- fromEnumError inst_ty x =
---     errorWithoutStackTrace $ "Enum.fromEnum{" ++ inst_ty ++ "}: value (" ++
---             show x ++
---             ") is outside of Int's bounds " ++
---             show (minBound::Int, maxBound::Int)
--- 
+fromEnumError :: (Show a) => String -> a -> b
+fromEnumError inst_ty x =
+    errorWithoutStackTrace $ "Enum.fromEnum{" ++ inst_ty ++ "}: value (" ++
+            show x ++
+            ") is outside of Int's bounds " ++
+            show (minBound::Int, maxBound::Int)
+
 {-# NOINLINE succError #-}
-succError :: a
-succError = succError
--- succError :: String -> a
--- succError inst_ty =
---     errorWithoutStackTrace $ "Enum.succ{" ++ inst_ty ++ "}: tried to take `succ' of maxBound"
--- 
+succError :: String -> a
+succError inst_ty =
+    errorWithoutStackTrace $ "Enum.succ{" ++ inst_ty ++ "}: tried to take `succ' of maxBound"
+
 {-# NOINLINE predError #-}
 predError :: a
 predError = predError

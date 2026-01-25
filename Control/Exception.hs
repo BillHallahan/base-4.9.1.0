@@ -58,8 +58,8 @@ module Control.Exception (
 --         ErrorCall(..),
 --         TypeError(..),
 -- 
---         -- * Throwing exceptions
---         throw,
+        -- * Throwing exceptions
+        throw,
 --         throwIO,
 --         ioError,
 --         throwTo,

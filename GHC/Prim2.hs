@@ -453,6 +453,9 @@ tagToEnum# _ = let x = x in x
 
 data (~#) a b (x :: a) (y :: b) = Co
 
+raise# :: a -> b
+raise# !x = raise## x
+
 -- String primitives
 
 {-# NOINLINE strLen# #-}
