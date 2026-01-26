@@ -41,28 +41,28 @@ module Control.Exception.Base (
 --         ErrorCall(..),
 --         TypeError(..), -- #10284, custom error type for deferred type errors
 -- 
---         -- * Throwing exceptions
+        -- * Throwing exceptions
 --         throwIO,
---         throw,
+        throw,
 --         ioError,
 --         throwTo,
 -- 
 --         -- * Catching Exceptions
 -- 
---         -- ** The @catch@ functions
---         catch,
---         catchJust,
--- 
---         -- ** The @handle@ functions
---         handle,
---         handleJust,
--- 
---         -- ** The @try@ functions
---         try,
---         tryJust,
---         onException,
--- 
---         -- ** The @evaluate@ function
+        -- ** The @catch@ functions
+        catch,
+        catchJust,
+
+        -- ** The @handle@ functions
+        handle,
+        handleJust,
+
+        -- ** The @try@ functions
+        try,
+        tryJust,
+        onException,
+
+        -- ** The @evaluate@ function
 --         evaluate,
 -- 
 --         -- ** The @mapException@ function
@@ -102,137 +102,98 @@ module Control.Exception.Base (
   ) where
 -- 
 import GHC.Base
--- import GHC.IO hiding (bracket,finally,onException)
+import GHC.IO hiding (bracket,finally,onException)
 import GHC.IO.Exception
 import GHC.Exception
 import GHC.Show
 import GHC.Exception hiding ( Exception )
 -- import GHC.Conc.Sync
--- 
--- import Data.Either
--- 
--- -----------------------------------------------------------------------------
--- -- Catching exceptions
--- 
--- -- |This is the simplest of the exception-catching functions.  It
--- -- takes a single argument, runs it, and if an exception is raised
--- -- the \"handler\" is executed, with the value of the exception passed as an
--- -- argument.  Otherwise, the result is returned as normal.  For example:
--- --
--- -- >   catch (readFile f)
--- -- >         (\e -> do let err = show (e :: IOException)
--- -- >                   hPutStr stderr ("Warning: Couldn't open " ++ f ++ ": " ++ err)
--- -- >                   return "")
--- --
--- -- Note that we have to give a type signature to @e@, or the program
--- -- will not typecheck as the type is ambiguous. While it is possible
--- -- to catch exceptions of any type, see the section \"Catching all
--- -- exceptions\" (in "Control.Exception") for an explanation of the problems with doing so.
--- --
--- -- For catching exceptions in pure (non-'IO') expressions, see the
--- -- function 'evaluate'.
--- --
--- -- Note that due to Haskell\'s unspecified evaluation order, an
--- -- expression may throw one of several possible exceptions: consider
--- -- the expression @(error \"urk\") + (1 \`div\` 0)@.  Does
--- -- the expression throw
--- -- @ErrorCall \"urk\"@, or @DivideByZero@?
--- --
--- -- The answer is \"it might throw either\"; the choice is
--- -- non-deterministic. If you are catching any type of exception then you
--- -- might catch either. If you are calling @catch@ with type
--- -- @IO Int -> (ArithException -> IO Int) -> IO Int@ then the handler may
--- -- get run with @DivideByZero@ as an argument, or an @ErrorCall \"urk\"@
--- -- exception may be propogated further up. If you call it again, you
--- -- might get a the opposite behaviour. This is ok, because 'catch' is an
--- -- 'IO' computation.
--- --
--- catch   :: Exception e
---         => IO a         -- ^ The computation to run
---         -> (e -> IO a)  -- ^ Handler to invoke if an exception is raised
---         -> IO a
--- catch act = catchException (lazy act)
--- 
--- -- | The function 'catchJust' is like 'catch', but it takes an extra
--- -- argument which is an /exception predicate/, a function which
--- -- selects which type of exceptions we\'re interested in.
--- --
--- -- > catchJust (\e -> if isDoesNotExistErrorType (ioeGetErrorType e) then Just () else Nothing)
--- -- >           (readFile f)
--- -- >           (\_ -> do hPutStrLn stderr ("No such file: " ++ show f)
--- -- >                     return "")
--- --
--- -- Any other exceptions which are not matched by the predicate
--- -- are re-raised, and may be caught by an enclosing
--- -- 'catch', 'catchJust', etc.
--- catchJust
---         :: Exception e
---         => (e -> Maybe b)         -- ^ Predicate to select exceptions
---         -> IO a                   -- ^ Computation to run
---         -> (b -> IO a)            -- ^ Handler
---         -> IO a
--- catchJust p a handler = catch a handler'
---   where handler' e = case p e of
---                         Nothing -> throwIO e
---                         Just b  -> handler b
--- 
--- -- | A version of 'catch' with the arguments swapped around; useful in
--- -- situations where the code for the handler is shorter.  For example:
--- --
--- -- >   do handle (\NonTermination -> exitWith (ExitFailure 1)) $
--- -- >      ...
--- handle     :: Exception e => (e -> IO a) -> IO a -> IO a
--- handle     =  flip catch
--- 
--- -- | A version of 'catchJust' with the arguments swapped around (see
--- -- 'handle').
--- handleJust :: Exception e => (e -> Maybe b) -> (b -> IO a) -> IO a -> IO a
--- handleJust p =  flip (catchJust p)
--- 
+
+import Data.Either
+
+-----------------------------------------------------------------------------
+-- Catching exceptions
+
+-- | The function 'catchJust' is like 'catch', but it takes an extra
+-- argument which is an /exception predicate/, a function which
+-- selects which type of exceptions we\'re interested in.
+--
+-- > catchJust (\e -> if isDoesNotExistErrorType (ioeGetErrorType e) then Just () else Nothing)
+-- >           (readFile f)
+-- >           (\_ -> do hPutStrLn stderr ("No such file: " ++ show f)
+-- >                     return "")
+--
+-- Any other exceptions which are not matched by the predicate
+-- are re-raised, and may be caught by an enclosing
+-- 'catch', 'catchJust', etc.
+catchJust
+        :: Exception e
+        => (e -> Maybe b)         -- ^ Predicate to select exceptions
+        -> IO a                   -- ^ Computation to run
+        -> (b -> IO a)            -- ^ Handler
+        -> IO a
+catchJust p a handler = catch a handler'
+  where handler' e = case p e of
+                        Nothing -> throwIO e
+                        Just b  -> handler b
+
+-- | A version of 'catch' with the arguments swapped around; useful in
+-- situations where the code for the handler is shorter.  For example:
+--
+-- >   do handle (\NonTermination -> exitWith (ExitFailure 1)) $
+-- >      ...
+handle     :: Exception e => (e -> IO a) -> IO a -> IO a
+handle     =  flip catch
+
+-- | A version of 'catchJust' with the arguments swapped around (see
+-- 'handle').
+handleJust :: Exception e => (e -> Maybe b) -> (b -> IO a) -> IO a -> IO a
+handleJust p =  flip (catchJust p)
+
 -- -----------------------------------------------------------------------------
 -- -- 'mapException'
--- 
+
 -- -- | This function maps one exception into another as proposed in the
 -- -- paper \"A semantics for imprecise exceptions\".
--- 
+
 -- -- Notice that the usage of 'unsafePerformIO' is safe here.
--- 
+
 -- mapException :: (Exception e1, Exception e2) => (e1 -> e2) -> a -> a
 -- mapException f v = unsafePerformIO (catch (evaluate v)
 --                                           (\x -> throwIO (f x)))
--- 
--- -----------------------------------------------------------------------------
--- -- 'try' and variations.
--- 
--- -- | Similar to 'catch', but returns an 'Either' result which is
--- -- @('Right' a)@ if no exception of type @e@ was raised, or @('Left' ex)@
--- -- if an exception of type @e@ was raised and its value is @ex@.
--- -- If any other type of exception is raised than it will be propogated
--- -- up to the next enclosing exception handler.
--- --
--- -- >  try a = catch (Right `liftM` a) (return . Left)
--- 
--- try :: Exception e => IO a -> IO (Either e a)
--- try a = catch (a >>= \ v -> return (Right v)) (\e -> return (Left e))
--- 
--- -- | A variant of 'try' that takes an exception predicate to select
--- -- which exceptions are caught (c.f. 'catchJust').  If the exception
--- -- does not match the predicate, it is re-thrown.
--- tryJust :: Exception e => (e -> Maybe b) -> IO a -> IO (Either b a)
--- tryJust p a = do
---   r <- try a
---   case r of
---         Right v -> return (Right v)
---         Left  e -> case p e of
---                         Nothing -> throwIO e
---                         Just b  -> return (Left b)
--- 
--- -- | Like 'finally', but only performs the final action if there was an
--- -- exception raised by the computation.
--- onException :: IO a -> IO b -> IO a
--- onException io what = io `catch` \e -> do _ <- what
---                                           throwIO (e :: SomeException)
--- 
+
+-----------------------------------------------------------------------------
+-- 'try' and variations.
+
+-- | Similar to 'catch', but returns an 'Either' result which is
+-- @('Right' a)@ if no exception of type @e@ was raised, or @('Left' ex)@
+-- if an exception of type @e@ was raised and its value is @ex@.
+-- If any other type of exception is raised than it will be propogated
+-- up to the next enclosing exception handler.
+--
+-- >  try a = catch (Right `liftM` a) (return . Left)
+
+try :: Exception e => IO a -> IO (Either e a)
+try a = catch (a >>= \ v -> return (Right v)) (\e -> return (Left e))
+
+-- | A variant of 'try' that takes an exception predicate to select
+-- which exceptions are caught (c.f. 'catchJust').  If the exception
+-- does not match the predicate, it is re-thrown.
+tryJust :: Exception e => (e -> Maybe b) -> IO a -> IO (Either b a)
+tryJust p a = do
+  r <- try a
+  case r of
+        Right v -> return (Right v)
+        Left  e -> case p e of
+                        Nothing -> throwIO e
+                        Just b  -> return (Left b)
+
+-- | Like 'finally', but only performs the final action if there was an
+-- exception raised by the computation.
+onException :: IO a -> IO b -> IO a
+onException io what = io `catch` \e -> do _ <- what
+                                          throwIO (e :: SomeException)
+
 -- -----------------------------------------------------------------------------
 -- -- Some Useful Functions
 -- 

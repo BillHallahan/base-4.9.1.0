@@ -72,8 +72,8 @@ module Control.Exception (
 -- 
 --         -- $catchall
 -- 
---         -- ** The @catch@ functions
---         catch,
+        -- ** The @catch@ functions
+        catch,
 --         catches, Handler(..),
 --         catchJust,
 -- 
@@ -85,7 +85,7 @@ module Control.Exception (
 --         try,
 --         tryJust,
 -- 
---         -- ** The @evaluate@ function
+        -- ** The @evaluate@ function
 --         evaluate,
 -- 
 --         -- ** The @mapException@ function
