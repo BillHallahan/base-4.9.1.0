@@ -137,7 +137,7 @@ catchException :: Exception e => IO a -> (e -> IO a) -> IO a
 catchException (IO io) handler = IO $ catch# io handler'
     where handler' e = case fromException e of
                        Just e' -> unIO (handler e')
-                       Nothing -> raiseIO# e
+                       Nothing -> raise# e
 
 -- |This is the simplest of the exception-catching functions.  It
 -- takes a single argument, runs it, and if an exception is raised

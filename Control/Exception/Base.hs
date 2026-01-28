@@ -33,13 +33,13 @@ module Control.Exception.Base (
 --         BlockedIndefinitelyOnSTM(..),
 --         AllocationLimitExceeded(..),
 --         Deadlock(..),
---         NoMethodError(..),
---         PatternMatchFail(..),
+        NoMethodError(..),
+        PatternMatchFail(..),
 --         RecConError(..),
 --         RecSelError(..),
 --         RecUpdError(..),
---         ErrorCall(..),
---         TypeError(..), -- #10284, custom error type for deferred type errors
+        ErrorCall(..),
+        TypeError(..), -- #10284, custom error type for deferred type errors
 -- 
         -- * Throwing exceptions
 --         throwIO,
