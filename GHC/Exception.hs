@@ -24,10 +24,10 @@
 
 module GHC.Exception
        ( Exception(..)    -- Class
---        , throw
-       , SomeException(..) -- , ErrorCall(..,ErrorCall), ArithException(..)
---        , divZeroException, overflowException, ratioZeroDenomException
---        , errorCallException, errorCallWithCallStackException
+       , throw
+       , SomeException(..), ErrorCall(..,ErrorCall), ArithException(..)
+       , divZeroException, overflowException, ratioZeroDenomException
+       , errorCallException, errorCallWithCallStackException
 --          -- re-export CallStack and SrcLoc from GHC.Types
 --        , CallStack, fromCallSiteList, getCallStack, prettyCallStack
 --        , prettyCallStackLines, showCCSStack
@@ -36,15 +36,15 @@ module GHC.Exception
 
 import qualified "base" Data.Typeable as BaseTy
 import qualified "base" GHC.Base as Base
--- import Data.Maybe
+import Data.Maybe
 import Data.Typeable (Typeable, cast)
    -- loop: Data.Typeable -> GHC.Err -> GHC.Exception
 import GHC.Base
 import GHC.Show
--- import GHC.Stack.Types
--- import GHC.OldList
--- import GHC.IO.Unsafe
--- import {-# SOURCE #-} GHC.Stack.CCS
+import GHC.Stack.Types
+import GHC.OldList
+import GHC.IO.Unsafe
+import GHC.Stack.CCS
 
 {- |
 The @SomeException@ type is the root of the exception type hierarchy.
@@ -167,92 +167,92 @@ instance Exception SomeException where
     fromException = Just
     displayException (SomeException e) = displayException e
 
--- -- | Throw an exception.  Exceptions may be thrown from purely
--- -- functional code, but may only be caught within the 'IO' monad.
--- throw :: Exception e => e -> a
--- throw e = raise# (toException e)
--- 
--- -- |This is thrown when the user calls 'error'. The @String@ is the
--- -- argument given to 'error'.
--- data ErrorCall = ErrorCallWithLocation String String
+-- | Throw an exception.  Exceptions may be thrown from purely
+-- functional code, but may only be caught within the 'IO' monad.
+throw :: Exception e => e -> a
+throw e = raise# (toException e)
+
+-- |This is thrown when the user calls 'error'. The @String@ is the
+-- argument given to 'error'.
+data ErrorCall = ErrorCallWithLocation String String
 --     deriving (Eq, Ord)
--- 
--- pattern ErrorCall :: String -> ErrorCall
--- pattern ErrorCall err <- ErrorCallWithLocation err _ where
---   ErrorCall err = ErrorCallWithLocation err ""
--- 
--- instance Exception ErrorCall
--- 
--- instance Show ErrorCall where
---   showsPrec _ (ErrorCallWithLocation err "") = showString err
---   showsPrec _ (ErrorCallWithLocation err loc) = showString (err ++ '\n' : loc)
--- 
--- errorCallException :: String -> SomeException
--- errorCallException s = toException (ErrorCall s)
--- 
--- errorCallWithCallStackException :: String -> CallStack -> SomeException
--- errorCallWithCallStackException s stk = unsafeDupablePerformIO $ do
---   ccsStack <- currentCallStack
---   let
---     implicitParamCallStack = prettyCallStackLines stk
---     ccsCallStack = showCCSStack ccsStack
---     stack = intercalate "\n" $ implicitParamCallStack ++ ccsCallStack
---   return $ toException (ErrorCallWithLocation s stack)
--- 
--- showCCSStack :: [String] -> [String]
--- showCCSStack [] = []
--- showCCSStack stk = "CallStack (from -prof):" : map ("  " ++) (reverse stk)
--- 
--- -- prettySrcLoc and prettyCallStack are defined here to avoid hs-boot
--- -- files. See Note [Definition of CallStack]
--- 
--- -- | Pretty print a 'SrcLoc'.
--- --
--- -- @since 4.9.0.0
--- prettySrcLoc :: SrcLoc -> String
--- prettySrcLoc SrcLoc {..}
---   = foldr (++) ""
---       [ srcLocFile, ":"
---       , show srcLocStartLine, ":"
---       , show srcLocStartCol, " in "
---       , srcLocPackage, ":", srcLocModule
---       ]
--- 
--- -- | Pretty print a 'CallStack'.
--- --
--- -- @since 4.9.0.0
--- prettyCallStack :: CallStack -> String
--- prettyCallStack = intercalate "\n" . prettyCallStackLines
--- 
--- prettyCallStackLines :: CallStack -> [String]
--- prettyCallStackLines cs = case getCallStack cs of
---   []  -> []
---   stk -> "CallStack (from HasCallStack):"
---        : map (("  " ++) . prettyCallSite) stk
---   where
---     prettyCallSite (f, loc) = f ++ ", called at " ++ prettySrcLoc loc
--- 
--- -- |Arithmetic exceptions.
--- data ArithException
---   = Overflow
---   | Underflow
---   | LossOfPrecision
---   | DivideByZero
---   | Denormal
---   | RatioZeroDenominator -- ^ @since 4.6.0.0
+
+pattern ErrorCall :: String -> ErrorCall
+pattern ErrorCall err <- ErrorCallWithLocation err _ where
+  ErrorCall err = ErrorCallWithLocation err ""
+
+instance Exception ErrorCall
+
+instance Show ErrorCall where
+  showsPrec _ (ErrorCallWithLocation err "") = showString err
+  showsPrec _ (ErrorCallWithLocation err loc) = showString (err ++ '\n' : loc)
+
+errorCallException :: String -> SomeException
+errorCallException s = toException (ErrorCall s)
+
+errorCallWithCallStackException :: String -> CallStack -> SomeException
+errorCallWithCallStackException s stk = unsafeDupablePerformIO $ do
+  ccsStack <- currentCallStack
+  let
+    implicitParamCallStack = prettyCallStackLines stk
+    ccsCallStack = showCCSStack ccsStack
+    stack = intercalate "\n" $ implicitParamCallStack ++ ccsCallStack
+  return $ toException (ErrorCallWithLocation s stack)
+
+showCCSStack :: [String] -> [String]
+showCCSStack [] = []
+showCCSStack stk = "CallStack (from -prof):" : map ("  " ++) (reverse stk)
+
+-- prettySrcLoc and prettyCallStack are defined here to avoid hs-boot
+-- files. See Note [Definition of CallStack]
+
+-- | Pretty print a 'SrcLoc'.
+--
+-- @since 4.9.0.0
+prettySrcLoc :: SrcLoc -> String
+prettySrcLoc SrcLoc {..}
+  = foldr (++) ""
+      [ srcLocFile, ":"
+      , show srcLocStartLine, ":"
+      , show srcLocStartCol, " in "
+      , srcLocPackage, ":", srcLocModule
+      ]
+
+-- | Pretty print a 'CallStack'.
+--
+-- @since 4.9.0.0
+prettyCallStack :: CallStack -> String
+prettyCallStack = intercalate "\n" . prettyCallStackLines
+
+prettyCallStackLines :: CallStack -> [String]
+prettyCallStackLines cs = case getCallStack cs of
+  []  -> []
+  stk -> "CallStack (from HasCallStack):"
+       : map (("  " ++) . prettyCallSite) stk
+  where
+    prettyCallSite (f, loc) = f ++ ", called at " ++ prettySrcLoc loc
+
+-- |Arithmetic exceptions.
+data ArithException
+  = Overflow
+  | Underflow
+  | LossOfPrecision
+  | DivideByZero
+  | Denormal
+  | RatioZeroDenominator -- ^ @since 4.6.0.0
 --   deriving (Eq, Ord)
--- 
--- divZeroException, overflowException, ratioZeroDenomException  :: SomeException
--- divZeroException        = toException DivideByZero
--- overflowException       = toException Overflow
--- ratioZeroDenomException = toException RatioZeroDenominator
--- 
--- instance Exception ArithException
--- 
--- instance Show ArithException where
---   showsPrec _ Overflow        = showString "arithmetic overflow"
---   showsPrec _ Underflow       = showString "arithmetic underflow"
---   showsPrec _ LossOfPrecision = showString "loss of precision"
---   showsPrec _ DivideByZero    = showString "divide by zero"
---   showsPrec _ Denormal        = showString "denormal"
---   showsPrec _ RatioZeroDenominator = showString "Ratio has zero denominator"
+
+divZeroException, overflowException, ratioZeroDenomException  :: SomeException
+divZeroException        = toException DivideByZero
+overflowException       = toException Overflow
+ratioZeroDenomException = toException RatioZeroDenominator
+
+instance Exception ArithException
+
+instance Show ArithException where
+  showsPrec _ Overflow        = showString "arithmetic overflow"
+  showsPrec _ Underflow       = showString "arithmetic underflow"
+  showsPrec _ LossOfPrecision = showString "loss of precision"
+  showsPrec _ DivideByZero    = showString "divide by zero"
+  showsPrec _ Denormal        = showString "denormal"
+  showsPrec _ RatioZeroDenominator = showString "Ratio has zero denominator"

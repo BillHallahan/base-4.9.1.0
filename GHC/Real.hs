@@ -26,7 +26,7 @@ import GHC.Num
 import GHC.List
 import GHC.Enum
 import GHC.Show
--- import {-# SOURCE #-} GHC.Exception( divZeroException, overflowException, ratioZeroDenomException )
+import {-# SOURCE #-} GHC.Exception( divZeroException, overflowException, ratioZeroDenomException )
 -- 
 -- #ifdef OPTIMISE_INTEGER_GCD_LCM
 -- # if defined(MIN_VERSION_integer_gmp)
@@ -52,19 +52,16 @@ default ()              -- Double isn't available yet,
 -- 
 {-# NOINLINE divZeroError #-}
 divZeroError :: a
-divZeroError = divZeroError
--- divZeroError = raise# divZeroException
+divZeroError = raise# divZeroException
 -- 
 {-# NOINLINE ratioZeroDenominatorError #-}
 ratioZeroDenominatorError :: a
-ratioZeroDenominatorError = ratioZeroDenominatorError
--- ratioZeroDenominatorError = raise# ratioZeroDenomException
--- 
+ratioZeroDenominatorError = raise# ratioZeroDenomException
+
 {-# NOINLINE overflowError #-}
 overflowError :: a
-overflowError = overflowError
--- overflowError = raise# overflowException
--- 
+overflowError = raise# overflowException
+
 -- --------------------------------------------------------------
 -- -- The Ratio and Rational types
 -- --------------------------------------------------------------

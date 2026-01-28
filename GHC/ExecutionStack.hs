@@ -29,15 +29,15 @@
 -- -- @since 4.9.0.0
 -- -----------------------------------------------------------------------------
 -- 
--- module GHC.ExecutionStack (
+module GHC.ExecutionStack (
 --     Location (..)
---   , SrcLoc (..)
+  , SrcLoc (..)
 --   , getStackTrace
 --   , showStackTrace
---   ) where
+  ) where
 -- 
 -- import Control.Monad (join)
--- import GHC.ExecutionStack.Internal
+import GHC.ExecutionStack.Internal
 -- 
 -- -- | Get a trace of the current execution stack state.
 -- --

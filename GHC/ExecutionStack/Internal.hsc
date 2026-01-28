@@ -19,17 +19,17 @@
 -- 
 -- {-# LANGUAGE MultiWayIf #-}
 -- 
--- module GHC.ExecutionStack.Internal (
+module GHC.ExecutionStack.Internal (
 --   -- * Internal
 --     Location (..)
---   , SrcLoc (..)
+  , SrcLoc (..)
 --   , StackTrace
 --   , stackFrames
 --   , stackDepth
 --   , collectStackTrace
 --   , showStackFrames
 --   , invalidateDebugCache
---   ) where
+  ) where
 -- 
 -- import Control.Monad (join)
 -- import Data.Word
@@ -41,14 +41,14 @@
 -- import Foreign.Storable (Storable(..))
 -- import System.IO.Unsafe (unsafePerformIO, unsafeInterleaveIO)
 -- 
--- -- N.B. See includes/rts/Libdw.h for notes on stack representation.
--- 
--- -- | A location in the original program source.
--- data SrcLoc = SrcLoc { sourceFile   :: String
---                      , sourceLine   :: Int
---                      , sourceColumn :: Int
---                      }
--- 
+-- N.B. See includes/rts/Libdw.h for notes on stack representation.
+
+-- | A location in the original program source.
+data SrcLoc = SrcLoc { sourceFile   :: String
+                     , sourceLine   :: Int
+                     , sourceColumn :: Int
+                     }
+
 -- -- | Location information about an addresss from a backtrace.
 -- data Location = Location { objectName   :: String
 --                          , functionName :: String

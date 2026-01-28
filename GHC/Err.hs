@@ -29,13 +29,14 @@
 -- 
 module GHC.Err( absentErr, error, errorWithoutStackTrace, undefined ) where
 -- import GHC.CString ()
--- import GHC.Types (Char, RuntimeRep)
--- import GHC.Stack.Types
--- import GHC.Prim
--- import GHC.Integer ()   -- Make sure Integer is compiled first
---                         -- because GHC depends on it in a wired-in way
---                         -- so the build system doesn't see the dependency
--- import {-# SOURCE #-} GHC.Exception( errorCallWithCallStackException )
+import GHC.Types (TYPE (..), RuntimeRep)
+import GHC.Types2 (Char)
+import GHC.Stack.Types
+import GHC.Prim2
+import GHC.Integer ()   -- Make sure Integer is compiled first
+                        -- because GHC depends on it in a wired-in way
+                        -- so the build system doesn't see the dependency
+import {-# SOURCE #-} GHC.Exception( errorCallWithCallStackException, errorCallException )
 -- 
 -- -- | 'error' stops execution and displays an error message.
 -- error :: forall (r :: RuntimeRep). forall (a :: TYPE r).
@@ -89,26 +90,47 @@ module GHC.Err( absentErr, error, errorWithoutStackTrace, undefined ) where
 -- -- absentErr :: a
 -- -- absentErr = errorWithoutStackTrace "Oops! The program has entered an `absent' argument!\n"
 
--- error :: a
--- error = error
+-- | 'error' stops execution and displays an error message.
+error :: forall (r :: RuntimeRep). forall a.
+         HasCallStack => [Char] -> a
+error s = raise# (errorCallWithCallStackException s ?callStack)
 
--- errorWithoutStackTrace :: a
--- errorWithoutStackTrace = errorWithoutStackTrace
+-- | A variant of 'error' that does not produce a stack trace.
+--
+-- @since base-4.9.0.0
+errorWithoutStackTrace :: forall (r :: RuntimeRep). forall a.
+                          [Char] -> a
+errorWithoutStackTrace s = raise# (errorCallException s)
 
--- -- undefined :: a
--- -- undefined = undefined
+-- Note [Errors in base]
+-- ~~~~~~~~~~~~~~~~~~~~~
+-- As of base-4.9.0.0, `error` produces a stack trace alongside the
+-- error message using the HasCallStack machinery. This provides
+-- a partial stack trace, containing the call-site of each function
+-- with a HasCallStack constraint.
+--
+-- In base, error and undefined were the only functions that had such
+-- constraint. Errors like "Prelude.!!: negative index" are good, yet if the
+-- code base contains dozens of !! applications (including dependencies,
+-- which code is not as easily accessible), pinpointing the bad call is
+-- where the stack trace would help.  Therefore we annotate most calls to
+-- error, so users have a chance to get a better idea.
 
--- absentErr :: a
--- absentErr = absentErr
+-- | A special case of 'error'.
+-- It is expected that compilers will recognize this and insert error
+-- messages which are more appropriate to the context in which 'undefined'
+-- appears.
+undefined :: forall (r :: RuntimeRep). forall a.
+             HasCallStack => a
+-- This used to be
+--   undefined = error "Prelude.undefined"
+-- but that would add an extra call stack entry that is not actually helpful
+-- nor wanted (see #19886). We’d like to use withFrozenCallStack, but that
+-- is not available in this module yet, and making it so is hard. So let’s just
+-- use raise# directly.
+undefined = raise# (errorCallWithCallStackException "Prelude.undefined" ?callStack)
 
-error :: a
-error = error
-
-errorWithoutStackTrace :: a
-errorWithoutStackTrace = errorWithoutStackTrace
-
-undefined :: a
-undefined = undefined
-
+-- | Used for compiler-generated error message;
+-- encoding saves bytes of string junk.
 absentErr :: a
-absentErr = absentErr
+absentErr = errorWithoutStackTrace "Oops! The program has entered an `absent' argument!\n"
