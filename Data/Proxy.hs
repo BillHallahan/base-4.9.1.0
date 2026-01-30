@@ -26,7 +26,7 @@ import GHC.Base
 import GHC.Show
 import GHC.Read
 import GHC.Enum
-import GHC.Arr
+-- import GHC.Arr
 import GHC.Types (Type)
 
 -- | A concrete, poly-kinded proxy type

@@ -3,8 +3,8 @@
 -- 
 module GHC.IO.Exception where
 
-import GHC.Base
-import GHC.Exception
+-- import GHC.Base
+-- import GHC.Exception
 -- 
 -- data IOException
 -- instance Exception IOException

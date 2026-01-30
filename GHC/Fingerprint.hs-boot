@@ -8,7 +8,7 @@ module GHC.Fingerprint (
 -- 
 -- import GHC.Base
 import GHC.Fingerprint.Type
--- 
+
 -- fingerprintFingerprints :: [Fingerprint] -> Fingerprint
 -- fingerprintString :: String -> Fingerprint
 -- 

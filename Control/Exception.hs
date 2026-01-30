@@ -55,11 +55,11 @@ module Control.Exception (
 --         RecConError(..),
 --         RecSelError(..),
 --         RecUpdError(..),
---         ErrorCall(..),
+--         (..),
 --         TypeError(..),
 -- 
---         -- * Throwing exceptions
---         throw,
+        -- * Throwing exceptions
+        throw,
 --         throwIO,
 --         ioError,
 --         throwTo,
@@ -72,8 +72,8 @@ module Control.Exception (
 -- 
 --         -- $catchall
 -- 
---         -- ** The @catch@ functions
---         catch,
+        -- ** The @catch@ functions
+        catch,
 --         catches, Handler(..),
 --         catchJust,
 -- 
@@ -81,11 +81,11 @@ module Control.Exception (
 --         handle,
 --         handleJust,
 -- 
---         -- ** The @try@ functions
---         try,
---         tryJust,
+        -- ** The @try@ functions
+        try,
+        tryJust,
 -- 
---         -- ** The @evaluate@ function
+        -- ** The @evaluate@ function
 --         evaluate,
 -- 
 --         -- ** The @mapException@ function

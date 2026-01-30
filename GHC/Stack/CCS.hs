@@ -1,24 +1,24 @@
--- {-# LANGUAGE Trustworthy #-}
--- 
--- -----------------------------------------------------------------------------
--- -- |
--- -- Module      :  GHC.Stack.CCS
--- -- Copyright   :  (c) The University of Glasgow 2011
--- -- License     :  see libraries/base/LICENSE
--- --
--- -- Maintainer  :  cvs-ghc@haskell.org
--- -- Stability   :  internal
--- -- Portability :  non-portable (GHC Extensions)
--- --
--- -- Access to GHC's call-stack simulation
--- --
--- -- @since 4.5.0.0
--- -----------------------------------------------------------------------------
--- 
--- {-# LANGUAGE UnboxedTuples, MagicHash, NoImplicitPrelude #-}
--- module GHC.Stack.CCS (
+{-# LANGUAGE Trustworthy #-}
+
+-----------------------------------------------------------------------------
+-- |
+-- Module      :  GHC.Stack.CCS
+-- Copyright   :  (c) The University of Glasgow 2011
+-- License     :  see libraries/base/LICENSE
+--
+-- Maintainer  :  cvs-ghc@haskell.org
+-- Stability   :  internal
+-- Portability :  non-portable (GHC Extensions)
+--
+-- Access to GHC's call-stack simulation
+--
+-- @since 4.5.0.0
+-----------------------------------------------------------------------------
+
+{-# LANGUAGE UnboxedTuples, MagicHash, NoImplicitPrelude #-}
+module GHC.Stack.CCS (
 --     -- * Call stacks
---     currentCallStack,
+    currentCallStack,
 --     whoCreated,
 -- 
 --     -- * Internals
@@ -34,12 +34,12 @@
 --     ccSrcSpan,
 --     ccsToStrings,
 --     renderStack
---   ) where
+  ) where
 -- 
 -- import Foreign
 -- import Foreign.C
 -- 
--- import GHC.Base
+import GHC.Base
 -- import GHC.Ptr
 -- import GHC.Foreign as GHC
 -- import GHC.IO.Encoding
@@ -78,20 +78,20 @@
 -- 
 -- ccSrcSpan :: Ptr CostCentre -> IO CString
 -- ccSrcSpan p = (# peek CostCentre, srcloc) p
--- 
--- -- | Returns a @[String]@ representing the current call stack.  This
--- -- can be useful for debugging.
--- --
--- -- The implementation uses the call-stack simulation maintined by the
--- -- profiler, so it only works if the program was compiled with @-prof@
--- -- and contains suitable SCC annotations (e.g. by using @-fprof-auto@).
--- -- Otherwise, the list returned is likely to be empty or
--- -- uninformative.
--- --
--- -- @since 4.5.0.0
--- currentCallStack :: IO [String]
--- currentCallStack = ccsToStrings =<< getCurrentCCS ()
--- 
+
+-- | Returns a @[String]@ representing the current call stack.  This
+-- can be useful for debugging.
+--
+-- The implementation uses the call-stack simulation maintined by the
+-- profiler, so it only works if the program was compiled with @-prof@
+-- and contains suitable SCC annotations (e.g. by using @-fprof-auto@).
+-- Otherwise, the list returned is likely to be empty or
+-- uninformative.
+--
+-- @since 4.5.0.0
+currentCallStack :: IO [String]
+currentCallStack = return [] -- ccsToStrings =<< getCurrentCCS ()
+
 -- ccsToStrings :: Ptr CostCentreStack -> IO [String]
 -- ccsToStrings ccs0 = go ccs0 []
 --   where
