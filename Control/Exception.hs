@@ -81,9 +81,9 @@ module Control.Exception (
 --         handle,
 --         handleJust,
 -- 
---         -- ** The @try@ functions
---         try,
---         tryJust,
+        -- ** The @try@ functions
+        try,
+        tryJust,
 -- 
         -- ** The @evaluate@ function
 --         evaluate,
