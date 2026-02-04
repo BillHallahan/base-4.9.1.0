@@ -19,12 +19,12 @@
 module GHC.Stack.CCS (
 --     -- * Call stacks
     currentCallStack,
---     whoCreated,
+    whoCreated,
 -- 
 --     -- * Internals
 --     CostCentreStack,
 --     CostCentre,
---     getCurrentCCS,
+    getCurrentCCS,
 --     getCCSOf,
 --     clearCCS,
 --     ccsCC,
@@ -32,8 +32,8 @@ module GHC.Stack.CCS (
 --     ccLabel,
 --     ccModule,
 --     ccSrcSpan,
---     ccsToStrings,
---     renderStack
+    ccsToStrings,
+    renderStack
   ) where
 -- 
 -- import Foreign
@@ -43,7 +43,7 @@ import GHC.Base
 -- import GHC.Ptr
 -- import GHC.Foreign as GHC
 -- import GHC.IO.Encoding
--- import GHC.List ( concatMap, reverse )
+import GHC.List ( concatMap, reverse )
 -- 
 -- #define PROFILING
 -- #include "Rts.h"
@@ -51,6 +51,8 @@ import GHC.Base
 -- data CostCentreStack
 -- data CostCentre
 -- 
+getCurrentCCS :: dummy -> IO Int
+getCurrentCCS _ = return 0
 -- getCurrentCCS :: dummy -> IO (Ptr CostCentreStack)
 -- getCurrentCCS dummy = IO $ \s ->
 --    case getCurrentCCS## dummy s of
@@ -92,6 +94,8 @@ import GHC.Base
 currentCallStack :: IO [String]
 currentCallStack = return [] -- ccsToStrings =<< getCurrentCCS ()
 
+ccsToStrings :: a -> IO [String]
+ccsToStrings _ = return []
 -- ccsToStrings :: Ptr CostCentreStack -> IO [String]
 -- ccsToStrings ccs0 = go ccs0 []
 --   where
@@ -110,11 +114,13 @@ currentCallStack = return [] -- ccsToStrings =<< getCurrentCCS ()
 -- -- | Get the stack trace attached to an object.
 -- --
 -- -- @since 4.5.0.0
+whoCreated :: a -> IO [String]
+whoCreated _ = return []
 -- whoCreated :: a -> IO [String]
 -- whoCreated obj = do
 --   ccs <- getCCSOf obj
 --   ccsToStrings ccs
 -- 
--- renderStack :: [String] -> String
--- renderStack strs =
---   "CallStack (from -prof):" ++ concatMap ("\n  "++) (reverse strs)
+renderStack :: [String] -> String
+renderStack strs =
+  "CallStack (from -prof):" ++ concatMap ("\n  "++) (reverse strs)
