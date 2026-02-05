@@ -521,6 +521,10 @@ iteChar# = iteChar#
 strIndexOf# :: [a] -> [a] -> Int# -> Int#
 strIndexOf# = strIndexOf#
 
+{-# NOINLINE strContains# #-}
+strContains# :: [a] -> [a] -> Bool
+strContains# = strContains#
+
 {-# NOINLINE strPrefixOf# #-}
 strPrefixOf# :: [a] -> [a] -> Bool
 strPrefixOf# = strPrefixOf#
