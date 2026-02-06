@@ -27,7 +27,7 @@ module GHC.IO (
 --         unIO, failIO, liftIO, mplusIO,
         unsafePerformIO,
 --         unsafeInterleaveIO,
---         unsafeDupablePerformIO, unsafeDupableInterleaveIO,
+        unsafeDupablePerformIO, -- unsafeDupableInterleaveIO,
 --         noDuplicate,
 -- 
 --         -- To and from from ST

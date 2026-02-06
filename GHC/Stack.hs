@@ -46,12 +46,12 @@ module GHC.Stack (
 --     renderStack
   ) where
 -- 
--- import GHC.Stack.CCS
+import GHC.Stack.CCS
 import GHC.Stack.Types
--- import GHC.IO
+import GHC.IO
 import GHC.Base
 import GHC.List
--- import GHC.Exception
+import GHC.Exception
 
 -- | Like the function 'error', but appends a stack trace to the error
 -- message if one is available.
