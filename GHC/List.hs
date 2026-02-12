@@ -1,4 +1,5 @@
 {-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE PackageImports #-}
 {-# LANGUAGE CPP, NoImplicitPrelude, ScopedTypeVariables, MagicHash #-}
 {-# LANGUAGE BangPatterns, TypeApplications #-}
 {-# OPTIONS_HADDOCK hide #-}
@@ -26,12 +27,10 @@ module GHC.List (
    scanr, scanr1, iterate, repeat, replicate, cycle,
    take, drop, sum, product, maximum, minimum, splitAt, takeWhile, dropWhile,
    span, break, reverse, and, or,
-   any, all, elem, notElem, lookup,
+   any, BaseList.all, elem, notElem, lookup,
    concatMap,
    zip, zip3, zipWith, zipWith3, unzip, unzip3,
    errorEmptyList,
-   strAll,
--- 
  ) where
 -- 
 import Data.Maybe
@@ -40,6 +39,7 @@ import GHC.Num (Num(..))
 -- import GHC.Integer (Integer)
 import GHC.Integer2
 import GHC.Prim2
+import qualified "base" GHC.List as BaseList
 
 import GHC.Stack.Types
 -- 
@@ -974,10 +974,10 @@ all f xs = let !lt = buildLitTable f
            in error "not implemented yet"
 
 -- temporary implementation, for literal table testing purposes
-strAll :: (Char -> Bool) -> String -> Bool
-strAll f xs = let f' c = f (C# c)
-                  !lt = buildLitTable f'
-              in error "not implemented yet"
+-- all :: (Char -> Bool) -> String -> Bool
+-- all f xs = let f' c = f (C# c)
+--                !lt = buildLitTable f'
+--            in error "not implemented yet"
 -- #else
 -- all _ []        =  True
 -- all p (x:xs)    =  p x && all p xs
