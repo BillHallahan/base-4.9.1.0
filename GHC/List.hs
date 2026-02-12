@@ -30,6 +30,7 @@ module GHC.List (
    concatMap,
    zip, zip3, zipWith, zipWith3, unzip, unzip3,
    errorEmptyList,
+   strAll,
 -- 
  ) where
 -- 
@@ -971,6 +972,12 @@ all                     :: (a -> Bool) -> [a] -> Bool
 --                                _ -> all' p ys
 all f xs = let !lt = buildLitTable f
            in error "not implemented yet"
+
+-- temporary implementation, for literal table testing purposes
+strAll :: (Char -> Bool) -> String -> Bool
+strAll f xs = let f' c = f (C# c)
+                  !lt = buildLitTable f'
+              in error "not implemented yet"
 -- #else
 -- all _ []        =  True
 -- all p (x:xs)    =  p x && all p xs
