@@ -82,7 +82,6 @@ module Data.Typeable.Internal (
   ) where
 
 import GHC.Base
-import qualified GHC.Arr as A
 import GHC.Types2 ( Type (..), Multiplicity )
 import Data.Type.Equality
 import GHC.List ( splitAt, foldl', elem )
@@ -94,7 +93,7 @@ import Unsafe.Coerce ( unsafeCoerce )
 import GHC.Types
   (TYPE, Type (..), RuntimeRep (..))
 
-import GHC.Fingerprint.Type
+-- import GHC.Fingerprint.Type
 import {-# SOURCE #-} GHC.Fingerprint
 --    -- loop: GHC.Fingerprint -> Foreign.Ptr -> Data.Typeable
 --    -- Better to break the loop here, because we want non-SOURCE imports

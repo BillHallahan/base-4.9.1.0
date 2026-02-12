@@ -14,6 +14,7 @@ module GHC.Types2
   , unpackChar
   , intToString#
   , IO (..)
+  , catch#
   , RealWorld (..)
   , LiftedRep (..)
   , T.Bool(..)

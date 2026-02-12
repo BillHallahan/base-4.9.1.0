@@ -140,3 +140,7 @@ readMutVar## = readMutVar##
 {-# NOINLINE writeMutVar## #-}
 writeMutVar## :: forall d a. MutVar# d a -> a -> State# d -> State# d
 writeMutVar## _ _ s = s
+
+{-# NOINLINE raise## #-}
+raise## :: a -> b
+raise## = raise##

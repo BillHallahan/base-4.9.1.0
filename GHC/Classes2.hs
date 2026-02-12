@@ -42,6 +42,12 @@ infix  4  ==, /=, <, <=, >=, >
 infixr 3 &&
 infixr 2 ||
 
+-- | The syntax @?x :: a@ is desugared into @IP "x" a@
+-- IP is declared very early, so that libraries can take
+-- advantage of the implicit-call-stack feature
+class IP x a | x -> a where
+  ip :: a
+
 class  Eq a  where
     (==), (/=)           :: a -> a -> Bool
 

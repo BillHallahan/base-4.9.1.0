@@ -40,18 +40,18 @@ module GHC.IO.Exception (
 --   userError,
   assertError,
 --   unsupportedOperation,
---   untangle,
+  untangle,
  ) where
 -- 
 import GHC.Base
 -- import GHC.Generics
--- import GHC.List
+import GHC.List
 -- import GHC.IO
 -- import GHC.Show
 -- import GHC.Read
 import GHC.Exception
 -- import GHC.IO.Handle.Types
--- import GHC.OldList ( intercalate )
+import GHC.OldList ( intercalate )
 -- import {-# SOURCE #-} GHC.Stack.CCS
 -- import Foreign.C.Types
 -- 
@@ -372,28 +372,28 @@ assertError predicate v
 -- unsupportedOperation =
 --    (IOError Nothing UnsupportedOperation ""
 --         "Operation is not supported" Nothing Nothing)
--- 
--- {-
--- (untangle coded message) expects "coded" to be of the form
---         "location|details"
--- It prints
---         location message details
--- -}
--- untangle :: Addr# -> String -> String
--- untangle coded message
---   =  location
---   ++ ": "
---   ++ message
---   ++ details
---   ++ "\n"
---   where
---     coded_str = unpackCStringUtf8# coded
--- 
---     (location, details)
---       = case (span not_bar coded_str) of { (loc, rest) ->
---         case rest of
---           ('|':det) -> (loc, ' ' : det)
---           _         -> (loc, "")
---         }
---     not_bar c = c /= '|'
--- 
+
+{-
+(untangle coded message) expects "coded" to be of the form
+        "location|details"
+It prints
+        location message details
+-}
+untangle :: Addr# -> String -> String
+untangle coded message
+  =  location
+  ++ ": "
+  ++ message
+  ++ details
+  ++ "\n"
+  where
+    coded_str = "" -- unpackCStringUtf8# coded
+
+    (location, details)
+      = case (span not_bar coded_str) of { (loc, rest) ->
+        case rest of
+          ('|':det) -> (loc, ' ' : det)
+          _         -> (loc, "")
+        }
+    not_bar c = c /= '|'
+

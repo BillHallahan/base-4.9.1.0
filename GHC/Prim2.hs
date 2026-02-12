@@ -453,6 +453,18 @@ tagToEnum# _ = let x = x in x
 
 data (~#) a b (x :: a) (y :: b) = Co
 
+raise# :: a -> b
+raise# !x = raise## x
+
+raiseIO# :: a -> State# RealWorld -> (# State# RealWorld, b #)
+raiseIO# x s = let !y = raise# x :: b in (# s, y #)
+
+catch# :: (State# RealWorld -> (# State# RealWorld, a #))
+       -> (b -> State# RealWorld -> (# State# RealWorld, a #))
+       -> State# RealWorld
+       -> (# State# RealWorld, a #)
+catch# = catch#
+
 -- String primitives
 
 {-# NOINLINE strLen# #-}
@@ -508,6 +520,10 @@ iteChar# = iteChar#
 {-# NOINLINE strIndexOf# #-}
 strIndexOf# :: [a] -> [a] -> Int# -> Int#
 strIndexOf# = strIndexOf#
+
+{-# NOINLINE strContains# #-}
+strContains# :: [a] -> [a] -> Bool
+strContains# = strContains#
 
 {-# NOINLINE strPrefixOf# #-}
 strPrefixOf# :: [a] -> [a] -> Bool

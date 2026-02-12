@@ -1,24 +1,24 @@
--- {-# LANGUAGE Unsafe #-}
+{-# LANGUAGE Unsafe #-}
 {-# LANGUAGE NoImplicitPrelude
            , MagicHash
            , UnboxedTuples
   #-}
--- {-# OPTIONS_HADDOCK hide #-}
--- 
--- -----------------------------------------------------------------------------
--- -- |
--- -- Module      :  GHC.IO.Unsafe
--- -- Copyright   :  (c) The University of Glasgow 1994-2002
--- -- License     :  see libraries/base/LICENSE
--- --
--- -- Maintainer  :  cvs-ghc@haskell.org
--- -- Stability   :  internal
--- -- Portability :  non-portable (GHC Extensions)
--- --
--- -- Unsafe IO operations
--- --
--- -----------------------------------------------------------------------------
--- 
+{-# OPTIONS_HADDOCK hide #-}
+
+-----------------------------------------------------------------------------
+-- |
+-- Module      :  GHC.IO.Unsafe
+-- Copyright   :  (c) The University of Glasgow 1994-2002
+-- License     :  see libraries/base/LICENSE
+--
+-- Maintainer  :  cvs-ghc@haskell.org
+-- Stability   :  internal
+-- Portability :  non-portable (GHC Extensions)
+--
+-- Unsafe IO operations
+--
+-----------------------------------------------------------------------------
+
 module GHC.IO.Unsafe (
       unsafePerformIO
 --     , unsafeInterleaveIO,
@@ -28,64 +28,64 @@ module GHC.IO.Unsafe (
   ) where
 -- 
 import GHC.Base
--- 
--- 
--- {-|
--- This is the \"back door\" into the 'IO' monad, allowing
--- 'IO' computation to be performed at any time.  For
--- this to be safe, the 'IO' computation should be
--- free of side effects and independent of its environment.
--- 
--- If the I\/O computation wrapped in 'unsafePerformIO' performs side
--- effects, then the relative order in which those side effects take
--- place (relative to the main I\/O trunk, or other calls to
--- 'unsafePerformIO') is indeterminate.  Furthermore, when using
--- 'unsafePerformIO' to cause side-effects, you should take the following
--- precautions to ensure the side effects are performed as many times as
--- you expect them to be.  Note that these precautions are necessary for
--- GHC, but may not be sufficient, and other compilers may require
--- different precautions:
--- 
---   * Use @{\-\# NOINLINE foo \#-\}@ as a pragma on any function @foo@
---         that calls 'unsafePerformIO'.  If the call is inlined,
---         the I\/O may be performed more than once.
--- 
---   * Use the compiler flag @-fno-cse@ to prevent common sub-expression
---         elimination being performed on the module, which might combine
---         two side effects that were meant to be separate.  A good example
---         is using multiple global variables (like @test@ in the example below).
--- 
---   * Make sure that the either you switch off let-floating (@-fno-full-laziness@), or that the
---         call to 'unsafePerformIO' cannot float outside a lambda.  For example,
---         if you say:
---         @
---            f x = unsafePerformIO (newIORef [])
---         @
---         you may get only one reference cell shared between all calls to @f@.
---         Better would be
---         @
---            f x = unsafePerformIO (newIORef [x])
---         @
---         because now it can't float outside the lambda.
--- 
--- It is less well known that
--- 'unsafePerformIO' is not type safe.  For example:
--- 
--- >     test :: IORef [a]
--- >     test = unsafePerformIO $ newIORef []
--- >
--- >     main = do
--- >             writeIORef test [42]
--- >             bang <- readIORef test
--- >             print (bang :: [Char])
--- 
--- This program will core dump.  This problem with polymorphic references
--- is well known in the ML community, and does not arise with normal
--- monadic use of references.  There is no easy way to make it impossible
--- once you use 'unsafePerformIO'.  Indeed, it is
--- possible to write @coerce :: a -> b@ with the
--- help of 'unsafePerformIO'.  So be careful!
--- -}
+
+
+{-|
+This is the \"back door\" into the 'IO' monad, allowing
+'IO' computation to be performed at any time.  For
+this to be safe, the 'IO' computation should be
+free of side effects and independent of its environment.
+
+If the I\/O computation wrapped in 'unsafePerformIO' performs side
+effects, then the relative order in which those side effects take
+place (relative to the main I\/O trunk, or other calls to
+'unsafePerformIO') is indeterminate.  Furthermore, when using
+'unsafePerformIO' to cause side-effects, you should take the following
+precautions to ensure the side effects are performed as many times as
+you expect them to be.  Note that these precautions are necessary for
+GHC, but may not be sufficient, and other compilers may require
+different precautions:
+
+  * Use @{\-\# NOINLINE foo \#-\}@ as a pragma on any function @foo@
+        that calls 'unsafePerformIO'.  If the call is inlined,
+        the I\/O may be performed more than once.
+
+  * Use the compiler flag @-fno-cse@ to prevent common sub-expression
+        elimination being performed on the module, which might combine
+        two side effects that were meant to be separate.  A good example
+        is using multiple global variables (like @test@ in the example below).
+
+  * Make sure that the either you switch off let-floating (@-fno-full-laziness@), or that the
+        call to 'unsafePerformIO' cannot float outside a lambda.  For example,
+        if you say:
+        @
+           f x = unsafePerformIO (newIORef [])
+        @
+        you may get only one reference cell shared between all calls to @f@.
+        Better would be
+        @
+           f x = unsafePerformIO (newIORef [x])
+        @
+        because now it can't float outside the lambda.
+
+It is less well known that
+'unsafePerformIO' is not type safe.  For example:
+
+>     test :: IORef [a]
+>     test = unsafePerformIO $ newIORef []
+>
+>     main = do
+>             writeIORef test [42]
+>             bang <- readIORef test
+>             print (bang :: [Char])
+
+This program will core dump.  This problem with polymorphic references
+is well known in the ML community, and does not arise with normal
+monadic use of references.  There is no easy way to make it impossible
+once you use 'unsafePerformIO'.  Indeed, it is
+possible to write @coerce :: a -> b@ with the
+help of 'unsafePerformIO'.  So be careful!
+-}
 -- unsafePerformIO :: IO a -> a
 -- unsafePerformIO m = unsafeDupablePerformIO (noDuplicate >> m)
 unsafePerformIO :: IO a -> a

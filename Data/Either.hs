@@ -124,6 +124,11 @@ import GHC.Base
 data  Either a b  =  Left a | Right b
 --   deriving (Eq, Ord, Read, Show)
 -- 
+instance (Eq a, Eq b) => Eq (Either a b) where
+    Left x == Left y = x == y
+    Right x == Right y = x == y
+    _ == _ = False
+
 instance Functor (Either a) where
     fmap _ (Left x) = Left x
     fmap f (Right y) = Right (f y)

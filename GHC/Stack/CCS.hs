@@ -1,30 +1,30 @@
--- {-# LANGUAGE Trustworthy #-}
--- 
--- -----------------------------------------------------------------------------
--- -- |
--- -- Module      :  GHC.Stack.CCS
--- -- Copyright   :  (c) The University of Glasgow 2011
--- -- License     :  see libraries/base/LICENSE
--- --
--- -- Maintainer  :  cvs-ghc@haskell.org
--- -- Stability   :  internal
--- -- Portability :  non-portable (GHC Extensions)
--- --
--- -- Access to GHC's call-stack simulation
--- --
--- -- @since 4.5.0.0
--- -----------------------------------------------------------------------------
--- 
--- {-# LANGUAGE UnboxedTuples, MagicHash, NoImplicitPrelude #-}
--- module GHC.Stack.CCS (
+{-# LANGUAGE Trustworthy #-}
+
+-----------------------------------------------------------------------------
+-- |
+-- Module      :  GHC.Stack.CCS
+-- Copyright   :  (c) The University of Glasgow 2011
+-- License     :  see libraries/base/LICENSE
+--
+-- Maintainer  :  cvs-ghc@haskell.org
+-- Stability   :  internal
+-- Portability :  non-portable (GHC Extensions)
+--
+-- Access to GHC's call-stack simulation
+--
+-- @since 4.5.0.0
+-----------------------------------------------------------------------------
+
+{-# LANGUAGE UnboxedTuples, MagicHash, NoImplicitPrelude #-}
+module GHC.Stack.CCS (
 --     -- * Call stacks
---     currentCallStack,
---     whoCreated,
+    currentCallStack,
+    whoCreated,
 -- 
 --     -- * Internals
 --     CostCentreStack,
 --     CostCentre,
---     getCurrentCCS,
+    getCurrentCCS,
 --     getCCSOf,
 --     clearCCS,
 --     ccsCC,
@@ -32,18 +32,18 @@
 --     ccLabel,
 --     ccModule,
 --     ccSrcSpan,
---     ccsToStrings,
---     renderStack
---   ) where
+    ccsToStrings,
+    renderStack
+  ) where
 -- 
 -- import Foreign
 -- import Foreign.C
 -- 
--- import GHC.Base
+import GHC.Base
 -- import GHC.Ptr
 -- import GHC.Foreign as GHC
 -- import GHC.IO.Encoding
--- import GHC.List ( concatMap, reverse )
+import GHC.List ( concatMap, reverse )
 -- 
 -- #define PROFILING
 -- #include "Rts.h"
@@ -51,6 +51,8 @@
 -- data CostCentreStack
 -- data CostCentre
 -- 
+getCurrentCCS :: dummy -> IO Int
+getCurrentCCS _ = return 0
 -- getCurrentCCS :: dummy -> IO (Ptr CostCentreStack)
 -- getCurrentCCS dummy = IO $ \s ->
 --    case getCurrentCCS## dummy s of
@@ -78,20 +80,22 @@
 -- 
 -- ccSrcSpan :: Ptr CostCentre -> IO CString
 -- ccSrcSpan p = (# peek CostCentre, srcloc) p
--- 
--- -- | Returns a @[String]@ representing the current call stack.  This
--- -- can be useful for debugging.
--- --
--- -- The implementation uses the call-stack simulation maintined by the
--- -- profiler, so it only works if the program was compiled with @-prof@
--- -- and contains suitable SCC annotations (e.g. by using @-fprof-auto@).
--- -- Otherwise, the list returned is likely to be empty or
--- -- uninformative.
--- --
--- -- @since 4.5.0.0
--- currentCallStack :: IO [String]
--- currentCallStack = ccsToStrings =<< getCurrentCCS ()
--- 
+
+-- | Returns a @[String]@ representing the current call stack.  This
+-- can be useful for debugging.
+--
+-- The implementation uses the call-stack simulation maintined by the
+-- profiler, so it only works if the program was compiled with @-prof@
+-- and contains suitable SCC annotations (e.g. by using @-fprof-auto@).
+-- Otherwise, the list returned is likely to be empty or
+-- uninformative.
+--
+-- @since 4.5.0.0
+currentCallStack :: IO [String]
+currentCallStack = return [] -- ccsToStrings =<< getCurrentCCS ()
+
+ccsToStrings :: a -> IO [String]
+ccsToStrings _ = return []
 -- ccsToStrings :: Ptr CostCentreStack -> IO [String]
 -- ccsToStrings ccs0 = go ccs0 []
 --   where
@@ -110,11 +114,13 @@
 -- -- | Get the stack trace attached to an object.
 -- --
 -- -- @since 4.5.0.0
+whoCreated :: a -> IO [String]
+whoCreated _ = return []
 -- whoCreated :: a -> IO [String]
 -- whoCreated obj = do
 --   ccs <- getCCSOf obj
 --   ccsToStrings ccs
 -- 
--- renderStack :: [String] -> String
--- renderStack strs =
---   "CallStack (from -prof):" ++ concatMap ("\n  "++) (reverse strs)
+renderStack :: [String] -> String
+renderStack strs =
+  "CallStack (from -prof):" ++ concatMap ("\n  "++) (reverse strs)

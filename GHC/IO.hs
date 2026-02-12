@@ -27,7 +27,7 @@ module GHC.IO (
 --         unIO, failIO, liftIO, mplusIO,
         unsafePerformIO,
 --         unsafeInterleaveIO,
---         unsafeDupablePerformIO, unsafeDupableInterleaveIO,
+        unsafeDupablePerformIO, -- unsafeDupableInterleaveIO,
 --         noDuplicate,
 -- 
 --         -- To and from from ST
@@ -35,7 +35,7 @@ module GHC.IO (
 -- 
 --         FilePath,
 -- 
---         catchException, catchAny, throwIO,
+        catchException, catch, catchAny, throwIO,
 --         mask, mask_, uninterruptibleMask, uninterruptibleMask_,
 --         MaskingState(..), getMaskingState,
 --         unsafeUnmask, interruptible,
@@ -44,7 +44,7 @@ module GHC.IO (
 -- 
 import GHC.Base
 import GHC.ST
--- import GHC.Exception
+import GHC.Exception
 -- import GHC.Show
 import GHC.IO.Unsafe
 -- 
@@ -111,66 +111,105 @@ stToIO (ST m) = IO m
 -- 
 -- type FilePath = String
 -- 
--- -- -----------------------------------------------------------------------------
--- -- Primitive catch and throwIO
--- 
--- {-
--- catchException used to handle the passing around of the state to the
--- action and the handler.  This turned out to be a bad idea - it meant
--- that we had to wrap both arguments in thunks so they could be entered
--- as normal (remember IO returns an unboxed pair...).
--- 
--- Now catch# has type
--- 
---     catch# :: IO a -> (b -> IO a) -> IO a
--- 
--- (well almost; the compiler doesn't know about the IO newtype so we
--- have to work around that in the definition of catchException below).
--- -}
--- 
--- -- | Catch an exception in the 'IO' monad.
--- --
--- -- Note that this function is /strict/ in the action. That is,
--- -- @catchException undefined b == _|_@. See #exceptions_and_strictness#
--- -- for details.
--- catchException :: Exception e => IO a -> (e -> IO a) -> IO a
--- catchException (IO io) handler = IO $ catch# io handler'
---     where handler' e = case fromException e of
---                        Just e' -> unIO (handler e')
---                        Nothing -> raiseIO# e
--- 
--- -- | Catch any 'Exception' type in the 'IO' monad.
--- --
--- -- Note that this function is /strict/ in the action. That is,
--- -- @catchException undefined b == _|_@. See #exceptions_and_strictness# for
--- -- details.
--- catchAny :: IO a -> (forall e . Exception e => e -> IO a) -> IO a
--- catchAny (IO io) handler = IO $ catch# io handler'
---     where handler' (SomeException e) = unIO (handler e)
--- 
--- 
+-- -----------------------------------------------------------------------------
+-- Primitive catch and throwIO
+
+{-
+catchException used to handle the passing around of the state to the
+action and the handler.  This turned out to be a bad idea - it meant
+that we had to wrap both arguments in thunks so they could be entered
+as normal (remember IO returns an unboxed pair...).
+
+Now catch# has type
+
+    catch# :: IO a -> (b -> IO a) -> IO a
+
+(well almost; the compiler doesn't know about the IO newtype so we
+have to work around that in the definition of catchException below).
+-}
+
+-- | Catch an exception in the 'IO' monad.
+--
+-- Note that this function is /strict/ in the action. That is,
+-- @catchException undefined b == _|_@. See #exceptions_and_strictness#
+-- for details.
+catchException :: Exception e => IO a -> (e -> IO a) -> IO a
+catchException (IO io) handler = IO $ catch# io handler'
+    where handler' e = case fromException e of
+                       Just e' -> unIO (handler e')
+                       Nothing -> raise# e
+
+-- |This is the simplest of the exception-catching functions.  It
+-- takes a single argument, runs it, and if an exception is raised
+-- the \"handler\" is executed, with the value of the exception passed as an
+-- argument.  Otherwise, the result is returned as normal.  For example:
+--
+-- >   catch (readFile f)
+-- >         (\e -> do let err = show (e :: IOException)
+-- >                   hPutStr stderr ("Warning: Couldn't open " ++ f ++ ": " ++ err)
+-- >                   return "")
+--
+-- Note that we have to give a type signature to @e@, or the program
+-- will not typecheck as the type is ambiguous. While it is possible
+-- to catch exceptions of any type, see the section \"Catching all
+-- exceptions\" (in "Control.Exception") for an explanation of the problems with doing so.
+--
+-- For catching exceptions in pure (non-'IO') expressions, see the
+-- function 'evaluate'.
+--
+-- Note that due to Haskell\'s unspecified evaluation order, an
+-- expression may throw one of several possible exceptions: consider
+-- the expression @(error \"urk\") + (1 \`div\` 0)@.  Does
+-- the expression throw
+-- @ErrorCall \"urk\"@, or @DivideByZero@?
+--
+-- The answer is \"it might throw either\"; the choice is
+-- non-deterministic. If you are catching any type of exception then you
+-- might catch either. If you are calling @catch@ with type
+-- @IO Int -> (ArithException -> IO Int) -> IO Int@ then the handler may
+-- get run with @DivideByZero@ as an argument, or an @ErrorCall \"urk\"@
+-- exception may be propogated further up. If you call it again, you
+-- might get a the opposite behaviour. This is ok, because 'catch' is an
+-- 'IO' computation.
+--
+catch   :: Exception e
+        => IO a         -- ^ The computation to run
+        -> (e -> IO a)  -- ^ Handler to invoke if an exception is raised
+        -> IO a
+catch act = catchException act
+
+-- | Catch any 'Exception' type in the 'IO' monad.
+--
+-- Note that this function is /strict/ in the action. That is,
+-- @catchException undefined b == _|_@. See #exceptions_and_strictness# for
+-- details.
+catchAny :: IO a -> (forall e . Exception e => e -> IO a) -> IO a
+catchAny (IO io) handler = IO $ catch# io handler'
+    where handler' (SomeException e) = unIO (handler e)
+
+
 -- mplusIO :: IO a -> IO a -> IO a
 -- mplusIO m n = m `catchIOError` \ _ -> n
 --     where catchIOError :: IO a -> (IOError -> IO a) -> IO a
 --           catchIOError = catchException
--- 
--- -- | A variant of 'throw' that can only be used within the 'IO' monad.
--- --
--- -- Although 'throwIO' has a type that is an instance of the type of 'throw', the
--- -- two functions are subtly different:
--- --
--- -- > throw e   `seq` x  ===> throw e
--- -- > throwIO e `seq` x  ===> x
--- --
--- -- The first example will cause the exception @e@ to be raised,
--- -- whereas the second one won\'t.  In fact, 'throwIO' will only cause
--- -- an exception to be raised when it is used within the 'IO' monad.
--- -- The 'throwIO' variant should be used in preference to 'throw' to
--- -- raise an exception within the 'IO' monad because it guarantees
--- -- ordering with respect to other 'IO' operations, whereas 'throw'
--- -- does not.
--- throwIO :: Exception e => e -> IO a
--- throwIO e = IO (raiseIO# (toException e))
+
+-- | A variant of 'throw' that can only be used within the 'IO' monad.
+--
+-- Although 'throwIO' has a type that is an instance of the type of 'throw', the
+-- two functions are subtly different:
+--
+-- > throw e   `seq` x  ===> throw e
+-- > throwIO e `seq` x  ===> x
+--
+-- The first example will cause the exception @e@ to be raised,
+-- whereas the second one won\'t.  In fact, 'throwIO' will only cause
+-- an exception to be raised when it is used within the 'IO' monad.
+-- The 'throwIO' variant should be used in preference to 'throw' to
+-- raise an exception within the 'IO' monad because it guarantees
+-- ordering with respect to other 'IO' operations, whereas 'throw'
+-- does not.
+throwIO :: Exception e => e -> IO a
+throwIO e = IO (raiseIO# (toException e))
 -- 
 -- -- -----------------------------------------------------------------------------
 -- -- Controlling asynchronous exception delivery
