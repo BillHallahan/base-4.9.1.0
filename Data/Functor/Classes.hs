@@ -1,41 +1,41 @@
 -- {-# LANGUAGE Safe #-}
--- -----------------------------------------------------------------------------
--- -- |
--- -- Module      :  Data.Functor.Classes
--- -- Copyright   :  (c) Ross Paterson 2013
--- -- License     :  BSD-style (see the file LICENSE)
--- --
--- -- Maintainer  :  libraries@haskell.org
--- -- Stability   :  experimental
--- -- Portability :  portable
--- --
--- -- Liftings of the Prelude classes 'Eq', 'Ord', 'Read' and 'Show' to
--- -- unary and binary type constructors.
--- --
--- -- These classes are needed to express the constraints on arguments of
--- -- transformers in portable Haskell.  Thus for a new transformer @T@,
--- -- one might write instances like
--- --
--- -- > instance (Eq1 f) => Eq1 (T f) where ...
--- -- > instance (Ord1 f) => Ord1 (T f) where ...
--- -- > instance (Read1 f) => Read1 (T f) where ...
--- -- > instance (Show1 f) => Show1 (T f) where ...
--- --
--- -- If these instances can be defined, defining instances of the base
--- -- classes is mechanical:
--- --
--- -- > instance (Eq1 f, Eq a) => Eq (T f a) where (==) = eq1
--- -- > instance (Ord1 f, Ord a) => Ord (T f a) where compare = compare1
--- -- > instance (Read1 f, Read a) => Read (T f a) where readsPrec = readsPrec1
--- -- > instance (Show1 f, Show a) => Show (T f a) where showsPrec = showsPrec1
--- --
--- -- @since 4.9.0.0
--- -----------------------------------------------------------------------------
--- 
--- module Data.Functor.Classes (
---     -- * Liftings of Prelude classes
---     -- ** For unary constructors
---     Eq1(..), eq1,
+-----------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Functor.Classes
+-- Copyright   :  (c) Ross Paterson 2013
+-- License     :  BSD-style (see the file LICENSE)
+--
+-- Maintainer  :  libraries@haskell.org
+-- Stability   :  experimental
+-- Portability :  portable
+--
+-- Liftings of the Prelude classes 'Eq', 'Ord', 'Read' and 'Show' to
+-- unary and binary type constructors.
+--
+-- These classes are needed to express the constraints on arguments of
+-- transformers in portable Haskell.  Thus for a new transformer @T@,
+-- one might write instances like
+--
+-- > instance (Eq1 f) => Eq1 (T f) where ...
+-- > instance (Ord1 f) => Ord1 (T f) where ...
+-- > instance (Read1 f) => Read1 (T f) where ...
+-- > instance (Show1 f) => Show1 (T f) where ...
+--
+-- If these instances can be defined, defining instances of the base
+-- classes is mechanical:
+--
+-- > instance (Eq1 f, Eq a) => Eq (T f a) where (==) = eq1
+-- > instance (Ord1 f, Ord a) => Ord (T f a) where compare = compare1
+-- > instance (Read1 f, Read a) => Read (T f a) where readsPrec = readsPrec1
+-- > instance (Show1 f, Show a) => Show (T f a) where showsPrec = showsPrec1
+--
+-- @since 4.9.0.0
+-----------------------------------------------------------------------------
+
+module Data.Functor.Classes (
+    -- * Liftings of Prelude classes
+    -- ** For unary constructors
+    Eq1(..), eq1,
 --     Ord1(..), compare1,
 --     Read1(..), readsPrec1,
 --     Show1(..), showsPrec1,
@@ -58,42 +58,42 @@
 --     showsUnary,
 --     showsUnary1,
 --     showsBinary1,
---   ) where
+  ) where
 -- 
 -- import Control.Applicative (Const(Const))
 -- import Data.Functor.Identity (Identity(Identity))
 -- import Data.Proxy (Proxy(Proxy))
--- import Data.Monoid (mappend)
+import Data.Monoid (mappend)
 -- import Text.Show (showListWith)
--- 
--- -- | Lifting of the 'Eq' class to unary type constructors.
--- class Eq1 f where
---     -- | Lift an equality test through the type constructor.
---     --
---     -- The function will usually be applied to an equality function,
---     -- but the more general type ensures that the implementation uses
---     -- it to compare elements of the first container with elements of
---     -- the second.
---     liftEq :: (a -> b -> Bool) -> f a -> f b -> Bool
--- 
--- -- | Lift the standard @('==')@ function through the type constructor.
--- eq1 :: (Eq1 f, Eq a) => f a -> f a -> Bool
--- eq1 = liftEq (==)
--- 
--- -- | Lifting of the 'Ord' class to unary type constructors.
--- class (Eq1 f) => Ord1 f where
---     -- | Lift a 'compare' function through the type constructor.
---     --
---     -- The function will usually be applied to a comparison function,
---     -- but the more general type ensures that the implementation uses
---     -- it to compare elements of the first container with elements of
---     -- the second.
---     liftCompare :: (a -> b -> Ordering) -> f a -> f b -> Ordering
--- 
--- -- | Lift the standard 'compare' function through the type constructor.
--- compare1 :: (Ord1 f, Ord a) => f a -> f a -> Ordering
--- compare1 = liftCompare compare
--- 
+
+-- | Lifting of the 'Eq' class to unary type constructors.
+class Eq1 f where
+    -- | Lift an equality test through the type constructor.
+    --
+    -- The function will usually be applied to an equality function,
+    -- but the more general type ensures that the implementation uses
+    -- it to compare elements of the first container with elements of
+    -- the second.
+    liftEq :: (a -> b -> Bool) -> f a -> f b -> Bool
+
+-- | Lift the standard @('==')@ function through the type constructor.
+eq1 :: (Eq1 f, Eq a) => f a -> f a -> Bool
+eq1 = liftEq (==)
+
+-- | Lifting of the 'Ord' class to unary type constructors.
+class (Eq1 f) => Ord1 f where
+    -- | Lift a 'compare' function through the type constructor.
+    --
+    -- The function will usually be applied to a comparison function,
+    -- but the more general type ensures that the implementation uses
+    -- it to compare elements of the first container with elements of
+    -- the second.
+    liftCompare :: (a -> b -> Ordering) -> f a -> f b -> Ordering
+
+-- | Lift the standard 'compare' function through the type constructor.
+compare1 :: (Ord1 f, Ord a) => f a -> f a -> Ordering
+compare1 = liftCompare compare
+
 -- -- | Lifting of the 'Read' class to unary type constructors.
 -- class Read1 f where
 --     -- | 'readsPrec' function for an application of the type constructor
@@ -213,13 +213,12 @@
 -- showsPrec2 = liftShowsPrec2 showsPrec showList showsPrec showList
 -- 
 -- -- Instances for Prelude type constructors
--- 
--- instance Eq1 Maybe where
---     liftEq _ Nothing Nothing = True
---     liftEq _ Nothing (Just _) = False
---     liftEq _ (Just _) Nothing = False
---     liftEq eq (Just x) (Just y) = eq x y
--- 
+
+instance Eq1 Maybe where
+    liftEq _ Nothing Nothing = True
+    liftEq eq (Just x) (Just y) = eq x y
+    liftEq _ _ _ = False
+
 -- instance Ord1 Maybe where
 --     liftCompare _ Nothing Nothing = EQ
 --     liftCompare _ Nothing (Just _) = LT
@@ -235,19 +234,18 @@
 -- instance Show1 Maybe where
 --     liftShowsPrec _ _ _ Nothing = showString "Nothing"
 --     liftShowsPrec sp _ d (Just x) = showsUnaryWith sp "Just" d x
--- 
--- instance Eq1 [] where
---     liftEq _ [] [] = True
---     liftEq _ [] (_:_) = False
---     liftEq _ (_:_) [] = False
---     liftEq eq (x:xs) (y:ys) = eq x y && liftEq eq xs ys
--- 
+
+instance Eq1 [] where
+    liftEq _ [] [] = True
+    liftEq eq (x:xs) (y:ys) = eq x y && liftEq eq xs ys
+    liftEq _ _ _ = False
+
 -- instance Ord1 [] where
 --     liftCompare _ [] [] = EQ
 --     liftCompare _ [] (_:_) = LT
 --     liftCompare _ (_:_) [] = GT
 --     liftCompare comp (x:xs) (y:ys) = comp x y `mappend` liftCompare comp xs ys
--- 
+--
 -- instance Read1 [] where
 --     liftReadsPrec _ rl _ = rl
 -- 
