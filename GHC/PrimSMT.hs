@@ -6,7 +6,7 @@ import GHC.Prim
   ( Int#, Double#, Char#, Float#, Word#, TYPE -- , Addr#
   , coerce)
 import GHC.Types
-  (Bool (..), Char)
+  (Bool (..), Char, Type)
 
 -- We can't allow these to inline, and we can't put these in GHC.Prim2,
 -- because we need to avoid GHC trying to optimize based on the idea
@@ -27,7 +27,7 @@ data LitTable = LitTable
 -- Build a mapping of path conditions to literals, and return a reference
 -- to the literal table that was built in G2's internal state
 {-# NOINLINE buildLitTable #-}
-buildLitTable :: forall a b. (a -> b) -> LitTable
+buildLitTable :: forall r (a :: TYPE r) (b :: Type) . (a -> b) -> LitTable
 buildLitTable = buildLitTable
 
 {-# NOINLINE ($==#) #-}

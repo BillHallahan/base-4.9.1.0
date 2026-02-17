@@ -2,6 +2,7 @@
 {-# LANGUAGE PackageImports #-}
 {-# LANGUAGE CPP, NoImplicitPrelude, ScopedTypeVariables, MagicHash #-}
 {-# LANGUAGE BangPatterns, TypeApplications #-}
+{-# LANGUAGE TypeApplications, GADTs #-}
 {-# OPTIONS_HADDOCK hide #-}
 -- 
 -- -----------------------------------------------------------------------------
@@ -27,7 +28,7 @@ module GHC.List (
    scanr, scanr1, iterate, repeat, replicate, cycle,
    take, drop, sum, product, maximum, minimum, splitAt, takeWhile, dropWhile,
    span, break, reverse, and, or,
-   any, BaseList.all, elem, notElem, lookup,
+   any, all, elem, notElem, lookup,
    concatMap,
    zip, zip3, zipWith, zipWith3, unzip, unzip3,
    errorEmptyList,
@@ -39,7 +40,8 @@ import GHC.Num (Num(..))
 -- import GHC.Integer (Integer)
 import GHC.Integer2
 import GHC.Prim2
-import qualified "base" GHC.List as BaseList
+-- import qualified "base" GHC.List as BaseList
+import Type.Reflection ( Typeable, typeOf, typeRep, eqTypeRep, (:~~:) (HRefl) )
 
 import GHC.Stack.Types
 -- 
@@ -960,6 +962,7 @@ any p                   =  or . map p
 -- -- of the list satisfy the predicate. For the result to be
 -- -- 'True', the list must be finite; 'False', however, results from a 'False'
 -- -- value for the predicate applied to an element at a finite index of a finite or infinite list.
+-- all                     :: forall a . Typeable a => (a -> Bool) -> [a] -> Bool
 all                     :: (a -> Bool) -> [a] -> Bool
 -- #ifdef USE_REPORT_PRELUDE
 -- all p ys                =  let all' _ []        = True
@@ -975,9 +978,11 @@ all f xs = let !lt = buildLitTable f
 
 -- temporary implementation, for literal table testing purposes
 -- all :: (Char -> Bool) -> String -> Bool
--- all f xs = let f' c = f (C# c)
---                !lt = buildLitTable f'
---            in error "not implemented yet"
+-- all f xs = case typeRep @a `eqTypeRep` typeRep @Char of
+--                 Just HRefl -> let f' c = f (C# c)
+--                                   !lt = buildLitTable f'
+--                               in error "not implemented yet"
+--                 _ -> error "not a string!"
 -- #else
 -- all _ []        =  True
 -- all p (x:xs)    =  p x && all p xs
