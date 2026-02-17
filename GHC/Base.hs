@@ -746,16 +746,8 @@ mapFB c f = \x ys -> c (f x) ys
 {-# NOINLINE [1] (++) #-}    -- We want the RULE to fire first.
 --                              -- It's recursive, so won't inline anyway,
 --                              -- but saying so is more explicit
-(++) xs ys = 
-    let append [] ys = ys
-        append (x:xs) ys = x : (append xs ys)
-    in case typeIndex# xs `adjStr` xs `adjStr` ys of
-        1# -> strAppend# xs ys
-        2# -> strAppend# xs ys
-        _ -> append xs ys
--- 
--- (++) [] ys = ys
--- (++) (x:xs) ys = x : xs ++ ys
+(++) []     ys = ys
+(++) (x:xs) ys = x : xs ++ ys
 {-# RULES
 "++"    [~1] forall xs ys. xs ++ ys = augment (\c n -> foldr c n xs) ys
   #-}
