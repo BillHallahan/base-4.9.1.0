@@ -410,25 +410,38 @@ instance Foldable [] where
 newtype Max a = Max {getMax :: Maybe a}
 newtype Min a = Min {getMin :: Maybe a}
 -- 
+instance Ord a => Semigroup (Max a) where
+    {-# INLINE (<>) #-}
+    m <> Max Nothing = m
+    Max Nothing <> n = n
+    (Max m@(Just x)) <> (Max n@(Just y))
+      | x >= y    = Max m
+      | otherwise = Max n
+
+-- | @since base-4.8.0.0
 instance Ord a => Monoid (Max a) where
-  mempty = Max Nothing
--- 
-  {-# INLINE mappend #-}
-  m `mappend` Max Nothing = m
-  Max Nothing `mappend` n = n
-  (Max m@(Just x)) `mappend` (Max n@(Just y))
-    | x >= y    = Max m
-    | otherwise = Max n
--- 
+    mempty = Max Nothing
+    -- By default, we would get a lazy right fold. This forces the use of a strict
+    -- left fold instead.
+    mconcat = List.foldl' (<>) mempty
+    {-# INLINE mconcat #-}
+
+-- | @since base-4.11.0.0
+instance Ord a => Semigroup (Min a) where
+    {-# INLINE (<>) #-}
+    m <> Min Nothing = m
+    Min Nothing <> n = n
+    (Min m@(Just x)) <> (Min n@(Just y))
+      | x <= y    = Min m
+      | otherwise = Min n
+
+-- | @since base-4.8.0.0
 instance Ord a => Monoid (Min a) where
-  mempty = Min Nothing
--- 
-  {-# INLINE mappend #-}
-  m `mappend` Min Nothing = m
-  Min Nothing `mappend` n = n
-  (Min m@(Just x)) `mappend` (Min n@(Just y))
-    | x <= y    = Min m
-    | otherwise = Min n
+    mempty = Min Nothing
+    -- By default, we would get a lazy right fold. This forces the use of a strict
+    -- left fold instead.
+    mconcat = List.foldl' (<>) mempty
+    {-# INLINE mconcat #-}
 -- 
 -- -- Instances for GHC.Generics
 -- instance Foldable U1 where
