@@ -1,4 +1,4 @@
-{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE KindSignatures, NoImplicitPrelude #-}
 
 module GHC.Real (Integral (..)) where
 

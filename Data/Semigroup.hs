@@ -6,6 +6,7 @@
 -- {-# LANGUAGE ScopedTypeVariables #-}
 -- {-# LANGUAGE Trustworthy         #-}
 -- {-# LANGUAGE TypeOperators       #-}
+{-# LANGUAGE BangPatterns, ScopedTypeVariables       #-}
 {-# LANGUAGE MagicHash       #-}
 {-# LANGUAGE NoImplicitPrelude       #-}
 

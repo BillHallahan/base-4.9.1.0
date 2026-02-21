@@ -1,4 +1,4 @@
-{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE KindSignatures, NoImplicitPrelude #-}
 
 -- For why this file exists
 -- See Note [Semigroup stimes cycle] in GHC.Internal.Base
