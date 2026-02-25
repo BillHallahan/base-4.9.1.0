@@ -33,7 +33,7 @@ module GHC.List (
 -- 
  ) where
 -- 
-import Data.Maybe
+import GHC.Maybe
 import GHC.Base
 import GHC.Num (Num(..))
 -- import GHC.Integer (Integer)
@@ -81,6 +81,11 @@ uncons                  :: [a] -> Maybe (a, [a])
 uncons []               = Nothing
 uncons (x:xs)           = Just (x, xs)
 -- 
+
+maybe :: b -> (a -> b) -> Maybe a -> b
+maybe n _ Nothing  = n
+maybe _ f (Just x) = f x
+
 -- Decompose a list into 'init' and 'last'.
 --
 -- * If the list is empty, returns 'Nothing'.
@@ -92,6 +97,7 @@ uncons (x:xs)           = Just (x, xs)
 --
 -- > unsnoc xs = (\(hd, tl) -> (reverse tl, hd)) <$> uncons (reverse xs)
 --
+
 unsnoc :: [a] -> Maybe ([a], a)
 -- The lazy pattern ~(a, b) is important to be productive on infinite lists
 -- and not to be prone to stack overflows.

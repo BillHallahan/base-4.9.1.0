@@ -1,30 +1,30 @@
--- {-# LANGUAGE DeriveDataTypeable #-}
--- {-# LANGUAGE DeriveGeneric #-}
--- {-# LANGUAGE Trustworthy #-} -- can't use Safe due to IsList instance
--- {-# LANGUAGE TypeFamilies #-}
--- 
--- -----------------------------------------------------------------------------
--- -- |
--- -- Module      :  Data.List.NonEmpty
--- -- Copyright   :  (C) 2011-2015 Edward Kmett,
--- --                (C) 2010 Tony Morris, Oliver Taylor, Eelis van der Weegen
--- -- License     :  BSD-style (see the file LICENSE)
--- --
--- -- Maintainer  :  libraries@haskell.org
--- -- Stability   :  provisional
--- -- Portability :  portable
--- --
--- -- A 'NonEmpty' list is one which always has at least one element, but
--- -- is otherwise identical to the traditional list type in complexity
--- -- and in terms of API. You will almost certainly want to import this
--- -- module @qualified@.
--- --
--- -- @since 4.9.0.0
--- ----------------------------------------------------------------------------
--- 
--- module Data.List.NonEmpty (
---    -- * The type of non-empty streams
---      NonEmpty(..)
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE Trustworthy #-} -- can't use Safe due to IsList instance
+{-# LANGUAGE TypeFamilies #-}
+
+-----------------------------------------------------------------------------
+-- |
+-- Module      :  Data.List.NonEmpty
+-- Copyright   :  (C) 2011-2015 Edward Kmett,
+--                (C) 2010 Tony Morris, Oliver Taylor, Eelis van der Weegen
+-- License     :  BSD-style (see the file LICENSE)
+--
+-- Maintainer  :  libraries@haskell.org
+-- Stability   :  provisional
+-- Portability :  portable
+--
+-- A 'NonEmpty' list is one which always has at least one element, but
+-- is otherwise identical to the traditional list type in complexity
+-- and in terms of API. You will almost certainly want to import this
+-- module @qualified@.
+--
+-- @since 4.9.0.0
+----------------------------------------------------------------------------
+
+module Data.List.NonEmpty (
+   -- * The type of non-empty streams
+     NonEmpty(..)
 -- 
 --    -- * Non-empty stream transformations
 --    , map         -- :: (a -> b) -> NonEmpty a -> NonEmpty b
@@ -90,7 +90,7 @@
 --    , toList      -- :: NonEmpty a -> [a]
 --    , nonEmpty    -- :: [a] -> Maybe (NonEmpty a)
 --    , xor         -- :: NonEmpty a -> Bool
---    ) where
+   ) where
 -- 
 -- 
 -- import           Prelude             hiding (break, cycle, drop, dropWhile,
@@ -116,11 +116,6 @@
 -- 
 -- infixr 5 :|, <|
 -- 
--- -- | Non-empty (and non-strict) list type.
--- --
--- -- @since 4.9.0.0
--- data NonEmpty a = a :| [a]
---   deriving ( Eq, Ord, Show, Read, Data, Generic, Generic1 )
 -- 
 -- instance Exts.IsList (NonEmpty a) where
 --   type Item (NonEmpty a) = a

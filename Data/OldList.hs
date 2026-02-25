@@ -743,7 +743,7 @@ genericLength xs = let
                         2# -> fromInteger $ Z# (strLen# xs)
                         _ -> genericLength' xs
 -- 
--- {-# RULES
+-- {-
 --   "genericLengthInt"     genericLength = (strictGenericLength :: [a] -> Int);
 --   "genericLengthInteger" genericLength = (strictGenericLength :: [a] -> Integer);
 --  #-}

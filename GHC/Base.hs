@@ -151,8 +151,11 @@ import GHC.Err
 -- import GHC.Tuple ()     -- Note [Depend on GHC.Tuple]
 import GHC.Tuple2 ()     -- Note [Depend on GHC.Tuple]
 -- import GHC.Integer ()   -- Note [Depend on GHC.Integer]
--- import GHC.Integer2 ()
--- 
+import GHC.Integer2
+--
+import {-# SOURCE #-} GHC.Num
+import {-# SOURCE #-} GHC.Real (Integral (..))
+
 #if __GLASGOW_HASKELL__ >= 806
 import GHC.Maybe
 #endif
@@ -240,47 +243,161 @@ instance (Ord a) => Ord (Maybe a) where
     Just x  <= Just y  = x <= y
 #endif
 
+infixr 6 <>
+
+-- | The class of semigroups (types with an associative binary operation).
+--
+-- Instances should satisfy the following:
+--
+-- [Associativity] @x '<>' (y '<>' z) = (x '<>' y) '<>' z@
+--
+-- You can alternatively define `sconcat` instead of (`<>`), in which case the
+-- laws are:
+--
+-- [Unit]: @'sconcat' ('pure' x) = x@
+-- [Multiplication]: @'sconcat' ('join' xss) = 'sconcat' ('fmap' 'sconcat' xss)@
+--
+-- @since base-4.9.0.0
+class Semigroup a where
+        -- | An associative operation.
+        --
+        -- ==== __Examples__
+        --
+        -- >>> [1,2,3] <> [4,5,6]
+        -- [1,2,3,4,5,6]
+        --
+        -- >>> Just [1, 2, 3] <> Just [4, 5, 6]
+        -- Just [1,2,3,4,5,6]
+        --
+        -- >>> putStr "Hello, " <> putStrLn "World!"
+        -- Hello, World!
+        (<>) :: a -> a -> a
+        a <> b = sconcat (a :| [ b ])
+
+        -- | Reduce a non-empty list with '<>'
+        --
+        -- The default definition should be sufficient, but this can be
+        -- overridden for efficiency.
+        --
+        -- ==== __Examples__
+        --
+        -- For the following examples, we will assume that we have:
+        --
+        -- >>> import Data.List.NonEmpty (NonEmpty (..))
+        --
+        -- >>> sconcat $ "Hello" :| [" ", "Haskell", "!"]
+        -- "Hello Haskell!"
+        --
+        -- >>> sconcat $ Just [1, 2, 3] :| [Nothing, Just [4, 5, 6]]
+        -- Just [1,2,3,4,5,6]
+        --
+        -- >>> sconcat $ Left 1 :| [Right 2, Left 3, Right 4]
+        -- Right 2
+        sconcat :: NonEmpty a -> a
+        sconcat (a :| as) = go a as where
+          go b (c:cs) = b <> go c cs
+          go b []     = b
+
+        -- | Repeat a value @n@ times.
+        --
+        -- The default definition will raise an exception for a multiplier that is @<= 0@.
+        -- This may be overridden with an implementation that is total. For monoids
+        -- it is preferred to use 'stimesMonoid'.
+        --
+        -- By making this a member of the class, idempotent semigroups
+        -- and monoids can upgrade this to execute in \(\mathcal{O}(1)\) by
+        -- picking @stimes = 'Data.Semigroup.stimesIdempotent'@ or @stimes =
+        -- 'Data.Semigroup.stimesIdempotentMonoid'@ respectively.
+        --
+        -- ==== __Examples__
+        --
+        -- >>> stimes 4 [1]
+        -- [1,1,1,1]
+        --
+        -- >>> stimes 5 (putStr "hi!")
+        -- hi!hi!hi!hi!hi!
+        --
+        -- >>> stimes 3 (Right ":)")
+        -- Right ":)"
+        stimes :: Integral b => b -> a -> a
+        stimes y0 x0
+          | y0 <= fromInteger (Z# 0#)   = errorWithoutStackTrace "stimes: positive multiplier expected"
+          | otherwise = f x0 y0
+          where
+            f x y
+              | y `rem` fromInteger (Z# 2#) == fromInteger (Z# 0#) = f (x <> x) (y `quot` fromInteger (Z# 2#))
+              | y == fromInteger (Z# 1#) = x
+              | otherwise = g (x <> x) (y `quot` fromInteger (Z# 2#)) x        -- See Note [Half of y - 1]
+            g x y z
+              | y `rem` fromInteger (Z# 2#) == fromInteger (Z# 0#) = g (x <> x) (y `quot` fromInteger (Z# 2#)) z
+              | y == fromInteger (Z# 1#) = x <> z
+              | otherwise = g (x <> x) (y `quot` fromInteger (Z# 2#)) (x <> z) -- See Note [Half of y - 1]
+
+        {-# MINIMAL (<>) | sconcat #-}
 -- 
--- -- | The class of monoids (types with an associative binary operation that
--- -- has an identity).  Instances should satisfy the following laws:
--- --
--- --  * @mappend mempty x = x@
--- --
--- --  * @mappend x mempty = x@
--- --
--- --  * @mappend x (mappend y z) = mappend (mappend x y) z@
--- --
--- --  * @mconcat = 'foldr' mappend mempty@
--- --
--- -- The method names refer to the monoid of lists under concatenation,
--- -- but there are many other instances.
--- --
--- -- Some types can be viewed as a monoid in more than one way,
--- -- e.g. both addition and multiplication on numbers.
--- -- In such cases we often define @newtype@s and make those instances
--- -- of 'Monoid', e.g. 'Sum' and 'Product'.
--- 
-class Monoid a where
-        mempty  :: a
---         -- ^ Identity of 'mappend'
-        mappend :: a -> a -> a
---         -- ^ An associative operation
-        mconcat :: [a] -> a
--- 
---         -- ^ Fold a list using the monoid.
---         -- For most types, the default definition for 'mconcat' will be
---         -- used, but the function is included in the class definition so
---         -- that an optimized version can be provided for specific types.
--- 
-        mconcat = foldr mappend mempty
--- 
-instance Monoid [a] where
+-- | The class of monoids (types with an associative binary operation that
+-- has an identity).  Instances should satisfy the following:
+--
+-- [Right identity] @x '<>' 'mempty' = x@
+-- [Left identity]  @'mempty' '<>' x = x@
+-- [Associativity]  @x '<>' (y '<>' z) = (x '<>' y) '<>' z@ ('Semigroup' law)
+-- [Concatenation]  @'mconcat' = 'foldr' ('<>') 'mempty'@
+--
+-- You can alternatively define `mconcat` instead of `mempty`, in which case the
+-- laws are:
+--
+-- [Unit]: @'mconcat' ('pure' x) = x@
+-- [Multiplication]: @'mconcat' ('join' xss) = 'mconcat' ('fmap' 'mconcat' xss)@
+-- [Subclass]: @'mconcat' ('toList' xs) = 'sconcat' xs@
+--
+-- The method names refer to the monoid of lists under concatenation,
+-- but there are many other instances.
+--
+-- Some types can be viewed as a monoid in more than one way,
+-- e.g. both addition and multiplication on numbers.
+-- In such cases we often define @newtype@s and make those instances
+-- of 'Monoid', e.g. 'Data.Semigroup.Sum' and 'Data.Semigroup.Product'.
+--
+-- __NOTE__: 'Semigroup' is a superclass of 'Monoid' since /base-4.11.0.0/.
+class Semigroup a => Monoid a where
+        -- | Identity of 'mappend'
+        --
+        -- ==== __Examples__
+        -- >>> "Hello world" <> mempty
+        -- "Hello world"
+        --
+        -- >>> mempty <> [1, 2, 3]
+        -- [1,2,3]
+        mempty :: a
+        mempty = mconcat []
         {-# INLINE mempty #-}
-        mempty  = []
+
+        -- | An associative operation
+        --
+        -- __NOTE__: This method is redundant and has the default
+        -- implementation @'mappend' = ('<>')@ since /base-4.11.0.0/.
+        -- Should it be implemented manually, since 'mappend' is a synonym for
+        -- ('<>'), it is expected that the two functions are defined the same
+        -- way. In a future GHC release 'mappend' will be removed from 'Monoid'.
+        mappend :: a -> a -> a
+        mappend = (<>)
         {-# INLINE mappend #-}
-        mappend = (++)
+
+        -- | Fold a list using the monoid.
+        --
+        -- For most types, the default definition for 'mconcat' will be
+        -- used, but the function is included in the class definition so
+        -- that an optimized version can be provided for specific types.
+        --
+        -- >>> mconcat ["Hello", " ", "Haskell", "!"]
+        -- "Hello Haskell!"
+        mconcat :: [a] -> a
+        mconcat = foldr mappend mempty
         {-# INLINE mconcat #-}
-        mconcat xss = [x | xs <- xss, x <- xs]
+        -- INLINE in the hope of fusion with mconcat's argument (see !4890)
+
+        {-# MINIMAL mempty | mconcat #-}
+
 -- -- See Note: [List comprehensions and inlining]
 -- 
 -- {-
@@ -1033,3 +1150,8 @@ divModInt# = divModInt#
 -- 
 --   #-}
 
+-- | Non-empty (and non-strict) list type.
+--
+-- @since 4.9.0.0
+data NonEmpty a = a :| [a]
+--   deriving ( Eq, Ord, Show, Read, Data, Generic, Generic1 )
