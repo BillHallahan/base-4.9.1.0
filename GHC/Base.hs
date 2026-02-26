@@ -403,7 +403,7 @@ instance Semigroup [a] where
         {-# INLINE (<>) #-}
 
         stimes n x
-          | n < (fromInteger (Z# 0git#)) = errorWithoutStackTrace "stimes: [], negative multiplier"
+          | n < (fromInteger (Z# 0#)) = errorWithoutStackTrace "stimes: [], negative multiplier"
           | otherwise = rep n
           where
             rep n | n == (fromInteger (Z# 0#)) = []

@@ -409,7 +409,7 @@
     `All`, `Any`, `Sum`, `Product`, `First`, and `Last`; as well as
     `Generic1` instances for `Dual`, `Sum`, `Product`, `First`, and `Last`.
 
-  * The `Data..{Product,Sum}` newtype wrappers now have `Num` instances.
+  * The `Data.Monoid.{Product,Sum}` newtype wrappers now have `Num` instances.
 
   * There are now `Functor` instances for `System.Console.GetOpt`'s
     `ArgOrder`, `OptDescr`, and `ArgDescr`.
