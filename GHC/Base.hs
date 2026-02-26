@@ -398,79 +398,160 @@ class Semigroup a => Monoid a where
 
         {-# MINIMAL mempty | mconcat #-}
 
--- -- See Note: [List comprehensions and inlining]
--- 
--- {-
--- Note: [List comprehensions and inlining]
--- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
--- The list monad operations are traditionally described in terms of concatMap:
--- 
--- xs >>= f = concatMap f xs
--- 
--- Similarly, mconcat for lists is just concat. Here in Base, however, we don't
--- have concatMap, and we'll refrain from adding it here so it won't have to be
--- hidden in imports. Instead, we use GHC's list comprehension desugaring
--- mechanism to define mconcat and the Applicative and Monad instances for lists.
--- We mark them INLINE because the inliner is not generally too keen to inline
--- build forms such as the ones these desugar to without our insistence.  Defining
--- these using list comprehensions instead of foldr has an additional potential
--- benefit, as described in compiler/deSugar/DsListComp.lhs: if optimizations
--- needed to make foldr/build forms efficient are turned off, we'll get reasonably
--- efficient translations anyway.
--- -}
--- 
--- instance Monoid b => Monoid (a -> b) where
---         mempty _ = mempty
---         mappend f g x = f x `mappend` g x
--- 
--- instance Monoid () where
---         -- Should it be strict?
---         mempty        = ()
---         _ `mappend` _ = ()
---         mconcat _     = ()
--- 
--- instance (Monoid a, Monoid b) => Monoid (a,b) where
---         mempty = (mempty, mempty)
---         (a1,b1) `mappend` (a2,b2) =
---                 (a1 `mappend` a2, b1 `mappend` b2)
--- 
--- instance (Monoid a, Monoid b, Monoid c) => Monoid (a,b,c) where
---         mempty = (mempty, mempty, mempty)
---         (a1,b1,c1) `mappend` (a2,b2,c2) =
---                 (a1 `mappend` a2, b1 `mappend` b2, c1 `mappend` c2)
--- 
--- instance (Monoid a, Monoid b, Monoid c, Monoid d) => Monoid (a,b,c,d) where
---         mempty = (mempty, mempty, mempty, mempty)
---         (a1,b1,c1,d1) `mappend` (a2,b2,c2,d2) =
---                 (a1 `mappend` a2, b1 `mappend` b2,
---                  c1 `mappend` c2, d1 `mappend` d2)
--- 
--- instance (Monoid a, Monoid b, Monoid c, Monoid d, Monoid e) =>
---                 Monoid (a,b,c,d,e) where
---         mempty = (mempty, mempty, mempty, mempty, mempty)
---         (a1,b1,c1,d1,e1) `mappend` (a2,b2,c2,d2,e2) =
---                 (a1 `mappend` a2, b1 `mappend` b2, c1 `mappend` c2,
---                  d1 `mappend` d2, e1 `mappend` e2)
--- 
--- -- lexicographical ordering
--- instance Monoid Ordering where
---         mempty         = EQ
---         LT `mappend` _ = LT
---         EQ `mappend` y = y
---         GT `mappend` _ = GT
--- 
--- -- | Lift a semigroup into 'Maybe' forming a 'Monoid' according to
--- -- <http://en.wikipedia.org/wiki/Monoid>: \"Any semigroup @S@ may be
--- -- turned into a monoid simply by adjoining an element @e@ not in @S@
--- -- and defining @e*e = e@ and @e*s = s = s*e@ for all @s ∈ S@.\" Since
--- -- there is no \"Semigroup\" typeclass providing just 'mappend', we
--- -- use 'Monoid' instead.
--- instance Monoid a => Monoid (Maybe a) where
---   mempty = Nothing
---   Nothing `mappend` m = m
---   m `mappend` Nothing = m
---   Just m1 `mappend` Just m2 = Just (m1 `mappend` m2)
--- 
+instance Semigroup [a] where
+        (<>) = (++)
+        {-# INLINE (<>) #-}
+
+        stimes n x
+          | n < (fromInteger (Z# 0git#)) = errorWithoutStackTrace "stimes: [], negative multiplier"
+          | otherwise = rep n
+          where
+            rep n | n == (fromInteger (Z# 0#)) = []
+            rep i = x ++ rep (i - (fromInteger (Z# 1#)))
+
+-- | @since base-2.01
+instance Monoid [a] where
+        {-# INLINE mempty #-}
+        mempty  = []
+        {-# INLINE mconcat #-}
+        mconcat xss = [x | xs <- xss, x <- xs]
+-- See Note: [List comprehensions and inlining]
+
+{-
+Note: [List comprehensions and inlining]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The list monad operations are traditionally described in terms of concatMap:
+
+xs >>= f = concatMap f xs
+
+Similarly, mconcat for lists is just concat. Here in Base, however, we don't
+have concatMap, and we'll refrain from adding it here so it won't have to be
+hidden in imports. Instead, we use GHC's list comprehension desugaring
+mechanism to define mconcat and the Applicative and Monad instances for lists.
+We mark them INLINE because the inliner is not generally too keen to inline
+build forms such as the ones these desugar to without our insistence.  Defining
+these using list comprehensions instead of foldr has an additional potential
+benefit, as described in compiler/GHC/HsToCore/ListComp.hs: if optimizations
+needed to make foldr/build forms efficient are turned off, we'll get reasonably
+efficient translations anyway.
+-}
+
+-- | @since base-4.9.0.0
+instance Semigroup b => Semigroup (a -> b) where
+        f <> g = \x -> f x <> g x
+        stimes n f e = stimes n (f e)
+
+-- | @since base-2.01
+instance Monoid b => Monoid (a -> b) where
+        mempty _ = mempty
+        -- If `b` has a specialised mconcat, use that, rather than the default
+        -- mconcat, which can be much less efficient.  Inline in the hope that
+        -- it may result in list fusion.
+        mconcat = \fs x -> mconcat $ map (\f -> f x) fs
+        {-# INLINE mconcat #-}
+
+-- | @since base-4.9.0.0
+instance Semigroup () where
+        _ <> _      = ()
+        sconcat _   = ()
+        stimes  _ _ = ()
+
+-- | @since base-2.01
+instance Monoid () where
+        -- Should it be strict?
+        mempty        = ()
+        mconcat _     = ()
+
+-- | @since base-4.15
+-- instance Semigroup a => Semigroup (Solo a) where
+--   MkSolo a <> MkSolo b = MkSolo (a <> b)
+--   stimes n (MkSolo a) = MkSolo (stimes n a)
+
+-- -- | @since base-4.15
+-- instance Monoid a => Monoid (Solo a) where
+--   mempty = MkSolo mempty
+
+-- | @since base-4.9.0.0
+instance (Semigroup a, Semigroup b) => Semigroup (a, b) where
+        (a,b) <> (a',b') = (a<>a',b<>b')
+        stimes n (a,b) = (stimes n a, stimes n b)
+
+-- | @since base-2.01
+instance (Monoid a, Monoid b) => Monoid (a,b) where
+        mempty = (mempty, mempty)
+
+-- | @since base-4.9.0.0
+instance (Semigroup a, Semigroup b, Semigroup c) => Semigroup (a, b, c) where
+        (a,b,c) <> (a',b',c') = (a<>a',b<>b',c<>c')
+        stimes n (a,b,c) = (stimes n a, stimes n b, stimes n c)
+
+-- | @since base-2.01
+instance (Monoid a, Monoid b, Monoid c) => Monoid (a,b,c) where
+        mempty = (mempty, mempty, mempty)
+
+-- | @since base-4.9.0.0
+instance (Semigroup a, Semigroup b, Semigroup c, Semigroup d)
+         => Semigroup (a, b, c, d) where
+        (a,b,c,d) <> (a',b',c',d') = (a<>a',b<>b',c<>c',d<>d')
+        stimes n (a,b,c,d) = (stimes n a, stimes n b, stimes n c, stimes n d)
+
+-- | @since base-2.01
+instance (Monoid a, Monoid b, Monoid c, Monoid d) => Monoid (a,b,c,d) where
+        mempty = (mempty, mempty, mempty, mempty)
+
+-- | @since base-4.9.0.0
+instance (Semigroup a, Semigroup b, Semigroup c, Semigroup d, Semigroup e)
+         => Semigroup (a, b, c, d, e) where
+        (a,b,c,d,e) <> (a',b',c',d',e') = (a<>a',b<>b',c<>c',d<>d',e<>e')
+        stimes n (a,b,c,d,e) =
+            (stimes n a, stimes n b, stimes n c, stimes n d, stimes n e)
+
+-- | @since base-2.01
+instance (Monoid a, Monoid b, Monoid c, Monoid d, Monoid e) =>
+                Monoid (a,b,c,d,e) where
+        mempty = (mempty, mempty, mempty, mempty, mempty)
+
+
+-- | @since base-4.9.0.0
+instance Semigroup Ordering where
+    LT <> _ = LT
+    EQ <> y = y
+    GT <> _ = GT
+
+    stimes n x = case compare n (fromInteger (Z# 0#)) of
+      LT -> errorWithoutStackTrace "stimes: Ordering, negative multiplier"
+      EQ -> EQ
+      GT -> x
+
+-- lexicographical ordering
+-- | @since base-2.01
+instance Monoid Ordering where
+    mempty             = EQ
+
+-- | @since base-4.9.0.0
+instance Semigroup a => Semigroup (Maybe a) where
+    Nothing <> b       = b
+    a       <> Nothing = a
+    Just a  <> Just b  = Just (a <> b)
+
+    stimes _ Nothing = Nothing
+    stimes n (Just a) = case compare n (fromInteger (Z# 0#)) of
+      LT -> errorWithoutStackTrace "stimes: Maybe, negative multiplier"
+      EQ -> Nothing
+      GT -> Just (stimes n a)
+
+-- | Lift a semigroup into 'Maybe' forming a 'Monoid' according to
+-- <http://en.wikipedia.org/wiki/Monoid>: \"Any semigroup @S@ may be
+-- turned into a monoid simply by adjoining an element @e@ not in @S@
+-- and defining @e*e = e@ and @e*s = s = s*e@ for all @s ∈ S@.\"
+--
+-- /Since 4.11.0/: constraint on inner @a@ value generalised from
+-- 'Monoid' to 'Semigroup'.
+--
+-- @since base-2.01
+instance Semigroup a => Monoid (Maybe a) where
+    mempty = Nothing
+
 -- instance Monoid a => Applicative ((,) a) where
 --     pure x = (mempty, x)
 --     (u, f) <*> (v, x) = (u `mappend` v, f x)
