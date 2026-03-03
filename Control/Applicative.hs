@@ -37,8 +37,8 @@
 module Control.Applicative (
     -- * Applicative functors
     Applicative(..),
---     -- * Alternatives
---     Alternative(..),
+    -- * Alternatives
+    Alternative(..)
 --     -- * Instances
 --     Const(..), WrappedMonad(..), WrappedArrow(..), ZipList(..),
 --     -- * Utility functions

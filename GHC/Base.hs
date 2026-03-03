@@ -436,6 +436,9 @@ needed to make foldr/build forms efficient are turned off, we'll get reasonably
 efficient translations anyway.
 -}
 
+instance Semigroup (NonEmpty a) where
+        (a :| as) <> ~(b :| bs) = a :| (as ++ b : bs)
+
 -- | @since base-4.9.0.0
 instance Semigroup b => Semigroup (a -> b) where
         f <> g = \x -> f x <> g x
@@ -1236,3 +1239,26 @@ divModInt# = divModInt#
 -- @since 4.9.0.0
 data NonEmpty a = a :| [a]
 --   deriving ( Eq, Ord, Show, Read, Data, Generic, Generic1 )
+
+instance Eq a => Eq (NonEmpty a) where
+    x :| xs == y :| ys = x ==y && xs == ys
+
+infixr 5 :|
+
+-- | @since 4.9.0.0
+instance Functor NonEmpty where
+  fmap f (a :| as) = f a :| fmap f as
+  b <$ (_ :| as)   = b   :| (b <$ as)
+
+-- | @since 4.9.0.0
+instance Applicative NonEmpty where
+  pure a = a :| []
+  (<*>) = ap
+  liftA2 = liftM2
+
+-- | @since 4.9.0.0
+instance Monad NonEmpty where
+  (a :| as) >>= f = b :| (bs ++ bs')
+    where b :| bs = f a
+          bs' = as >>= toList . f
+          toList (c :| cs) = c : cs
