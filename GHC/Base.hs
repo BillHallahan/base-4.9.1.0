@@ -591,78 +591,78 @@ instance Semigroup a => Monoid (Maybe a) where
 {-# SPECIALISE (=<<) :: (a -> [b]) -> [a] -> [b] #-}
 (=<<)           :: Monad m => (a -> m b) -> m a -> m b
 f =<< x         = x >>= f
--- 
--- -- | Conditional execution of 'Applicative' expressions. For example,
--- --
--- -- > when debug (putStrLn "Debugging")
--- --
--- -- will output the string @Debugging@ if the Boolean value @debug@
--- -- is 'True', and otherwise do nothing.
+
+-- | Conditional execution of 'Applicative' expressions. For example,
+--
+-- > when debug (putStrLn "Debugging")
+--
+-- will output the string @Debugging@ if the Boolean value @debug@
+-- is 'True', and otherwise do nothing.
 -- when      :: (Applicative f) => Bool -> f () -> f ()
 -- {-# INLINEABLE when #-}
 -- {-# SPECIALISE when :: Bool -> IO () -> IO () #-}
 -- {-# SPECIALISE when :: Bool -> Maybe () -> Maybe () #-}
 -- when p s  = if p then s else pure ()
--- 
--- -- | Evaluate each action in the sequence from left to right,
--- -- and collect the results.
--- sequence :: Monad m => [m a] -> m [a]
--- {-# INLINE sequence #-}
--- sequence = mapM id
--- -- Note: [sequence and mapM]
--- 
--- -- | @'mapM' f@ is equivalent to @'sequence' . 'map' f@.
--- mapM :: Monad m => (a -> m b) -> [a] -> m [b]
--- {-# INLINE mapM #-}
--- mapM f as = foldr k (return []) as
---             where
---               k a r = do { x <- f a; xs <- r; return (x:xs) }
--- 
--- {-
+
+-- | Evaluate each action in the sequence from left to right,
+-- and collect the results.
+sequence :: Monad m => [m a] -> m [a]
+{-# INLINE sequence #-}
+sequence = mapM id
 -- Note: [sequence and mapM]
--- ~~~~~~~~~~~~~~~~~~~~~~~~~
--- Originally, we defined
--- 
--- mapM f = sequence . map f
--- 
--- This relied on list fusion to produce efficient code for mapM, and led to
--- excessive allocation in cryptarithm2. Defining
--- 
--- sequence = mapM id
--- 
--- relies only on inlining a tiny function (id) and beta reduction, which tends to
--- be a more reliable aspect of simplification. Indeed, this does not lead to
--- similar problems in nofib.
--- -}
--- 
--- -- | Promote a function to a monad.
--- liftM   :: (Monad m) => (a1 -> r) -> m a1 -> m r
--- liftM f m1              = do { x1 <- m1; return (f x1) }
--- 
--- -- | Promote a function to a monad, scanning the monadic arguments from
--- -- left to right.  For example,
--- --
--- -- >    liftM2 (+) [0,1] [0,2] = [0,2,1,3]
--- -- >    liftM2 (+) (Just 1) Nothing = Nothing
--- --
--- liftM2  :: (Monad m) => (a1 -> a2 -> r) -> m a1 -> m a2 -> m r
--- liftM2 f m1 m2          = do { x1 <- m1; x2 <- m2; return (f x1 x2) }
--- 
--- -- | Promote a function to a monad, scanning the monadic arguments from
--- -- left to right (cf. 'liftM2').
--- liftM3  :: (Monad m) => (a1 -> a2 -> a3 -> r) -> m a1 -> m a2 -> m a3 -> m r
--- liftM3 f m1 m2 m3       = do { x1 <- m1; x2 <- m2; x3 <- m3; return (f x1 x2 x3) }
--- 
--- -- | Promote a function to a monad, scanning the monadic arguments from
--- -- left to right (cf. 'liftM2').
--- liftM4  :: (Monad m) => (a1 -> a2 -> a3 -> a4 -> r) -> m a1 -> m a2 -> m a3 -> m a4 -> m r
--- liftM4 f m1 m2 m3 m4    = do { x1 <- m1; x2 <- m2; x3 <- m3; x4 <- m4; return (f x1 x2 x3 x4) }
--- 
--- -- | Promote a function to a monad, scanning the monadic arguments from
--- -- left to right (cf. 'liftM2').
--- liftM5  :: (Monad m) => (a1 -> a2 -> a3 -> a4 -> a5 -> r) -> m a1 -> m a2 -> m a3 -> m a4 -> m a5 -> m r
--- liftM5 f m1 m2 m3 m4 m5 = do { x1 <- m1; x2 <- m2; x3 <- m3; x4 <- m4; x5 <- m5; return (f x1 x2 x3 x4 x5) }
--- 
+
+-- | @'mapM' f@ is equivalent to @'sequence' . 'map' f@.
+mapM :: Monad m => (a -> m b) -> [a] -> m [b]
+{-# INLINE mapM #-}
+mapM f as = foldr k (return []) as
+            where
+              k a r = do { x <- f a; xs <- r; return (x:xs) }
+
+{-
+Note: [sequence and mapM]
+~~~~~~~~~~~~~~~~~~~~~~~~~
+Originally, we defined
+
+mapM f = sequence . map f
+
+This relied on list fusion to produce efficient code for mapM, and led to
+excessive allocation in cryptarithm2. Defining
+
+sequence = mapM id
+
+relies only on inlining a tiny function (id) and beta reduction, which tends to
+be a more reliable aspect of simplification. Indeed, this does not lead to
+similar problems in nofib.
+-}
+
+-- | Promote a function to a monad.
+liftM   :: (Monad m) => (a1 -> r) -> m a1 -> m r
+liftM f m1              = do { x1 <- m1; return (f x1) }
+
+-- | Promote a function to a monad, scanning the monadic arguments from
+-- left to right.  For example,
+--
+-- >    liftM2 (+) [0,1] [0,2] = [0,2,1,3]
+-- >    liftM2 (+) (Just 1) Nothing = Nothing
+--
+liftM2  :: (Monad m) => (a1 -> a2 -> r) -> m a1 -> m a2 -> m r
+liftM2 f m1 m2          = do { x1 <- m1; x2 <- m2; return (f x1 x2) }
+
+-- | Promote a function to a monad, scanning the monadic arguments from
+-- left to right (cf. 'liftM2').
+liftM3  :: (Monad m) => (a1 -> a2 -> a3 -> r) -> m a1 -> m a2 -> m a3 -> m r
+liftM3 f m1 m2 m3       = do { x1 <- m1; x2 <- m2; x3 <- m3; return (f x1 x2 x3) }
+
+-- | Promote a function to a monad, scanning the monadic arguments from
+-- left to right (cf. 'liftM2').
+liftM4  :: (Monad m) => (a1 -> a2 -> a3 -> a4 -> r) -> m a1 -> m a2 -> m a3 -> m a4 -> m r
+liftM4 f m1 m2 m3 m4    = do { x1 <- m1; x2 <- m2; x3 <- m3; x4 <- m4; return (f x1 x2 x3 x4) }
+
+-- | Promote a function to a monad, scanning the monadic arguments from
+-- left to right (cf. 'liftM2').
+liftM5  :: (Monad m) => (a1 -> a2 -> a3 -> a4 -> a5 -> r) -> m a1 -> m a2 -> m a3 -> m a4 -> m a5 -> m r
+liftM5 f m1 m2 m3 m4 m5 = do { x1 <- m1; x2 <- m2; x3 <- m3; x4 <- m4; x5 <- m5; return (f x1 x2 x3 x4 x5) }
+
 -- {-# INLINEABLE liftM #-}
 -- {-# SPECIALISE liftM :: (a1->r) -> IO a1 -> IO r #-}
 -- {-# SPECIALISE liftM :: (a1->r) -> Maybe a1 -> Maybe r #-}

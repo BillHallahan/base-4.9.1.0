@@ -1,43 +1,43 @@
--- {-# LANGUAGE DeriveDataTypeable #-}
--- {-# LANGUAGE DeriveGeneric #-}
--- {-# LANGUAGE DeriveTraversable #-}
--- {-# LANGUAGE GeneralizedNewtypeDeriving #-}
--- {-# LANGUAGE Trustworthy #-}
--- 
--- -----------------------------------------------------------------------------
--- -- |
--- -- Module      :  Data.Functor.Identity
--- -- Copyright   :  (c) Andy Gill 2001,
--- --                (c) Oregon Graduate Institute of Science and Technology 2001
--- -- License     :  BSD-style (see the file LICENSE)
--- --
--- -- Maintainer  :  ross@soi.city.ac.uk
--- -- Stability   :  experimental
--- -- Portability :  portable
--- --
--- -- The identity functor and monad.
--- --
--- -- This trivial type constructor serves two purposes:
--- --
--- -- * It can be used with functions parameterized by functor or monad classes.
--- --
--- -- * It can be used as a base monad to which a series of monad
--- --   transformers may be applied to construct a composite monad.
--- --   Most monad transformer modules include the special case of
--- --   applying the transformer to 'Identity'.  For example, @State s@
--- --   is an abbreviation for @StateT s 'Identity'@.
--- --
--- -- @since 4.8.0.0
--- -----------------------------------------------------------------------------
--- 
--- module Data.Functor.Identity (
---     Identity(..),
---   ) where
+{-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE Trustworthy #-}
+
+-----------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Functor.Identity
+-- Copyright   :  (c) Andy Gill 2001,
+--                (c) Oregon Graduate Institute of Science and Technology 2001
+-- License     :  BSD-style (see the file LICENSE)
+--
+-- Maintainer  :  ross@soi.city.ac.uk
+-- Stability   :  experimental
+-- Portability :  portable
+--
+-- The identity functor and monad.
+--
+-- This trivial type constructor serves two purposes:
+--
+-- * It can be used with functions parameterized by functor or monad classes.
+--
+-- * It can be used as a base monad to which a series of monad
+--   transformers may be applied to construct a composite monad.
+--   Most monad transformer modules include the special case of
+--   applying the transformer to 'Identity'.  For example, @State s@
+--   is an abbreviation for @StateT s 'Identity'@.
+--
+-- @since 4.8.0.0
+-----------------------------------------------------------------------------
+
+module Data.Functor.Identity (
+    Identity(..),
+  ) where
 -- 
 -- import Control.Monad.Fix
 -- import Control.Monad.Zip
 -- import Data.Bits (Bits, FiniteBits)
--- import Data.Coerce
+import Data.Coerce
 -- import Data.Data (Data)
 -- import Data.Foldable
 -- import Data.Ix (Ix)
@@ -46,10 +46,10 @@
 -- import Foreign.Storable (Storable)
 -- import GHC.Generics (Generic, Generic1)
 -- 
--- -- | Identity functor and monad. (a non-strict monad)
--- --
--- -- @since 4.8.0.0
--- newtype Identity a = Identity { runIdentity :: a }
+-- | Identity functor and monad. (a non-strict monad)
+--
+-- @since 4.8.0.0
+newtype Identity a = Identity { runIdentity :: a }
 --     deriving ( Bits, Bounded, Data, Enum, Eq, FiniteBits, Floating, Fractional
 --              , Generic, Generic1, Integral, IsString, Ix, Monoid, Num, Ord
 --              , Real, RealFrac, RealFloat , Semigroup, Storable, Traversable)
@@ -65,10 +65,10 @@
 -- instance (Show a) => Show (Identity a) where
 --     showsPrec d (Identity x) = showParen (d > 10) $
 --         showString "Identity " . showsPrec 11 x
--- 
--- -- ---------------------------------------------------------------------------
--- -- Identity instances for Functor and Monad
--- 
+
+-- ---------------------------------------------------------------------------
+-- Identity instances for Functor and Monad
+
 -- instance Foldable Identity where
 --     foldMap                = coerce
 -- 
@@ -87,16 +87,16 @@
 --     sum                    = runIdentity
 --     toList (Identity x)    = [x]
 -- 
--- instance Functor Identity where
---     fmap     = coerce
--- 
--- instance Applicative Identity where
---     pure     = Identity
---     (<*>)    = coerce
--- 
--- instance Monad Identity where
---     m >>= k  = k (runIdentity m)
--- 
+instance Functor Identity where
+    fmap     = coerce
+
+instance Applicative Identity where
+    pure     = Identity
+    (<*>)    = coerce
+
+instance Monad Identity where
+    m >>= k  = k (runIdentity m)
+
 -- instance MonadFix Identity where
 --     mfix f   = Identity (fix (runIdentity . f))
 -- 

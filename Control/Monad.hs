@@ -62,11 +62,11 @@ module Control.Monad
 -- 
 --     -- ** Monadic lifting operators
 -- 
---     , liftM
---     , liftM2
---     , liftM3
---     , liftM4
---     , liftM5
+    , liftM
+    , liftM2
+    , liftM3
+    , liftM4
+    , liftM5
 -- 
 --     , ap
 -- 
@@ -80,7 +80,7 @@ import Data.Functor ( void, (<$>) )
 -- import Data.Traversable ( forM, mapM, traverse, sequence, sequenceA )
 -- 
 import GHC.Base hiding ( mapM, sequence )
--- import GHC.List ( zipWith, unzip )
+import GHC.List ( zipWith, unzip )
 import GHC.Num  ( zeroInteger, oneInteger, fromInteger, (-) )
 
 -- -- -----------------------------------------------------------------------------
