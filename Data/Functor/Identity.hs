@@ -53,7 +53,10 @@ newtype Identity a = Identity { runIdentity :: a }
 --     deriving ( Bits, Bounded, Data, Enum, Eq, FiniteBits, Floating, Fractional
 --              , Generic, Generic1, Integral, IsString, Ix, Monoid, Num, Ord
 --              , Real, RealFrac, RealFloat , Semigroup, Storable, Traversable)
--- 
+
+instance Eq a => Eq (Identity a) where
+    Identity x == Identity y = x == y
+
 -- -- | This instance would be equivalent to the derived instances of the
 -- -- 'Identity' newtype if the 'runIdentity' field were removed
 -- instance (Read a) => Read (Identity a) where
