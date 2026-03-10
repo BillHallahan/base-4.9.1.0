@@ -325,3 +325,11 @@ instance Monad []  where
 
 instance Functor ((,) a) where
     fmap f (x,y) = (x, f y)
+
+instance GHCB.Monoid a => Applicative ((,) a) where
+    pure x = (GHCB.mempty, x)
+    (u, f) <*> (v, x) = (u GHCB.<> v, f x)
+    liftA2 f (u, x) (v, y) = (u GHCB.<> v, f x y)
+
+instance GHCB.Monoid a => Monad ((,) a) where
+    (u, a) >>= k = case k a of (v, b) -> (u GHCB.<> v, b)
