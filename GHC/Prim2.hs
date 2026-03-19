@@ -537,6 +537,10 @@ strSuffixOf# = strSuffixOf#
 strReplace# :: [a] -> [a] -> [a] -> [a]
 strReplace# = strReplace#
 
+{-# NOINLINE strReplaceAll# #-}
+strReplaceAll# :: [a] -> [a] -> [a] -> [a]
+strReplaceAll# = strReplaceAll#
+
 -- The definition of (&&#) gets overwritten by an SMT construct in G2
 {-# NOINLINE (&&#)  #-}
 (&&#) :: Bool -> Bool -> Bool
