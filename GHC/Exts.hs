@@ -1,24 +1,24 @@
--- {-# LANGUAGE Unsafe #-}
--- {-# LANGUAGE MagicHash, UnboxedTuples, TypeFamilies, DeriveDataTypeable,
---              MultiParamTypeClasses, FlexibleInstances, NoImplicitPrelude #-}
--- 
--- -----------------------------------------------------------------------------
--- -- |
--- -- Module      :  GHC.Exts
--- -- Copyright   :  (c) The University of Glasgow 2002
--- -- License     :  see libraries/base/LICENSE
--- --
--- -- Maintainer  :  cvs-ghc@haskell.org
--- -- Stability   :  internal
--- -- Portability :  non-portable (GHC Extensions)
--- --
--- -- GHC Extensions: this is the Approved Way to get at GHC-specific extensions.
--- --
--- -- Note: no other base module should import this module.
--- -----------------------------------------------------------------------------
--- 
--- module GHC.Exts
---        (
+{-# LANGUAGE Unsafe #-}
+{-# LANGUAGE MagicHash, UnboxedTuples, TypeFamilies, DeriveDataTypeable,
+             MultiParamTypeClasses, FlexibleInstances, NoImplicitPrelude #-}
+
+-----------------------------------------------------------------------------
+-- |
+-- Module      :  GHC.Exts
+-- Copyright   :  (c) The University of Glasgow 2002
+-- License     :  see libraries/base/LICENSE
+--
+-- Maintainer  :  cvs-ghc@haskell.org
+-- Stability   :  internal
+-- Portability :  non-portable (GHC Extensions)
+--
+-- GHC Extensions: this is the Approved Way to get at GHC-specific extensions.
+--
+-- Note: no other base module should import this module.
+-----------------------------------------------------------------------------
+
+module GHC.Exts
+       (
 --         -- * Representations of some basic types
 --         Int(..),Word(..),Float(..),Double(..),
 --         Char(..),
@@ -74,13 +74,13 @@
 --         -- * The Constraint kind
 --         Constraint,
 -- 
---         -- * Overloaded lists
---         IsList(..)
---        ) where
+        -- * Overloaded lists
+        IsList(..)
+       ) where
 -- 
--- import GHC.Prim hiding ( coerce, TYPE )
--- import qualified GHC.Prim
--- import GHC.Base hiding ( coerce )
+import GHC.Prim hiding ( coerce, TYPE )
+import qualified GHC.Prim
+import GHC.Base hiding ( coerce )
 -- import GHC.Word
 -- import GHC.Int
 -- import GHC.Ptr
@@ -148,44 +148,44 @@
 -- 
 -- data SpecConstrAnnotation = NoSpecConstr | ForceSpecConstr
 --                 deriving( Data, Eq )
--- 
--- 
--- {- **********************************************************************
--- *                                                                       *
--- *              The IsList class                                         *
--- *                                                                       *
--- ********************************************************************** -}
--- 
--- -- | The 'IsList' class and its methods are intended to be used in
--- --   conjunction with the OverloadedLists extension.
--- --
--- -- @since 4.7.0.0
--- class IsList l where
---   -- | The 'Item' type function returns the type of items of the structure
---   --   @l@.
---   type Item l
--- 
---   -- | The 'fromList' function constructs the structure @l@ from the given
---   --   list of @Item l@
---   fromList  :: [Item l] -> l
--- 
---   -- | The 'fromListN' function takes the input list's length as a hint. Its
---   --   behaviour should be equivalent to 'fromList'. The hint can be used to
---   --   construct the structure @l@ more efficiently compared to 'fromList'. If
---   --   the given hint does not equal to the input list's length the behaviour of
---   --   'fromListN' is not specified.
---   fromListN :: Int -> [Item l] -> l
---   fromListN _ = fromList
--- 
---   -- | The 'toList' function extracts a list of @Item l@ from the structure @l@.
---   --   It should satisfy fromList . toList = id.
---   toList :: l -> [Item l]
--- 
--- instance IsList [a] where
---   type (Item [a]) = a
---   fromList = id
---   toList = id
--- 
+
+
+{- **********************************************************************
+*                                                                       *
+*              The IsList class                                         *
+*                                                                       *
+********************************************************************** -}
+
+-- | The 'IsList' class and its methods are intended to be used in
+--   conjunction with the OverloadedLists extension.
+--
+-- @since 4.7.0.0
+class IsList l where
+  -- | The 'Item' type function returns the type of items of the structure
+  --   @l@.
+  type Item l
+
+  -- | The 'fromList' function constructs the structure @l@ from the given
+  --   list of @Item l@
+  fromList  :: [Item l] -> l
+
+  -- | The 'fromListN' function takes the input list's length as a hint. Its
+  --   behaviour should be equivalent to 'fromList'. The hint can be used to
+  --   construct the structure @l@ more efficiently compared to 'fromList'. If
+  --   the given hint does not equal to the input list's length the behaviour of
+  --   'fromListN' is not specified.
+  fromListN :: Int -> [Item l] -> l
+  fromListN _ = fromList
+
+  -- | The 'toList' function extracts a list of @Item l@ from the structure @l@.
+  --   It should satisfy fromList . toList = id.
+  toList :: l -> [Item l]
+
+instance IsList [a] where
+  type (Item [a]) = a
+  fromList = id
+  toList = id
+
 -- -- | @since 4.8.0.0
 -- instance IsList Version where
 --   type (Item Version) = Int

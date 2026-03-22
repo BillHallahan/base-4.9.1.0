@@ -3574,7 +3574,7 @@ toAscList (Assocs kas) = kas
 -- {-# NOINLINE[0] toAscList #-}
 -- {-# NOINLINE[0] toDescList #-}
 -- {-# RULES "Map.elems" [~1] forall m . elems m = build (\c n -> foldrFB (\_ x xs -> c x xs) n m) #-}
--- {-# RULES "Map.elemsBack" [1] foldrFB (\_ x xs -> x : xs) [] = elems #-}
+-- {- "Map.elemsBack" [1] foldrFB (\_ x xs -> x : xs) [] = elems #-}
 -- {-# RULES "Map.keys" [~1] forall m . keys m = build (\c n -> foldrFB (\k _ xs -> c k xs) n m) #-}
 -- {-# RULES "Map.keysBack" [1] foldrFB (\k _ xs -> k : xs) [] = keys #-}
 -- {-# RULES "Map.toAscList" [~1] forall m . toAscList m = build (\c n -> foldrFB (\k x xs -> c (k,x) xs) n m) #-}

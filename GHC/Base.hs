@@ -151,8 +151,11 @@ import GHC.Err
 -- import GHC.Tuple ()     -- Note [Depend on GHC.Tuple]
 import GHC.Tuple2 ()     -- Note [Depend on GHC.Tuple]
 -- import GHC.Integer ()   -- Note [Depend on GHC.Integer]
--- import GHC.Integer2 ()
--- 
+import GHC.Integer2
+--
+import {-# SOURCE #-} GHC.Num
+import {-# SOURCE #-} GHC.Real (Integral (..))
+
 #if __GLASGOW_HASKELL__ >= 806
 import GHC.Maybe
 #endif
@@ -240,120 +243,318 @@ instance (Ord a) => Ord (Maybe a) where
     Just x  <= Just y  = x <= y
 #endif
 
+infixr 6 <>
+
+-- | The class of semigroups (types with an associative binary operation).
+--
+-- Instances should satisfy the following:
+--
+-- [Associativity] @x '<>' (y '<>' z) = (x '<>' y) '<>' z@
+--
+-- You can alternatively define `sconcat` instead of (`<>`), in which case the
+-- laws are:
+--
+-- [Unit]: @'sconcat' ('pure' x) = x@
+-- [Multiplication]: @'sconcat' ('join' xss) = 'sconcat' ('fmap' 'sconcat' xss)@
+--
+-- @since base-4.9.0.0
+class Semigroup a where
+        -- | An associative operation.
+        --
+        -- ==== __Examples__
+        --
+        -- >>> [1,2,3] <> [4,5,6]
+        -- [1,2,3,4,5,6]
+        --
+        -- >>> Just [1, 2, 3] <> Just [4, 5, 6]
+        -- Just [1,2,3,4,5,6]
+        --
+        -- >>> putStr "Hello, " <> putStrLn "World!"
+        -- Hello, World!
+        (<>) :: a -> a -> a
+        a <> b = sconcat (a :| [ b ])
+
+        -- | Reduce a non-empty list with '<>'
+        --
+        -- The default definition should be sufficient, but this can be
+        -- overridden for efficiency.
+        --
+        -- ==== __Examples__
+        --
+        -- For the following examples, we will assume that we have:
+        --
+        -- >>> import Data.List.NonEmpty (NonEmpty (..))
+        --
+        -- >>> sconcat $ "Hello" :| [" ", "Haskell", "!"]
+        -- "Hello Haskell!"
+        --
+        -- >>> sconcat $ Just [1, 2, 3] :| [Nothing, Just [4, 5, 6]]
+        -- Just [1,2,3,4,5,6]
+        --
+        -- >>> sconcat $ Left 1 :| [Right 2, Left 3, Right 4]
+        -- Right 2
+        sconcat :: NonEmpty a -> a
+        sconcat (a :| as) = go a as where
+          go b (c:cs) = b <> go c cs
+          go b []     = b
+
+        -- | Repeat a value @n@ times.
+        --
+        -- The default definition will raise an exception for a multiplier that is @<= 0@.
+        -- This may be overridden with an implementation that is total. For monoids
+        -- it is preferred to use 'stimesMonoid'.
+        --
+        -- By making this a member of the class, idempotent semigroups
+        -- and monoids can upgrade this to execute in \(\mathcal{O}(1)\) by
+        -- picking @stimes = 'Data.Semigroup.stimesIdempotent'@ or @stimes =
+        -- 'Data.Semigroup.stimesIdempotentMonoid'@ respectively.
+        --
+        -- ==== __Examples__
+        --
+        -- >>> stimes 4 [1]
+        -- [1,1,1,1]
+        --
+        -- >>> stimes 5 (putStr "hi!")
+        -- hi!hi!hi!hi!hi!
+        --
+        -- >>> stimes 3 (Right ":)")
+        -- Right ":)"
+        stimes :: Integral b => b -> a -> a
+        stimes y0 x0
+          | y0 <= fromInteger (Z# 0#)   = errorWithoutStackTrace "stimes: positive multiplier expected"
+          | otherwise = f x0 y0
+          where
+            f x y
+              | y `rem` fromInteger (Z# 2#) == fromInteger (Z# 0#) = f (x <> x) (y `quot` fromInteger (Z# 2#))
+              | y == fromInteger (Z# 1#) = x
+              | otherwise = g (x <> x) (y `quot` fromInteger (Z# 2#)) x        -- See Note [Half of y - 1]
+            g x y z
+              | y `rem` fromInteger (Z# 2#) == fromInteger (Z# 0#) = g (x <> x) (y `quot` fromInteger (Z# 2#)) z
+              | y == fromInteger (Z# 1#) = x <> z
+              | otherwise = g (x <> x) (y `quot` fromInteger (Z# 2#)) (x <> z) -- See Note [Half of y - 1]
+
+        {-# MINIMAL (<>) | sconcat #-}
 -- 
--- -- | The class of monoids (types with an associative binary operation that
--- -- has an identity).  Instances should satisfy the following laws:
--- --
--- --  * @mappend mempty x = x@
--- --
--- --  * @mappend x mempty = x@
--- --
--- --  * @mappend x (mappend y z) = mappend (mappend x y) z@
--- --
--- --  * @mconcat = 'foldr' mappend mempty@
--- --
--- -- The method names refer to the monoid of lists under concatenation,
--- -- but there are many other instances.
--- --
--- -- Some types can be viewed as a monoid in more than one way,
--- -- e.g. both addition and multiplication on numbers.
--- -- In such cases we often define @newtype@s and make those instances
--- -- of 'Monoid', e.g. 'Sum' and 'Product'.
--- 
-class Monoid a where
-        mempty  :: a
---         -- ^ Identity of 'mappend'
+-- | The class of monoids (types with an associative binary operation that
+-- has an identity).  Instances should satisfy the following:
+--
+-- [Right identity] @x '<>' 'mempty' = x@
+-- [Left identity]  @'mempty' '<>' x = x@
+-- [Associativity]  @x '<>' (y '<>' z) = (x '<>' y) '<>' z@ ('Semigroup' law)
+-- [Concatenation]  @'mconcat' = 'foldr' ('<>') 'mempty'@
+--
+-- You can alternatively define `mconcat` instead of `mempty`, in which case the
+-- laws are:
+--
+-- [Unit]: @'mconcat' ('pure' x) = x@
+-- [Multiplication]: @'mconcat' ('join' xss) = 'mconcat' ('fmap' 'mconcat' xss)@
+-- [Subclass]: @'mconcat' ('toList' xs) = 'sconcat' xs@
+--
+-- The method names refer to the monoid of lists under concatenation,
+-- but there are many other instances.
+--
+-- Some types can be viewed as a monoid in more than one way,
+-- e.g. both addition and multiplication on numbers.
+-- In such cases we often define @newtype@s and make those instances
+-- of 'Monoid', e.g. 'Data.Semigroup.Sum' and 'Data.Semigroup.Product'.
+--
+-- __NOTE__: 'Semigroup' is a superclass of 'Monoid' since /base-4.11.0.0/.
+class Semigroup a => Monoid a where
+        -- | Identity of 'mappend'
+        --
+        -- ==== __Examples__
+        -- >>> "Hello world" <> mempty
+        -- "Hello world"
+        --
+        -- >>> mempty <> [1, 2, 3]
+        -- [1,2,3]
+        mempty :: a
+        mempty = mconcat []
+        {-# INLINE mempty #-}
+
+        -- | An associative operation
+        --
+        -- __NOTE__: This method is redundant and has the default
+        -- implementation @'mappend' = ('<>')@ since /base-4.11.0.0/.
+        -- Should it be implemented manually, since 'mappend' is a synonym for
+        -- ('<>'), it is expected that the two functions are defined the same
+        -- way. In a future GHC release 'mappend' will be removed from 'Monoid'.
         mappend :: a -> a -> a
---         -- ^ An associative operation
+        mappend = (<>)
+        {-# INLINE mappend #-}
+
+        -- | Fold a list using the monoid.
+        --
+        -- For most types, the default definition for 'mconcat' will be
+        -- used, but the function is included in the class definition so
+        -- that an optimized version can be provided for specific types.
+        --
+        -- >>> mconcat ["Hello", " ", "Haskell", "!"]
+        -- "Hello Haskell!"
         mconcat :: [a] -> a
--- 
---         -- ^ Fold a list using the monoid.
---         -- For most types, the default definition for 'mconcat' will be
---         -- used, but the function is included in the class definition so
---         -- that an optimized version can be provided for specific types.
--- 
         mconcat = foldr mappend mempty
--- 
+        {-# INLINE mconcat #-}
+        -- INLINE in the hope of fusion with mconcat's argument (see !4890)
+
+        {-# MINIMAL mempty | mconcat #-}
+
+instance Semigroup [a] where
+        (<>) = (++)
+        {-# INLINE (<>) #-}
+
+        stimes n x
+          | n < (fromInteger (Z# 0#)) = errorWithoutStackTrace "stimes: [], negative multiplier"
+          | otherwise = rep n
+          where
+            rep n | n == (fromInteger (Z# 0#)) = []
+            rep i = x ++ rep (i - (fromInteger (Z# 1#)))
+
+-- | @since base-2.01
 instance Monoid [a] where
         {-# INLINE mempty #-}
         mempty  = []
-        {-# INLINE mappend #-}
-        mappend = (++)
         {-# INLINE mconcat #-}
         mconcat xss = [x | xs <- xss, x <- xs]
--- -- See Note: [List comprehensions and inlining]
--- 
--- {-
--- Note: [List comprehensions and inlining]
--- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
--- The list monad operations are traditionally described in terms of concatMap:
--- 
--- xs >>= f = concatMap f xs
--- 
--- Similarly, mconcat for lists is just concat. Here in Base, however, we don't
--- have concatMap, and we'll refrain from adding it here so it won't have to be
--- hidden in imports. Instead, we use GHC's list comprehension desugaring
--- mechanism to define mconcat and the Applicative and Monad instances for lists.
--- We mark them INLINE because the inliner is not generally too keen to inline
--- build forms such as the ones these desugar to without our insistence.  Defining
--- these using list comprehensions instead of foldr has an additional potential
--- benefit, as described in compiler/deSugar/DsListComp.lhs: if optimizations
--- needed to make foldr/build forms efficient are turned off, we'll get reasonably
--- efficient translations anyway.
--- -}
--- 
--- instance Monoid b => Monoid (a -> b) where
---         mempty _ = mempty
---         mappend f g x = f x `mappend` g x
--- 
--- instance Monoid () where
---         -- Should it be strict?
---         mempty        = ()
---         _ `mappend` _ = ()
---         mconcat _     = ()
--- 
--- instance (Monoid a, Monoid b) => Monoid (a,b) where
---         mempty = (mempty, mempty)
---         (a1,b1) `mappend` (a2,b2) =
---                 (a1 `mappend` a2, b1 `mappend` b2)
--- 
--- instance (Monoid a, Monoid b, Monoid c) => Monoid (a,b,c) where
---         mempty = (mempty, mempty, mempty)
---         (a1,b1,c1) `mappend` (a2,b2,c2) =
---                 (a1 `mappend` a2, b1 `mappend` b2, c1 `mappend` c2)
--- 
--- instance (Monoid a, Monoid b, Monoid c, Monoid d) => Monoid (a,b,c,d) where
---         mempty = (mempty, mempty, mempty, mempty)
---         (a1,b1,c1,d1) `mappend` (a2,b2,c2,d2) =
---                 (a1 `mappend` a2, b1 `mappend` b2,
---                  c1 `mappend` c2, d1 `mappend` d2)
--- 
--- instance (Monoid a, Monoid b, Monoid c, Monoid d, Monoid e) =>
---                 Monoid (a,b,c,d,e) where
---         mempty = (mempty, mempty, mempty, mempty, mempty)
---         (a1,b1,c1,d1,e1) `mappend` (a2,b2,c2,d2,e2) =
---                 (a1 `mappend` a2, b1 `mappend` b2, c1 `mappend` c2,
---                  d1 `mappend` d2, e1 `mappend` e2)
--- 
--- -- lexicographical ordering
--- instance Monoid Ordering where
---         mempty         = EQ
---         LT `mappend` _ = LT
---         EQ `mappend` y = y
---         GT `mappend` _ = GT
--- 
--- -- | Lift a semigroup into 'Maybe' forming a 'Monoid' according to
--- -- <http://en.wikipedia.org/wiki/Monoid>: \"Any semigroup @S@ may be
--- -- turned into a monoid simply by adjoining an element @e@ not in @S@
--- -- and defining @e*e = e@ and @e*s = s = s*e@ for all @s ∈ S@.\" Since
--- -- there is no \"Semigroup\" typeclass providing just 'mappend', we
--- -- use 'Monoid' instead.
--- instance Monoid a => Monoid (Maybe a) where
---   mempty = Nothing
---   Nothing `mappend` m = m
---   m `mappend` Nothing = m
---   Just m1 `mappend` Just m2 = Just (m1 `mappend` m2)
--- 
+-- See Note: [List comprehensions and inlining]
+
+{-
+Note: [List comprehensions and inlining]
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The list monad operations are traditionally described in terms of concatMap:
+
+xs >>= f = concatMap f xs
+
+Similarly, mconcat for lists is just concat. Here in Base, however, we don't
+have concatMap, and we'll refrain from adding it here so it won't have to be
+hidden in imports. Instead, we use GHC's list comprehension desugaring
+mechanism to define mconcat and the Applicative and Monad instances for lists.
+We mark them INLINE because the inliner is not generally too keen to inline
+build forms such as the ones these desugar to without our insistence.  Defining
+these using list comprehensions instead of foldr has an additional potential
+benefit, as described in compiler/GHC/HsToCore/ListComp.hs: if optimizations
+needed to make foldr/build forms efficient are turned off, we'll get reasonably
+efficient translations anyway.
+-}
+
+instance Semigroup (NonEmpty a) where
+        (a :| as) <> ~(b :| bs) = a :| (as ++ b : bs)
+
+-- | @since base-4.9.0.0
+instance Semigroup b => Semigroup (a -> b) where
+        f <> g = \x -> f x <> g x
+        stimes n f e = stimes n (f e)
+
+-- | @since base-2.01
+instance Monoid b => Monoid (a -> b) where
+        mempty _ = mempty
+        -- If `b` has a specialised mconcat, use that, rather than the default
+        -- mconcat, which can be much less efficient.  Inline in the hope that
+        -- it may result in list fusion.
+        mconcat = \fs x -> mconcat $ map (\f -> f x) fs
+        {-# INLINE mconcat #-}
+
+-- | @since base-4.9.0.0
+instance Semigroup () where
+        _ <> _      = ()
+        sconcat _   = ()
+        stimes  _ _ = ()
+
+-- | @since base-2.01
+instance Monoid () where
+        -- Should it be strict?
+        mempty        = ()
+        mconcat _     = ()
+
+-- | @since base-4.15
+-- instance Semigroup a => Semigroup (Solo a) where
+--   MkSolo a <> MkSolo b = MkSolo (a <> b)
+--   stimes n (MkSolo a) = MkSolo (stimes n a)
+
+-- -- | @since base-4.15
+-- instance Monoid a => Monoid (Solo a) where
+--   mempty = MkSolo mempty
+
+-- | @since base-4.9.0.0
+instance (Semigroup a, Semigroup b) => Semigroup (a, b) where
+        (a,b) <> (a',b') = (a<>a',b<>b')
+        stimes n (a,b) = (stimes n a, stimes n b)
+
+-- | @since base-2.01
+instance (Monoid a, Monoid b) => Monoid (a,b) where
+        mempty = (mempty, mempty)
+
+-- | @since base-4.9.0.0
+instance (Semigroup a, Semigroup b, Semigroup c) => Semigroup (a, b, c) where
+        (a,b,c) <> (a',b',c') = (a<>a',b<>b',c<>c')
+        stimes n (a,b,c) = (stimes n a, stimes n b, stimes n c)
+
+-- | @since base-2.01
+instance (Monoid a, Monoid b, Monoid c) => Monoid (a,b,c) where
+        mempty = (mempty, mempty, mempty)
+
+-- | @since base-4.9.0.0
+instance (Semigroup a, Semigroup b, Semigroup c, Semigroup d)
+         => Semigroup (a, b, c, d) where
+        (a,b,c,d) <> (a',b',c',d') = (a<>a',b<>b',c<>c',d<>d')
+        stimes n (a,b,c,d) = (stimes n a, stimes n b, stimes n c, stimes n d)
+
+-- | @since base-2.01
+instance (Monoid a, Monoid b, Monoid c, Monoid d) => Monoid (a,b,c,d) where
+        mempty = (mempty, mempty, mempty, mempty)
+
+-- | @since base-4.9.0.0
+instance (Semigroup a, Semigroup b, Semigroup c, Semigroup d, Semigroup e)
+         => Semigroup (a, b, c, d, e) where
+        (a,b,c,d,e) <> (a',b',c',d',e') = (a<>a',b<>b',c<>c',d<>d',e<>e')
+        stimes n (a,b,c,d,e) =
+            (stimes n a, stimes n b, stimes n c, stimes n d, stimes n e)
+
+-- | @since base-2.01
+instance (Monoid a, Monoid b, Monoid c, Monoid d, Monoid e) =>
+                Monoid (a,b,c,d,e) where
+        mempty = (mempty, mempty, mempty, mempty, mempty)
+
+
+-- | @since base-4.9.0.0
+instance Semigroup Ordering where
+    LT <> _ = LT
+    EQ <> y = y
+    GT <> _ = GT
+
+    stimes n x = case compare n (fromInteger (Z# 0#)) of
+      LT -> errorWithoutStackTrace "stimes: Ordering, negative multiplier"
+      EQ -> EQ
+      GT -> x
+
+-- lexicographical ordering
+-- | @since base-2.01
+instance Monoid Ordering where
+    mempty             = EQ
+
+-- | @since base-4.9.0.0
+instance Semigroup a => Semigroup (Maybe a) where
+    Nothing <> b       = b
+    a       <> Nothing = a
+    Just a  <> Just b  = Just (a <> b)
+
+    stimes _ Nothing = Nothing
+    stimes n (Just a) = case compare n (fromInteger (Z# 0#)) of
+      LT -> errorWithoutStackTrace "stimes: Maybe, negative multiplier"
+      EQ -> Nothing
+      GT -> Just (stimes n a)
+
+-- | Lift a semigroup into 'Maybe' forming a 'Monoid' according to
+-- <http://en.wikipedia.org/wiki/Monoid>: \"Any semigroup @S@ may be
+-- turned into a monoid simply by adjoining an element @e@ not in @S@
+-- and defining @e*e = e@ and @e*s = s = s*e@ for all @s ∈ S@.\"
+--
+-- /Since 4.11.0/: constraint on inner @a@ value generalised from
+-- 'Monoid' to 'Semigroup'.
+--
+-- @since base-2.01
+instance Semigroup a => Monoid (Maybe a) where
+    mempty = Nothing
+
 -- instance Monoid a => Applicative ((,) a) where
 --     pure x = (mempty, x)
 --     (u, f) <*> (v, x) = (u `mappend` v, f x)
@@ -393,78 +594,78 @@ instance Monoid [a] where
 {-# SPECIALISE (=<<) :: (a -> [b]) -> [a] -> [b] #-}
 (=<<)           :: Monad m => (a -> m b) -> m a -> m b
 f =<< x         = x >>= f
--- 
--- -- | Conditional execution of 'Applicative' expressions. For example,
--- --
--- -- > when debug (putStrLn "Debugging")
--- --
--- -- will output the string @Debugging@ if the Boolean value @debug@
--- -- is 'True', and otherwise do nothing.
+
+-- | Conditional execution of 'Applicative' expressions. For example,
+--
+-- > when debug (putStrLn "Debugging")
+--
+-- will output the string @Debugging@ if the Boolean value @debug@
+-- is 'True', and otherwise do nothing.
 -- when      :: (Applicative f) => Bool -> f () -> f ()
 -- {-# INLINEABLE when #-}
 -- {-# SPECIALISE when :: Bool -> IO () -> IO () #-}
 -- {-# SPECIALISE when :: Bool -> Maybe () -> Maybe () #-}
 -- when p s  = if p then s else pure ()
--- 
--- -- | Evaluate each action in the sequence from left to right,
--- -- and collect the results.
--- sequence :: Monad m => [m a] -> m [a]
--- {-# INLINE sequence #-}
--- sequence = mapM id
--- -- Note: [sequence and mapM]
--- 
--- -- | @'mapM' f@ is equivalent to @'sequence' . 'map' f@.
--- mapM :: Monad m => (a -> m b) -> [a] -> m [b]
--- {-# INLINE mapM #-}
--- mapM f as = foldr k (return []) as
---             where
---               k a r = do { x <- f a; xs <- r; return (x:xs) }
--- 
--- {-
+
+-- | Evaluate each action in the sequence from left to right,
+-- and collect the results.
+sequence :: Monad m => [m a] -> m [a]
+{-# INLINE sequence #-}
+sequence = mapM id
 -- Note: [sequence and mapM]
--- ~~~~~~~~~~~~~~~~~~~~~~~~~
--- Originally, we defined
--- 
--- mapM f = sequence . map f
--- 
--- This relied on list fusion to produce efficient code for mapM, and led to
--- excessive allocation in cryptarithm2. Defining
--- 
--- sequence = mapM id
--- 
--- relies only on inlining a tiny function (id) and beta reduction, which tends to
--- be a more reliable aspect of simplification. Indeed, this does not lead to
--- similar problems in nofib.
--- -}
--- 
--- -- | Promote a function to a monad.
--- liftM   :: (Monad m) => (a1 -> r) -> m a1 -> m r
--- liftM f m1              = do { x1 <- m1; return (f x1) }
--- 
--- -- | Promote a function to a monad, scanning the monadic arguments from
--- -- left to right.  For example,
--- --
--- -- >    liftM2 (+) [0,1] [0,2] = [0,2,1,3]
--- -- >    liftM2 (+) (Just 1) Nothing = Nothing
--- --
--- liftM2  :: (Monad m) => (a1 -> a2 -> r) -> m a1 -> m a2 -> m r
--- liftM2 f m1 m2          = do { x1 <- m1; x2 <- m2; return (f x1 x2) }
--- 
--- -- | Promote a function to a monad, scanning the monadic arguments from
--- -- left to right (cf. 'liftM2').
--- liftM3  :: (Monad m) => (a1 -> a2 -> a3 -> r) -> m a1 -> m a2 -> m a3 -> m r
--- liftM3 f m1 m2 m3       = do { x1 <- m1; x2 <- m2; x3 <- m3; return (f x1 x2 x3) }
--- 
--- -- | Promote a function to a monad, scanning the monadic arguments from
--- -- left to right (cf. 'liftM2').
--- liftM4  :: (Monad m) => (a1 -> a2 -> a3 -> a4 -> r) -> m a1 -> m a2 -> m a3 -> m a4 -> m r
--- liftM4 f m1 m2 m3 m4    = do { x1 <- m1; x2 <- m2; x3 <- m3; x4 <- m4; return (f x1 x2 x3 x4) }
--- 
--- -- | Promote a function to a monad, scanning the monadic arguments from
--- -- left to right (cf. 'liftM2').
--- liftM5  :: (Monad m) => (a1 -> a2 -> a3 -> a4 -> a5 -> r) -> m a1 -> m a2 -> m a3 -> m a4 -> m a5 -> m r
--- liftM5 f m1 m2 m3 m4 m5 = do { x1 <- m1; x2 <- m2; x3 <- m3; x4 <- m4; x5 <- m5; return (f x1 x2 x3 x4 x5) }
--- 
+
+-- | @'mapM' f@ is equivalent to @'sequence' . 'map' f@.
+mapM :: Monad m => (a -> m b) -> [a] -> m [b]
+{-# INLINE mapM #-}
+mapM f as = foldr k (return []) as
+            where
+              k a r = do { x <- f a; xs <- r; return (x:xs) }
+
+{-
+Note: [sequence and mapM]
+~~~~~~~~~~~~~~~~~~~~~~~~~
+Originally, we defined
+
+mapM f = sequence . map f
+
+This relied on list fusion to produce efficient code for mapM, and led to
+excessive allocation in cryptarithm2. Defining
+
+sequence = mapM id
+
+relies only on inlining a tiny function (id) and beta reduction, which tends to
+be a more reliable aspect of simplification. Indeed, this does not lead to
+similar problems in nofib.
+-}
+
+-- | Promote a function to a monad.
+liftM   :: (Monad m) => (a1 -> r) -> m a1 -> m r
+liftM f m1              = do { x1 <- m1; return (f x1) }
+
+-- | Promote a function to a monad, scanning the monadic arguments from
+-- left to right.  For example,
+--
+-- >    liftM2 (+) [0,1] [0,2] = [0,2,1,3]
+-- >    liftM2 (+) (Just 1) Nothing = Nothing
+--
+liftM2  :: (Monad m) => (a1 -> a2 -> r) -> m a1 -> m a2 -> m r
+liftM2 f m1 m2          = do { x1 <- m1; x2 <- m2; return (f x1 x2) }
+
+-- | Promote a function to a monad, scanning the monadic arguments from
+-- left to right (cf. 'liftM2').
+liftM3  :: (Monad m) => (a1 -> a2 -> a3 -> r) -> m a1 -> m a2 -> m a3 -> m r
+liftM3 f m1 m2 m3       = do { x1 <- m1; x2 <- m2; x3 <- m3; return (f x1 x2 x3) }
+
+-- | Promote a function to a monad, scanning the monadic arguments from
+-- left to right (cf. 'liftM2').
+liftM4  :: (Monad m) => (a1 -> a2 -> a3 -> a4 -> r) -> m a1 -> m a2 -> m a3 -> m a4 -> m r
+liftM4 f m1 m2 m3 m4    = do { x1 <- m1; x2 <- m2; x3 <- m3; x4 <- m4; return (f x1 x2 x3 x4) }
+
+-- | Promote a function to a monad, scanning the monadic arguments from
+-- left to right (cf. 'liftM2').
+liftM5  :: (Monad m) => (a1 -> a2 -> a3 -> a4 -> a5 -> r) -> m a1 -> m a2 -> m a3 -> m a4 -> m a5 -> m r
+liftM5 f m1 m2 m3 m4 m5 = do { x1 <- m1; x2 <- m2; x3 <- m3; x4 <- m4; x5 <- m5; return (f x1 x2 x3 x4 x5) }
+
 -- {-# INLINEABLE liftM #-}
 -- {-# SPECIALISE liftM :: (a1->r) -> IO a1 -> IO r #-}
 -- {-# SPECIALISE liftM :: (a1->r) -> Maybe a1 -> Maybe r #-}
@@ -746,16 +947,8 @@ mapFB c f = \x ys -> c (f x) ys
 {-# NOINLINE [1] (++) #-}    -- We want the RULE to fire first.
 --                              -- It's recursive, so won't inline anyway,
 --                              -- but saying so is more explicit
-(++) xs ys = 
-    let append [] ys = ys
-        append (x:xs) ys = x : (append xs ys)
-    in case typeIndex# xs `adjStr` xs `adjStr` ys of
-        1# -> strAppend# xs ys
-        2# -> strAppend# xs ys
-        _ -> append xs ys
--- 
--- (++) [] ys = ys
--- (++) (x:xs) ys = x : xs ++ ys
+(++) []     ys = ys
+(++) (x:xs) ys = x : xs ++ ys
 {-# RULES
 "++"    [~1] forall xs ys. xs ++ ys = augment (\c n -> foldr c n xs) ys
   #-}
@@ -1041,3 +1234,31 @@ divModInt# = divModInt#
 -- 
 --   #-}
 
+-- | Non-empty (and non-strict) list type.
+--
+-- @since 4.9.0.0
+data NonEmpty a = a :| [a]
+--   deriving ( Eq, Ord, Show, Read, Data, Generic, Generic1 )
+
+instance Eq a => Eq (NonEmpty a) where
+    x :| xs == y :| ys = x ==y && xs == ys
+
+infixr 5 :|
+
+-- | @since 4.9.0.0
+instance Functor NonEmpty where
+  fmap f (a :| as) = f a :| fmap f as
+  b <$ (_ :| as)   = b   :| (b <$ as)
+
+-- | @since 4.9.0.0
+instance Applicative NonEmpty where
+  pure a = a :| []
+  (<*>) = ap
+  liftA2 = liftM2
+
+-- | @since 4.9.0.0
+instance Monad NonEmpty where
+  (a :| as) >>= f = b :| (bs ++ bs')
+    where b :| bs = f a
+          bs' = as >>= toList . f
+          toList (c :| cs) = c : cs

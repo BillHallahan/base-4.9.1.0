@@ -6,38 +6,41 @@
 -- {-# LANGUAGE ScopedTypeVariables #-}
 -- {-# LANGUAGE Trustworthy         #-}
 -- {-# LANGUAGE TypeOperators       #-}
--- 
--- -----------------------------------------------------------------------------
--- -- |
--- -- Module      :  Data.Semigroup
--- -- Copyright   :  (C) 2011-2015 Edward Kmett
--- -- License     :  BSD-style (see the file LICENSE)
--- --
--- -- Maintainer  :  libraries@haskell.org
--- -- Stability   :  provisional
--- -- Portability :  portable
--- --
--- -- In mathematics, a semigroup is an algebraic structure consisting of a
--- -- set together with an associative binary operation. A semigroup
--- -- generalizes a monoid in that there might not exist an identity
--- -- element. It also (originally) generalized a group (a monoid with all
--- -- inverses) to a type where every element did not have to have an inverse,
--- -- thus the name semigroup.
--- --
--- -- The use of @(\<\>)@ in this module conflicts with an operator with the same
--- -- name that is being exported by Data.Monoid. However, this package
--- -- re-exports (most of) the contents of Data.Monoid, so to use semigroups
--- -- and monoids in the same package just
--- --
--- -- > import Data.Semigroup
--- --
--- -- @since 4.9.0.0
--- ----------------------------------------------------------------------------
--- module Data.Semigroup (
+{-# LANGUAGE BangPatterns, ScopedTypeVariables       #-}
+{-# LANGUAGE MagicHash       #-}
+{-# LANGUAGE NoImplicitPrelude       #-}
+
+-----------------------------------------------------------------------------
+-- |
+-- Module      :  Data.Semigroup
+-- Copyright   :  (C) 2011-2015 Edward Kmett
+-- License     :  BSD-style (see the file LICENSE)
+--
+-- Maintainer  :  libraries@haskell.org
+-- Stability   :  provisional
+-- Portability :  portable
+--
+-- In mathematics, a semigroup is an algebraic structure consisting of a
+-- set together with an associative binary operation. A semigroup
+-- generalizes a monoid in that there might not exist an identity
+-- element. It also (originally) generalized a group (a monoid with all
+-- inverses) to a type where every element did not have to have an inverse,
+-- thus the name semigroup.
+--
+-- The use of @(\<\>)@ in this module conflicts with an operator with the same
+-- name that is being exported by Data.Monoid. However, this package
+-- re-exports (most of) the contents of Data.Monoid, so to use semigroups
+-- and monoids in the same package just
+--
+-- > import Data.Semigroup
+--
+-- @since 4.9.0.0
+----------------------------------------------------------------------------
+module Data.Semigroup (
 --     Semigroup(..)
---   , stimesMonoid
---   , stimesIdempotent
---   , stimesIdempotentMonoid
+    stimesMonoid
+  , stimesIdempotent
+  , stimesIdempotentMonoid
 --   , mtimesDefault
 --   -- * Semigroups
 --   , Min(..)
@@ -47,12 +50,13 @@
 --   , WrappedMonoid(..)
 --   -- * Re-exported monoids from Data.Monoid
 --   , Monoid(..)
---   , Dual(..)
---   , Endo(..)
+  , Dual(..)
+  , Alt(..)
+  , Endo(..)
 --   , All(..)
 --   , Any(..)
---   , Sum(..)
---   , Product(..)
+  , Sum(..)
+  , Product(..)
 --   -- * A better monoid for Maybe
 --   , Option(..)
 --   , option
@@ -63,10 +67,17 @@
 --   , Arg(..)
 --   , ArgMin
 --   , ArgMax
---   ) where
+  ) where
 -- 
 -- import           Prelude             hiding (foldr1)
 -- 
+import GHC.Base hiding (Any)
+import GHC.Enum
+import GHC.Real
+import qualified GHC.List as List
+import GHC.Num
+import Data.Semigroup.Internal
+
 -- import           Control.Applicative
 -- import           Control.Monad
 -- import           Control.Monad.Fix
@@ -217,52 +228,8 @@
 --   stimes = stimesIdempotentMonoid
 -- 
 -- 
--- instance Num a => Semigroup (Sum a) where
---   (<>) = coerce ((+) :: a -> a -> a)
---   stimes n (Sum a) = Sum (fromIntegral n * a)
--- 
--- instance Num a => Semigroup (Product a) where
---   (<>) = coerce ((*) :: a -> a -> a)
---   stimes n (Product a) = Product (a ^ n)
--- 
--- -- | This is a valid definition of 'stimes' for a 'Monoid'.
--- --
--- -- Unlike the default definition of 'stimes', it is defined for 0
--- -- and so it should be preferred where possible.
--- stimesMonoid :: (Integral b, Monoid a) => b -> a -> a
--- stimesMonoid n x0 = case compare n 0 of
---   LT -> errorWithoutStackTrace "stimesMonoid: negative multiplier"
---   EQ -> mempty
---   GT -> f x0 n
---     where
---       f x y
---         | even y = f (x `mappend` x) (y `quot` 2)
---         | y == 1 = x
---         | otherwise = g (x `mappend` x) (pred y  `quot` 2) x
---       g x y z
---         | even y = g (x `mappend` x) (y `quot` 2) z
---         | y == 1 = x `mappend` z
---         | otherwise = g (x `mappend` x) (pred y `quot` 2) (x `mappend` z)
--- 
--- -- | This is a valid definition of 'stimes' for an idempotent 'Monoid'.
--- --
--- -- When @mappend x x = x@, this definition should be preferred, because it
--- -- works in /O(1)/ rather than /O(log n)/
--- stimesIdempotentMonoid :: (Integral b, Monoid a) => b -> a -> a
--- stimesIdempotentMonoid n x = case compare n 0 of
---   LT -> errorWithoutStackTrace "stimesIdempotentMonoid: negative multiplier"
---   EQ -> mempty
---   GT -> x
--- 
--- -- | This is a valid definition of 'stimes' for an idempotent 'Semigroup'.
--- --
--- -- When @x <> x = x@, this definition should be preferred, because it
--- -- works in /O(1)/ rather than /O(log n)/.
--- stimesIdempotent :: Integral b => b -> a -> a
--- stimesIdempotent n x
---   | n <= 0 = errorWithoutStackTrace "stimesIdempotent: positive multiplier expected"
---   | otherwise = x
--- 
+
+
 -- instance Semigroup a => Semigroup (Const a b) where
 --   (<>) = coerce ((<>) :: a -> a -> a)
 --   stimes n (Const a) = Const (stimes n a)

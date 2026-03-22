@@ -62,13 +62,13 @@ module Control.Monad
 -- 
 --     -- ** Monadic lifting operators
 -- 
---     , liftM
---     , liftM2
---     , liftM3
---     , liftM4
---     , liftM5
--- 
---     , ap
+    , liftM
+    , liftM2
+    , liftM3
+    , liftM4
+    , liftM5
+
+    , ap
 -- 
 --     -- ** Strict monadic functions
 -- 
@@ -80,7 +80,7 @@ import Data.Functor ( void, (<$>) )
 -- import Data.Traversable ( forM, mapM, traverse, sequence, sequenceA )
 -- 
 import GHC.Base hiding ( mapM, sequence )
--- import GHC.List ( zipWith, unzip )
+import GHC.List ( zipWith, unzip )
 import GHC.Num  ( zeroInteger, oneInteger, fromInteger, (-) )
 
 -- -- -----------------------------------------------------------------------------
@@ -166,8 +166,8 @@ foldM          :: (Foldable t, Monad m) => (b -> a -> m b) -> b -> t a -> m b
 -- {-# SPECIALISE foldM :: (a -> b -> IO a) -> a -> [b] -> IO a #-}
 -- {-# SPECIALISE foldM :: (a -> b -> Maybe a) -> a -> [b] -> Maybe a #-}
 foldM          = foldlM
--- 
--- -- | Like 'foldM', but discards the result.
+
+-- | Like 'foldM', but discards the result.
 foldM_         :: (Foldable t, Monad m) => (b -> a -> m b) -> b -> t a -> m ()
 {-# INLINEABLE foldM_ #-}
 {-# SPECIALISE foldM_ :: (a -> b -> IO a) -> a -> [b] -> IO () #-}
@@ -223,63 +223,63 @@ replicateM_ cnt0 f =
         | cnt <= fromInteger zeroInteger  = pure ()
         | otherwise = f *> loop (cnt - fromInteger oneInteger)
 
--- 
--- -- | The reverse of 'when'.
--- unless            :: (Applicative f) => Bool -> f () -> f ()
--- {-# INLINEABLE unless #-}
--- {-# SPECIALISE unless :: Bool -> IO () -> IO () #-}
--- {-# SPECIALISE unless :: Bool -> Maybe () -> Maybe () #-}
--- unless p s        =  if p then pure () else s
--- 
--- infixl 4 <$!>
--- 
--- -- | Strict version of 'Data.Functor.<$>'.
--- --
--- -- @since 4.8.0.0
--- (<$!>) :: Monad m => (a -> b) -> m a -> m b
--- {-# INLINE (<$!>) #-}
--- f <$!> m = do
---   x <- m
---   let z = f x
---   z `seq` return z
--- 
--- 
--- -- -----------------------------------------------------------------------------
--- -- Other MonadPlus functions
--- 
--- -- | Direct 'MonadPlus' equivalent of 'filter'
--- -- @'filter'@ = @(mfilter:: (a -> Bool) -> [a] -> [a]@
--- -- applicable to any 'MonadPlus', for example
--- -- @mfilter odd (Just 1) == Just 1@
--- -- @mfilter odd (Just 2) == Nothing@
--- 
--- mfilter :: (MonadPlus m) => (a -> Bool) -> m a -> m a
--- {-# INLINEABLE mfilter #-}
--- mfilter p ma = do
---   a <- ma
---   if p a then return a else mzero
--- 
--- {- $naming
--- 
--- The functions in this library use the following naming conventions:
--- 
--- * A postfix \'@M@\' always stands for a function in the Kleisli category:
---   The monad type constructor @m@ is added to function results
---   (modulo currying) and nowhere else.  So, for example,
--- 
--- >  filter  ::              (a ->   Bool) -> [a] ->   [a]
--- >  filterM :: (Monad m) => (a -> m Bool) -> [a] -> m [a]
--- 
--- * A postfix \'@_@\' changes the result type from @(m a)@ to @(m ())@.
---   Thus, for example:
--- 
--- >  sequence  :: Monad m => [m a] -> m [a]
--- >  sequence_ :: Monad m => [m a] -> m ()
--- 
--- * A prefix \'@m@\' generalizes an existing function to a monadic form.
---   Thus, for example:
--- 
--- >  sum  :: Num a       => [a]   -> a
--- >  msum :: MonadPlus m => [m a] -> m a
--- 
--- -}
+
+-- | The reverse of 'when'.
+unless            :: (Applicative f) => Bool -> f () -> f ()
+{-# INLINEABLE unless #-}
+{-# SPECIALISE unless :: Bool -> IO () -> IO () #-}
+{-# SPECIALISE unless :: Bool -> Maybe () -> Maybe () #-}
+unless p s        =  if p then pure () else s
+
+infixl 4 <$!>
+
+-- | Strict version of 'Data.Functor.<$>'.
+--
+-- @since 4.8.0.0
+(<$!>) :: Monad m => (a -> b) -> m a -> m b
+{-# INLINE (<$!>) #-}
+f <$!> m = do
+  x <- m
+  let z = f x
+  z `seq` return z
+
+
+-----------------------------------------------------------------------------
+-- Other MonadPlus functions
+
+-- | Direct 'MonadPlus' equivalent of 'filter'
+-- @'filter'@ = @(mfilter:: (a -> Bool) -> [a] -> [a]@
+-- applicable to any 'MonadPlus', for example
+-- @mfilter odd (Just 1) == Just 1@
+-- @mfilter odd (Just 2) == Nothing@
+
+mfilter :: (MonadPlus m) => (a -> Bool) -> m a -> m a
+{-# INLINEABLE mfilter #-}
+mfilter p ma = do
+  a <- ma
+  if p a then return a else mzero
+
+{- $naming
+
+The functions in this library use the following naming conventions:
+
+* A postfix \'@M@\' always stands for a function in the Kleisli category:
+  The monad type constructor @m@ is added to function results
+  (modulo currying) and nowhere else.  So, for example,
+
+>  filter  ::              (a ->   Bool) -> [a] ->   [a]
+>  filterM :: (Monad m) => (a -> m Bool) -> [a] -> m [a]
+
+* A postfix \'@_@\' changes the result type from @(m a)@ to @(m ())@.
+  Thus, for example:
+
+>  sequence  :: Monad m => [m a] -> m [a]
+>  sequence_ :: Monad m => [m a] -> m ()
+
+* A prefix \'@m@\' generalizes an existing function to a monadic form.
+  Thus, for example:
+
+>  sum  :: Num a       => [a]   -> a
+>  msum :: MonadPlus m => [m a] -> m a
+
+-}
