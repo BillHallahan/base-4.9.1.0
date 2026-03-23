@@ -973,20 +973,20 @@ all                     :: (a -> Bool) -> [a] -> Bool
 -- #ifdef USE_REPORT_PRELUDE
 -- all p ys                =  let all' _ []        = True
 --                                all' f (x:xs)    = p x && all' p xs
---                                strAll f xs = let !lt = buildLitTable f
+--                                strAll f xs = let !lt = buildLitTable# f
 --                                              in error "not implemented yet"
 --                            in case typeIndex# ys `adjStr` ys of
 --                                1# -> strAll p ys
 --                                2# -> strAll p ys
 --                                _ -> all' p ys
-all f xs = let !lt = buildLitTable f
-           in error "not implemented yet"
+all f xs = let !lt = buildLitTable# f
+           in allByLitTable# lt
 
 -- temporary implementation, for literal table testing purposes
 -- all :: (Char -> Bool) -> String -> Bool
 -- all f xs = case typeRep @a `eqTypeRep` typeRep @Char of
 --                 Just HRefl -> let f' c = f (C# c)
---                                   !lt = buildLitTable f'
+--                                   !lt = buildLitTable# f'
 --                               in error "not implemented yet"
 --                 _ -> error "not a string!"
 -- #else

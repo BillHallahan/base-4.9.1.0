@@ -26,9 +26,12 @@ data LitTable = LitTable
 
 -- Build a mapping of path conditions to literals, and return a reference
 -- to the literal table that was built in G2's internal state
-{-# NOINLINE buildLitTable #-}
-buildLitTable :: forall r (a :: TYPE r) (b :: Type) . (a -> b) -> LitTable
-buildLitTable = buildLitTable
+{-# NOINLINE buildLitTable# #-}
+buildLitTable# :: forall r (a :: TYPE r) (b :: Type) . (a -> b) -> LitTable
+buildLitTable# = buildLitTable#
+
+allByLitTable# :: forall a . a -> Bool
+allByLitTable# = allByLitTable#
 
 {-# NOINLINE ($==#) #-}
 ($==#) :: Int# -> Int# -> Bool
