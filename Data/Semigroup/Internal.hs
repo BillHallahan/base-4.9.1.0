@@ -266,6 +266,9 @@ newtype Sum a = Sum { getSum :: a }
         --          , Num      -- ^ @since base-4.7.0.0
         --          )
 
+instance Eq a => Eq (Sum a) where
+    Sum x == Sum y = x == y
+
 -- | @since base-4.9.0.0
 instance Num a => Semigroup (Sum a) where
         (<>) = coerce ((+) :: a -> a -> a)
