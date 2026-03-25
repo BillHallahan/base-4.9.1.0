@@ -577,6 +577,14 @@ reInter# = reInter#
 reStar# :: [a] -> [a]
 reStar# = reStar#
 
+{-# NOINLINE reRange# #-}
+reRange# :: [a] -> [a] -> [a]
+reRange# = reRange#
+
+{-# NOINLINE reComp# #-}
+reComp# :: [a] -> [a]
+reComp# = reComp#
+
 -- The definition of (&&#) gets overwritten by an SMT construct in G2
 {-# NOINLINE (&&#)  #-}
 (&&#) :: Bool -> Bool -> Bool
