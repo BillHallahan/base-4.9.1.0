@@ -30,7 +30,7 @@ data LitTable = LitTable
 buildLitTable# :: forall r (a :: TYPE r) (b :: Type) . (a -> b) -> LitTable
 buildLitTable# = buildLitTable#
 
-allByLitTable# :: forall a . a -> Bool
+allByLitTable# :: forall a b . a -> [b] -> Bool
 allByLitTable# = allByLitTable#
 
 {-# NOINLINE ($==#) #-}

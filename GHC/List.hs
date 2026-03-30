@@ -980,7 +980,7 @@ all                     :: (a -> Bool) -> [a] -> Bool
 --                                2# -> strAll p ys
 --                                _ -> all' p ys
 all f xs = let !lt = buildLitTable# f
-           in allByLitTable# lt
+           in allByLitTable# lt xs
 
 -- temporary implementation, for literal table testing purposes
 -- all :: (Char -> Bool) -> String -> Bool
