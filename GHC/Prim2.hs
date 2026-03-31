@@ -541,6 +541,14 @@ strReplace# = strReplace#
 strReplaceAll# :: [a] -> [a] -> [a] -> [a]
 strReplaceAll# = strReplaceAll#
 
+{-# NOINLINE strReplaceRe# #-}
+strReplaceRe# :: [a] -> [a] -> [a] -> [a]
+strReplaceRe# = strReplaceRe#
+
+{-# NOINLINE strReplaceReAll# #-}
+strReplaceReAll# :: [a] -> [a] -> [a] -> [a]
+strReplaceReAll# = strReplaceReAll#
+
 {-# NOINLINE inRe# #-}
 inRe# :: [a] -> [a] -> Bool
 inRe# = inRe#
