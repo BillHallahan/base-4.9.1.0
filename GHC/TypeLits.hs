@@ -1,28 +1,28 @@
--- {-# LANGUAGE Trustworthy #-}
--- {-# LANGUAGE DataKinds #-}
--- {-# LANGUAGE KindSignatures #-}
--- {-# LANGUAGE TypeFamilies #-}
--- {-# LANGUAGE TypeOperators #-}
--- {-# LANGUAGE FlexibleInstances #-}
--- {-# LANGUAGE FlexibleContexts #-}
--- {-# LANGUAGE ScopedTypeVariables #-}
--- {-# LANGUAGE ConstraintKinds #-}
--- {-# LANGUAGE ExistentialQuantification #-}
--- {-# LANGUAGE RankNTypes #-}
--- {-# LANGUAGE UndecidableInstances #-}  -- for compiling instances of (==)
--- {-# LANGUAGE NoImplicitPrelude #-}
--- {-# LANGUAGE MagicHash #-}
--- {-# LANGUAGE PolyKinds #-}
--- 
--- {-| This module is an internal GHC module.  It declares the constants used
--- in the implementation of type-level natural numbers.  The programmer interface
--- for working with type-level naturals should be defined in a separate library.
--- 
--- @since 4.6.0.0
--- -}
--- 
--- module GHC.TypeLits
---   ( -- * Kinds
+{-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE UndecidableInstances #-}  -- for compiling instances of (==)
+{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE MagicHash #-}
+{-# LANGUAGE PolyKinds #-}
+
+{-| This module is an internal GHC module.  It declares the constants used
+in the implementation of type-level natural numbers.  The programmer interface
+for working with type-level naturals should be defined in a separate library.
+
+@since 4.6.0.0
+-}
+
+module GHC.TypeLits
+  ( -- * Kinds
 --     Nat, Symbol  -- Both declared in GHC.Types in package ghc-prim
 -- 
 --     -- * Linking type and value level
@@ -40,9 +40,9 @@
 --   -- * User-defined type errors
 --   , TypeError
 --   , ErrorMessage(..)
--- 
---   ) where
--- 
+
+  ) where
+
 -- import GHC.Base(Eq(..), Ord(..), Bool(True,False), Ordering(..), otherwise)
 -- import GHC.Types( Nat, Symbol )
 -- import GHC.Num(Integer)
