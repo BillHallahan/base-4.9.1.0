@@ -682,3 +682,6 @@ checkStrLazy x xs = case x of
                       _ | isSMTRep# xs -> x
                         | evalsToSMTRep# xs -> adjStr' x xs
                       _ -> 0#
+
+usingSMTLams# :: Bool
+usingSMTLams# = False
