@@ -547,12 +547,25 @@ intersperse s xs =
                inter_prop i = s_str `strEq#` strAt# ys ((2# *# i) +# 1#)
             in
             assume len_prop . assume (forAllBoundInt# 0# sl_xs copy_prop) . assume (forAllBoundInt# 0# sl_xs_min_1 inter_prop) $ ys
+         
+         strIntersperseLam =
+            let
+               !s' = s
+               !len = strLen# xs
+               !len_min_1 = len -# 1#
+               !inter_reg = strSubstr# xs 1# len_min_1
+               !first_char = strAt# xs 0#
+               !fold = smtFoldLeft# (\ys x -> ys `strAppend#` [s'] `strAppend#` [x]) [] inter_reg
+            in
+           first_char `strAppend#` fold
 
          intersperse' _   []      = []
          intersperse' sep (x:xs')  = x : prependToAll sep xs'
    in
    case typeIndex# xs `adjStr` xs of
+      1# | usingSMTLams# -> strIntersperseLam
       1# -> strIntersperse
+      2# | usingSMTLams# -> strIntersperseLam
       2# -> strIntersperse
       _ -> intersperse' s xs
 -- 
