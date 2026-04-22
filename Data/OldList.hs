@@ -789,10 +789,19 @@ genericDrop n xs = let
                      genericDrop' _ []        =  []
                      genericDrop' n (_:xs)    =  genericDrop' (n-fromInteger (Z# 1#)) xs
 
-                     I# n' = fromIntegral n
+                     I# k' = fromIntegral n
+
+                     smtDrop =
+                           let
+                              !len = strLen# xs
+                              !comp = 0# $<=# k'
+                              !k'' = iteInt# comp k' 0#
+                           in
+                           strSubstr# xs k'' len
+
                    in case typeIndex# xs `adjStr` xs of
-                     1# -> let !len = strLen# xs in strSubstr# xs n' len
-                     2# -> let !len = strLen# xs in strSubstr# xs n' len
+                     1# -> smtDrop
+                     2# -> smtDrop
                      _ -> genericDrop' n xs
 
 
