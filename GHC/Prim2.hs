@@ -549,6 +549,10 @@ strReplaceRe# = strReplaceRe#
 strReplaceReAll# :: [a] -> [a] -> [a] -> [a]
 strReplaceReAll# = strReplaceReAll#
 
+{-# NOINLINE strReverse# #-}
+strReverse# :: [a] -> [a]
+strReverse# = strReverse#
+
 {-# NOINLINE inRe# #-}
 inRe# :: [a] -> [a] -> Bool
 inRe# = inRe#
@@ -693,3 +697,7 @@ checkStrLazy x xs = case x of
 {-# NOINLINE usingSMTLams# #-}
 usingSMTLams# :: Bool
 usingSMTLams# = False
+
+{-# NOINLINE usingStrReverse# #-}
+usingStrReverse# :: Bool
+usingStrReverse# = False
