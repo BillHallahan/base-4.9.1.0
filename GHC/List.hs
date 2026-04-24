@@ -904,8 +904,11 @@ reverse               xs  =
             strAt# xs i `strEq#` strAt# ys ((strLen# xs -# 1#) -# i)
       in
       assume rev_prop1 (assume (forAllBoundInt# 0# sl_xs rev_prop2) ys)
+    
+    strReverse xs = strReverse# xs
   in
   case typeIndex# xs `adjStr` xs of
+      1# | usingStrReverse# -> strReverse xs
       1# -> strRevQuant
       _ -> foldl (flip (:)) [] xs
 -- #else
