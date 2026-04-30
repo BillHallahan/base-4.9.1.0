@@ -793,10 +793,18 @@ drop k ys =
         drop' n (_:xs)          =  drop' (n-(fromInteger oneInteger)) xs
 
         I# k' = k
+
+        smtDrop =
+            let
+                !len = strLen# ys
+                !comp = 0# $<=# k'
+                !k'' = iteInt# comp k' 0#
+            in
+            strSubstr# ys k'' len
     in
     case typeIndex# ys `adjStr` ys of
-        1# -> let !len = strLen# ys in strSubstr# ys k' len
-        2# -> let !len = strLen# ys in strSubstr# ys k' len
+        1# -> smtDrop
+        2# -> smtDrop
         _ -> drop' k ys
 -- #else /* hack away */
 -- {-# INLINE drop #-}
@@ -899,8 +907,11 @@ reverse               xs  =
             strAt# xs i `strEq#` strAt# ys ((strLen# xs -# 1#) -# i)
       in
       assume rev_prop1 (assume (forAllBoundInt# 0# sl_xs rev_prop2) ys)
+    
+    strReverse xs = strReverse# xs
   in
   case typeIndex# xs `adjStr` xs of
+      1# | usingStrReverse# -> strReverse xs
       1# -> strRevQuant
       _ -> foldl (flip (:)) [] xs
 -- #else

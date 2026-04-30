@@ -66,7 +66,7 @@ smallInteger x = Z# x
 -- 
 integerToWord :: Integer -> Word#
 integerToWord (Z# i) =
-    if i $># 0#
+    if i $>=# 0#
         then integerToWord# i
         else let !i' = integerToWord# i in i' `plusWord#` 18446744073709551615##
 

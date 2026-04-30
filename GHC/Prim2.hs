@@ -549,6 +549,10 @@ strReplaceRe# = strReplaceRe#
 strReplaceReAll# :: [a] -> [a] -> [a] -> [a]
 strReplaceReAll# = strReplaceReAll#
 
+{-# NOINLINE strReverse# #-}
+strReverse# :: [a] -> [a]
+strReverse# = strReverse#
+
 {-# NOINLINE inRe# #-}
 inRe# :: [a] -> [a] -> Bool
 inRe# = inRe#
@@ -621,6 +625,13 @@ forAllBoundInt# :: Int# -- ^ Lower bound
                 -> Bool
 forAllBoundInt# _ _ _ = True
 
+{-# NOINLINE smtFoldLeft#  #-}
+smtFoldLeft# :: (a -> b -> a)
+             -> a
+             -> [b]
+             -> a
+smtFoldLeft# = smtFoldLeft#
+
 {-# NOINLINE assume #-}
 assume :: Bool -> a -> a
 assume b x = x
@@ -682,3 +693,11 @@ checkStrLazy x xs = case x of
                       _ | isSMTRep# xs -> x
                         | evalsToSMTRep# xs -> adjStr' x xs
                       _ -> 0#
+
+{-# NOINLINE usingSMTLams# #-}
+usingSMTLams# :: Bool
+usingSMTLams# = False
+
+{-# NOINLINE usingStrReverse# #-}
+usingStrReverse# :: Bool
+usingStrReverse# = False
