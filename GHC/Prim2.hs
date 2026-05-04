@@ -701,3 +701,7 @@ usingSMTLams# = False
 {-# NOINLINE usingStrReverse# #-}
 usingStrReverse# :: Bool
 usingStrReverse# = False
+
+{-# NOINLINE usingLiteralTables# #-}
+usingLiteralTables# :: Bool
+usingLiteralTables# = False
