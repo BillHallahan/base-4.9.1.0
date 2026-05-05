@@ -487,6 +487,10 @@ strSubstr# = strSubstr#
 strEq# :: [a] -> [a] -> Bool
 strEq# = strEq#
 
+{-# NOINLINE strUnit# #-}
+strUnit# :: a -> [a]
+strUnit# x = [x]
+
 infix 4 `strEq#`
 
 {-# NOINLINE strLt# #-}
