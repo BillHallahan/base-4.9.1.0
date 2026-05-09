@@ -479,6 +479,10 @@ strAppend# = strAppend#
 strAt# :: [a] -> Int# -> [a]
 strAt# = strAt#
 
+{-# NOINLINE seqNthInt# #-}
+seqNthInt# :: [a] -> Int# -> Int#
+seqNthInt# = seqNthInt#
+
 {-# NOINLINE strSubstr# #-}
 strSubstr# :: [a] -> Int# -> Int# -> [a]
 strSubstr# = strSubstr#
