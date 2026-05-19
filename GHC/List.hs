@@ -1,5 +1,4 @@
 {-# LANGUAGE Trustworthy #-}
-{-# LANGUAGE PackageImports #-}
 {-# LANGUAGE CPP, NoImplicitPrelude, ScopedTypeVariables, MagicHash #-}
 {-# LANGUAGE BangPatterns, TypeApplications #-}
 {-# OPTIONS_HADDOCK hide #-}
