@@ -979,7 +979,8 @@ all                     :: (a -> Bool) -> [a] -> Bool
 -- #ifdef USE_REPORT_PRELUDE
 all p ys                =  let all' p = and . map p
                                strAll f xs = let !lt = buildLitTable# f
-                                             in allByLitTable# lt xs
+                                                 !fold = smtFoldLeft# (\acc e -> acc &&# lt e) True xs
+                                             in fold
                            in case typeIndex# ys `adjStr` ys of
                                -- Literal tables only support strings, currently
                                1# | usingSMTLams# && usingLiteralTables# -> strAll p ys
