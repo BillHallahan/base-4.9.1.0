@@ -22,6 +22,12 @@ isSMTRep# = isSMTRep#
 evalsToSMTRep# :: forall a . a -> Bool
 evalsToSMTRep# = evalsToSMTRep#
 
+-- Build a mapping of path conditions to literals, and return a
+-- lambda function that approximates the function passed in
+{-# NOINLINE buildLitTable# #-}
+buildLitTable# :: forall a b . (a -> b) -> a -> b
+buildLitTable# = buildLitTable#
+
 {-# NOINLINE ($==#) #-}
 ($==#) :: Int# -> Int# -> Bool
 ($==#) = ($==#)

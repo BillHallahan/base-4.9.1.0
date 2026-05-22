@@ -30,7 +30,6 @@ module GHC.List (
    concatMap,
    zip, zip3, zipWith, zipWith3, unzip, unzip3,
    errorEmptyList,
--- 
  ) where
 -- 
 import GHC.Maybe
@@ -978,7 +977,15 @@ any p                   =  or . map p
 -- -- value for the predicate applied to an element at a finite index of a finite or infinite list.
 all                     :: (a -> Bool) -> [a] -> Bool
 -- #ifdef USE_REPORT_PRELUDE
-all p                   =  and . map p
+all p ys                =  let all' p = and . map p
+                               strAll f xs = let !lt = buildLitTable# f
+                                                 !fold = smtFoldLeft# (\acc e -> acc &&# lt e) True xs
+                                             in fold
+                           in case typeIndex# ys `adjStr` ys of
+                               -- Literal tables only support strings, currently
+                               1# | usingSMTLams# && usingLiteralTables# -> strAll p ys
+                               -- 2# -> strAll p ys
+                               _ -> all' p ys
 -- #else
 -- all _ []        =  True
 -- all p (x:xs)    =  p x && all p xs
