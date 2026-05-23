@@ -250,12 +250,24 @@ idLength = id
 -- --
 -- -- > filter p xs = [ x | x <- xs, p x]
 -- 
+filter' :: (a -> Bool) -> [a] -> [a]
+filter' _pred []    = []
+filter' pred (x:xs)
+  | pred x         = x : filter' pred xs
+  | otherwise      = filter' pred xs
+
+filterStr :: (a -> Bool) -> [a] -> [a]
+filterStr p xs =
+    let !lt = buildLitTable# p
+        !fold = smtFoldLeft# (\acc e -> ite (lt e) acc (acc `strAppend#` [e])) [] xs
+    in fold
+
 {-# NOINLINE [1] filter #-}
 filter :: (a -> Bool) -> [a] -> [a]
-filter _pred []    = []
-filter pred (x:xs)
-  | pred x         = x : filter pred xs
-  | otherwise      = filter pred xs
+filter p xs =
+    case typeIndex# xs `adjStr` xs of
+        1# | usingSMTLams# && usingLiteralTables# -> filterStr p xs
+        _ -> filter' p xs
 -- 
 {-# NOINLINE [0] filterFB #-}
 filterFB :: (a -> b -> b) -> (a -> Bool) -> a -> b -> b
@@ -689,6 +701,16 @@ dropWhile _ []          =  []
 dropWhile p xs@(x:xs')
             | p x       =  dropWhile p xs'
             | otherwise =  xs
+
+-- dropWhileStr p xs =
+--     let !lt = buildLitTable# p
+--         (!lst, !_) = smtFoldLeft# (\(l, d) e -> if d && lt e then ([], True) else (l ++ [e], False)) ([], True) xs
+--     in lst
+
+-- dropWhile p xs =
+--     case typeIndex# xs `adjStr` xs of
+--         1# | usingSMTLams# && usingLiteralTables# -> dropWhileStr p xs
+--         _ -> dropWhile' p xs
 -- 
 -- -- | 'take' @n@, applied to a list @xs@, returns the prefix of @xs@
 -- -- of length @n@, or @xs@ itself if @n > 'length' xs@:
@@ -958,7 +980,12 @@ or                      =  foldr (||) False
 any                     :: (a -> Bool) -> [a] -> Bool
 -- 
 -- #ifdef USE_REPORT_PRELUDE
-any p                   =  or . map p
+any p ys                =
+    let any' p = or . map p
+        anyStr p = not . all (not . p)
+    in case typeIndex# ys `adjStr` ys of
+           1# | usingSMTLams# && usingLiteralTables# -> anyStr p ys
+           _ -> any' p ys
 -- #else
 -- any _ []        = False
 -- any p (x:xs)    = p x || any p xs
