@@ -259,7 +259,7 @@ filter' pred (x:xs)
 filterStr :: (a -> Bool) -> [a] -> [a]
 filterStr p xs =
     let !lt = buildLitTable# p
-        !fold = smtFoldLeft# (\acc e -> ite (lt e) acc (acc `strAppend#` [e])) [] xs
+        !fold = smtFoldLeft# (\acc e -> ite (lt e) (acc `strAppend#` [e]) acc) [] xs
     in fold
 
 {-# NOINLINE [1] filter #-}
@@ -701,16 +701,6 @@ dropWhile _ []          =  []
 dropWhile p xs@(x:xs')
             | p x       =  dropWhile p xs'
             | otherwise =  xs
-
--- dropWhileStr p xs =
---     let !lt = buildLitTable# p
---         (!lst, !_) = smtFoldLeft# (\(l, d) e -> if d && lt e then ([], True) else (l ++ [e], False)) ([], True) xs
---     in lst
-
--- dropWhile p xs =
---     case typeIndex# xs `adjStr` xs of
---         1# | usingSMTLams# && usingLiteralTables# -> dropWhileStr p xs
---         _ -> dropWhile' p xs
 -- 
 -- -- | 'take' @n@, applied to a list @xs@, returns the prefix of @xs@
 -- -- of length @n@, or @xs@ itself if @n > 'length' xs@:
