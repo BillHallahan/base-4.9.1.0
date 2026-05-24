@@ -1,4 +1,5 @@
 {-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE PackageImports #-}
 {-# LANGUAGE CPP, NoImplicitPrelude, ScopedTypeVariables, MagicHash #-}
 {-# LANGUAGE BangPatterns, TypeApplications #-}
 {-# OPTIONS_HADDOCK hide #-}
@@ -684,11 +685,25 @@ takeWhileFB p c n = \x r -> if p x then x `c` r else n
 -- -- > dropWhile (< 0) [1,2,3] == [1,2,3]
 -- --
 -- 
-dropWhile               :: (a -> Bool) -> [a] -> [a]
-dropWhile _ []          =  []
-dropWhile p xs@(x:xs')
-            | p x       =  dropWhile p xs'
+dropWhile'               :: (a -> Bool) -> [a] -> [a]
+dropWhile' _ []          =  []
+dropWhile' p xs@(x:xs')
+            | p x       =  dropWhile' p xs'
             | otherwise =  xs
+
+dropWhileStr             :: (a -> Bool) -> [a] -> [a]
+dropWhileStr p xs =
+    let !lt = buildLitTable# p
+        -- seq.fold_lefti takes a starting offset, as well. We use -1 (an invalid index)
+        -- to signify that the correct index has not been found yet.
+        !idx = smtFoldLeftI# (\i acc e -> iteInt# ((acc $==# (-1#)) && lt e) i acc) 0# (-1#) xs
+    in ite (idx $==# (-1#)) [] (drop (I# idx) xs)
+
+dropWhile                :: (a -> Bool) -> [a] -> [a]
+dropWhile p xs =
+    case typeIndex# xs `adjStr` xs of
+        1# | usingSMTLams# && usingLiteralTables# -> dropWhileStr p xs
+        _ -> dropWhile' p xs
 -- 
 -- -- | 'take' @n@, applied to a list @xs@, returns the prefix of @xs@
 -- -- of length @n@, or @xs@ itself if @n > 'length' xs@:
