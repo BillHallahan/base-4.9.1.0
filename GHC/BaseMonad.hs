@@ -1,4 +1,4 @@
-{-# LANGUAGE BangPatterns, CPP, KindSignatures,
+{-# LANGUAGE BangPatterns, CPP, KindSignatures, MagicHash,
     NoImplicitPrelude, PackageImports, PolyKinds, RankNTypes,
     DataKinds, PolyKinds #-}
 
@@ -298,7 +298,7 @@ instance Monad ((->) r) where
 --   -- but saying so is more explicit, and silences warnings
 map' :: (a -> b) -> [a] -> [b]
 map' _ []     = []
-map' f (x:xs) = f x : map f xs
+map' f (x:xs) = f x : map' f xs
 
 mapStr :: (a -> b) -> [a] -> [b]
 mapStr f xs =
@@ -308,12 +308,14 @@ mapStr f xs =
 
 {-# NOINLINE [0] map #-}
 map :: (a -> b) -> [a] -> [b]
-map f xs = case typeIndex# (undefined :: [b]) of
-                1# || usingSMTLams# && usingLiteralTables# ->
-                    case typeIndex# xs `adjStr` xs of
-                        1# -> mapStr f xs
-                        _ -> map' f xs
-                _ -> map' f xs
+map = mapStr
+-- These checks are currently broken for some reason
+-- map f xs = case typeIndex# (undefined :: [b]) of
+--                 1# | usingSMTLams# && usingLiteralTables# ->
+--                     case typeIndex# xs `adjStr` xs of
+--                         1# -> mapStr f xs
+--                         _ -> map' f xs
+--                 _ -> map' f xs
 
 instance Functor [] where
     {-# INLINE fmap #-}
