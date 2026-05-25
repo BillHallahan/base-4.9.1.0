@@ -1,4 +1,5 @@
 {-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE PackageImports #-}
 {-# LANGUAGE CPP, NoImplicitPrelude, ScopedTypeVariables, MagicHash #-}
 {-# LANGUAGE BangPatterns, TypeApplications #-}
 {-# OPTIONS_HADDOCK hide #-}
@@ -663,12 +664,27 @@ cycle xs                = xs' where xs' = xs ++ xs'
 -- -- > takeWhile (< 0) [1,2,3] == []
 -- --
 -- 
-{-# NOINLINE [1] takeWhile #-}
-takeWhile               :: (a -> Bool) -> [a] -> [a]
-takeWhile _ []          =  []
-takeWhile p (x:xs)
-            | p x       =  x : takeWhile p xs
+takeWhile'               :: (a -> Bool) -> [a] -> [a]
+takeWhile' _ []          =  []
+takeWhile' p (x:xs)
+            | p x       =  x : takeWhile' p xs
             | otherwise =  []
+
+takeWhileStr p xs =
+    -- Find the first index that doesn't fit the predicate, and take until there. If
+    -- the predicate is never found, return the entire list.
+    let !lt = buildLitTable# (not . p)
+        !len = strLen# xs
+        !idx = smtFoldLeftI# (\i acc e -> iteInt# ((acc $==# len) &&# lt e) i acc) 0# len xs
+        !sub = strSubstr# xs 0# idx
+    in sub
+
+{-# NOINLINE [1] takeWhile #-}
+takeWhile p xs =
+    case typeIndex# xs `adjStr` xs of
+        1# | usingSMTLams# && usingLiteralTables# -> takeWhileStr p xs
+        _ -> takeWhile' p xs
+
 -- 
 {-# INLINE [0] takeWhileFB #-}
 takeWhileFB :: (a -> Bool) -> (a -> b -> b) -> b -> a -> b -> b
@@ -696,11 +712,27 @@ takeWhileFB p c n = \x r -> if p x then x `c` r else n
 -- -- > dropWhile (< 0) [1,2,3] == [1,2,3]
 -- --
 -- 
-dropWhile               :: (a -> Bool) -> [a] -> [a]
-dropWhile _ []          =  []
-dropWhile p xs@(x:xs')
-            | p x       =  dropWhile p xs'
+dropWhile'               :: (a -> Bool) -> [a] -> [a]
+dropWhile' _ []          =  []
+dropWhile' p xs@(x:xs')
+            | p x       =  dropWhile' p xs'
             | otherwise =  xs
+
+dropWhileStr             :: (a -> Bool) -> [a] -> [a]
+dropWhileStr p xs =
+    let !lt = buildLitTable# (not . p)
+        !len = strLen# xs
+        -- seq.fold_lefti takes a starting offset, as well. We use the length (an invalid index)
+        -- to signify that the correct index has not been found yet.
+        !idx = smtFoldLeftI# (\i acc e -> iteInt# ((acc $==# len) &&# lt e) i acc) 0# len xs
+        !sub = strSubstr# xs idx len
+    in sub
+
+dropWhile                :: (a -> Bool) -> [a] -> [a]
+dropWhile p xs =
+    case typeIndex# xs `adjStr` xs of
+        1# | usingSMTLams# && usingLiteralTables# -> dropWhileStr p xs
+        _ -> dropWhile' p xs
 -- 
 -- -- | 'take' @n@, applied to a list @xs@, returns the prefix of @xs@
 -- -- of length @n@, or @xs@ itself if @n > 'length' xs@:

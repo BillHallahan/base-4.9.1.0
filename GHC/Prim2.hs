@@ -26,10 +26,10 @@ import GHC.Prim
 
 #if MIN_VERSION_GLASGOW_HASKELL(9,2,0,0)
 import GHC.Types
-  (Bool (..), Char, Levity, RuntimeRep (..))
+  (Bool (..), Char, Levity, RuntimeRep (..), Type)
 #else
 import GHC.Types
-  (Bool (..), Char, RuntimeRep (..))
+  (Bool (..), Char, RuntimeRep (..), Type)
 #endif
 
 import GHC.PrimSMT
@@ -639,6 +639,15 @@ smtFoldLeft# :: (a -> b -> a)
              -> [b]
              -> a
 smtFoldLeft# = smtFoldLeft#
+
+{-# NOINLINE smtFoldLeftI#  #-}
+smtFoldLeftI# :: forall r (a :: TYPE r) (b :: Type)
+              . (Int# -> a -> b -> a)
+              -> Int#
+              -> a
+              -> [b]
+              -> a
+smtFoldLeftI# = smtFoldLeftI#
 
 {-# NOINLINE assume #-}
 assume :: Bool -> a -> a
