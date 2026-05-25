@@ -293,13 +293,27 @@ instance Monad ((->) r) where
 -- -- > map f [x1, x2, ..., xn] == [f x1, f x2, ..., f xn]
 -- -- > map f [x1, x2, ...] == [f x1, f x2, ...]
 -- 
-map :: (a -> b) -> [a] -> [b]
-{-# NOINLINE [0] map #-}
 --   -- We want the RULEs "map" and "map/coerce" to fire first.
 --   -- map is recursive, so won't inline anyway,
 --   -- but saying so is more explicit, and silences warnings
-map _ []     = []
-map f (x:xs) = f x : map f xs
+map' :: (a -> b) -> [a] -> [b]
+map' _ []     = []
+map' f (x:xs) = f x : map f xs
+
+mapStr :: (a -> b) -> [a] -> [b]
+mapStr f xs =
+    let !lt = buildLitTable# f
+        !mapped = smtMap# lt xs
+    in mapped
+
+{-# NOINLINE [0] map #-}
+map :: (a -> b) -> [a] -> [b]
+map f xs = case typeIndex# (undefined :: [b]) of
+                1# || usingSMTLams# && usingLiteralTables# ->
+                    case typeIndex# xs `adjStr` xs of
+                        1# -> mapStr f xs
+                        _ -> map' f xs
+                _ -> map' f xs
 
 instance Functor [] where
     {-# INLINE fmap #-}
