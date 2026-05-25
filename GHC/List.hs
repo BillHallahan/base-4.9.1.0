@@ -674,9 +674,10 @@ takeWhileStr p xs =
     -- Find the first index that doesn't fit the predicate, and take until there. If
     -- the predicate is never found, return the entire list.
     let !lt = buildLitTable# (not . p)
-        !idx = smtFoldLeftI# (\i acc e -> iteInt# ((acc $==# (-1#)) &&# lt e) i acc) 0# (-1#) xs
+        !len = strLen# xs
+        !idx = smtFoldLeftI# (\i acc e -> iteInt# ((acc $==# len) &&# lt e) i acc) 0# len xs
         !sub = strSubstr# xs 0# idx
-    in ite (idx $==# (-1#)) xs sub
+    in sub
 
 {-# NOINLINE [1] takeWhile #-}
 takeWhile p xs =
@@ -720,12 +721,12 @@ dropWhile' p xs@(x:xs')
 dropWhileStr             :: (a -> Bool) -> [a] -> [a]
 dropWhileStr p xs =
     let !lt = buildLitTable# (not . p)
-        -- seq.fold_lefti takes a starting offset, as well. We use -1 (an invalid index)
-        -- to signify that the correct index has not been found yet.
-        !idx = smtFoldLeftI# (\i acc e -> iteInt# ((acc $==# (-1#)) &&# lt e) i acc) 0# (-1#) xs
         !len = strLen# xs
+        -- seq.fold_lefti takes a starting offset, as well. We use the length (an invalid index)
+        -- to signify that the correct index has not been found yet.
+        !idx = smtFoldLeftI# (\i acc e -> iteInt# ((acc $==# len) &&# lt e) i acc) 0# len xs
         !sub = strSubstr# xs idx len
-    in ite (idx $==# (-1#)) [] sub
+    in sub
 
 dropWhile                :: (a -> Bool) -> [a] -> [a]
 dropWhile p xs =
