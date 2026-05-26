@@ -1,4 +1,4 @@
-{-# LANGUAGE BangPatterns, CPP, KindSignatures, MagicHash,
+{-# LANGUAGE BangPatterns, CPP, KindSignatures, MagicHash, ScopedTypeVariables,
     NoImplicitPrelude, PackageImports, PolyKinds, RankNTypes,
     DataKinds, PolyKinds #-}
 
@@ -307,15 +307,13 @@ mapStr f xs =
     in mapped
 
 {-# NOINLINE [0] map #-}
-map :: (a -> b) -> [a] -> [b]
-map = mapStr
--- These checks are currently broken for some reason
--- map f xs = case typeIndex# (undefined :: [b]) of
---                 1# | usingSMTLams# && usingLiteralTables# ->
---                     case typeIndex# xs `adjStr` xs of
---                         1# -> mapStr f xs
---                         _ -> map' f xs
---                 _ -> map' f xs
+map :: forall a b . (a -> b) -> [a] -> [b]
+map f xs = case typeIndex# (undefined :: [b]) of
+                1# | usingSMTLams# && usingLiteralTables# ->
+                    case typeIndex# xs `adjStr` xs of
+                        1# -> mapStr f xs
+                        _ -> map' f xs
+                _ -> map' f xs
 
 instance Functor [] where
     {-# INLINE fmap #-}
