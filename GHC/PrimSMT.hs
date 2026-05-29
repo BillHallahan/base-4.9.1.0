@@ -1,4 +1,4 @@
-{-# LANGUAGE MagicHash, NoImplicitPrelude, RankNTypes #-}
+{-# LANGUAGE MagicHash, NoImplicitPrelude, RankNTypes, UnboxedTuples #-}
 
 module GHC.PrimSMT where
 

@@ -1,6 +1,6 @@
 {-# LANGUAGE Trustworthy #-}
 {-# LANGUAGE PackageImports #-}
-{-# LANGUAGE CPP, NoImplicitPrelude, ScopedTypeVariables, MagicHash #-}
+{-# LANGUAGE CPP, NoImplicitPrelude, ScopedTypeVariables, MagicHash, UnboxedTuples #-}
 {-# LANGUAGE BangPatterns, TypeApplications #-}
 {-# OPTIONS_HADDOCK hide #-}
 -- 
