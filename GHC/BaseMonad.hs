@@ -75,7 +75,11 @@ const                   :: a -> b -> a
 const x _               =  x
 
 -- -- | @'flip' f@ takes its (first) two arguments in the reverse order of @f@.
+#if MIN_VERSION_GLASGOW_HASKELL(9,12,0,0)
+flip :: forall repc a b (c :: TYPE repc). (a -> b -> c) -> b -> a -> c
+#else
 flip                    :: (a -> b -> c) -> b -> a -> c
+#endif
 flip f x y              =  f y x
 
 -- -- | Application operator.  This operator is redundant, since ordinary
