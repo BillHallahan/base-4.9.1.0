@@ -633,6 +633,10 @@ forAllBoundInt# :: Int# -- ^ Lower bound
                 -> Bool
 forAllBoundInt# _ _ _ = True
 
+{-# NOINLINE smtMap#  #-}
+smtMap# :: (a -> b) -> [a] -> [b]
+smtMap# = smtMap#
+
 {-# NOINLINE smtFoldLeft#  #-}
 smtFoldLeft# :: (a -> b -> a)
              -> a
