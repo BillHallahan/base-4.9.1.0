@@ -259,7 +259,7 @@ filter' pred (x:xs)
 
 filterStr :: (a -> Bool) -> [a] -> [a]
 filterStr p xs =
-    let !(# lt, success #) = buildLitTable# p
+    let !(# !lt, !success #) = buildLitTable# p
         !fold = smtFoldLeft# (\acc e -> ite (lt e) (acc `strAppend#` [e]) acc) [] xs
     in if success then fold else filter' p xs
 
@@ -673,7 +673,7 @@ takeWhile' p (x:xs)
 takeWhileStr p xs =
     -- Find the first index that doesn't fit the predicate, and take until there. If
     -- the predicate is never found, return the entire list.
-    let !(# lt, success #) = buildLitTable# (not . p)
+    let !(# !lt, !success #) = buildLitTable# (not . p)
         !len = strLen# xs
         !idx = smtFoldLeftI# (\i acc e -> iteInt# ((acc $==# len) &&# lt e) i acc) 0# len xs
         !sub = strSubstr# xs 0# idx
@@ -720,7 +720,7 @@ dropWhile' p xs@(x:xs')
 
 dropWhileStr             :: (a -> Bool) -> [a] -> [a]
 dropWhileStr p xs =
-    let !(# lt, success #) = buildLitTable# (not . p)
+    let !(# !lt, !success #) = buildLitTable# (not . p)
         !len = strLen# xs
         -- seq.fold_lefti takes a starting offset, as well. We use the length (an invalid index)
         -- to signify that the correct index has not been found yet.
@@ -1027,7 +1027,7 @@ any p ys                =
 all                     :: (a -> Bool) -> [a] -> Bool
 -- #ifdef USE_REPORT_PRELUDE
 all p ys                =  let all' p = and . map p
-                               strAll f xs = let !(# lt, success #) = buildLitTable# f
+                               strAll f xs = let !(# !lt, !success #) = buildLitTable# f
                                                  !fold = smtFoldLeft# (\acc e -> acc &&# lt e) True xs
                                              in if success then fold else all' f xs
                            in case typeIndex# ys `adjStr` ys of
