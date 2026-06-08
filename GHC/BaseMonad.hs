@@ -1,6 +1,6 @@
 {-# LANGUAGE BangPatterns, CPP, KindSignatures, MagicHash, ScopedTypeVariables,
     NoImplicitPrelude, PackageImports, PolyKinds, RankNTypes,
-    DataKinds, PolyKinds #-}
+    DataKinds, PolyKinds, UnboxedTuples #-}
 
 module GHC.BaseMonad ( String
                      , id
@@ -306,9 +306,11 @@ map' f (x:xs) = f x : map' f xs
 
 mapStr :: (a -> b) -> [a] -> [b]
 mapStr f xs =
-    let !lt = buildLitTable# f
+    let !(# lt_, success_ #) = buildLitTable# f
+        !lt = lt_
+        !success = success_
         !mapped = smtMap# lt xs
-    in mapped
+    in if success then mapped else map' f xs
 
 {-# NOINLINE [0] map #-}
 map :: forall a b . (a -> b) -> [a] -> [b]
