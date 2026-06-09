@@ -319,6 +319,10 @@ map f xs = case typeIndex# (undefined :: [b]) of
                     case typeIndex# xs `adjStr` xs of
                         1# -> mapStr f xs
                         _ -> map' f xs
+                2# | usingSMTLams# && usingLiteralTables# ->
+                    case typeIndex# xs `adjStr` xs of
+                        2# -> mapStr f xs
+                        _ -> map' f xs
                 _ -> map' f xs
 
 instance Functor [] where
