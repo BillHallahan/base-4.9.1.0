@@ -270,6 +270,7 @@ filter :: (a -> Bool) -> [a] -> [a]
 filter p xs =
     case typeIndex# xs `adjStr` xs of
         1# | usingSMTLams# && usingLiteralTables# -> filterStr p xs
+        2# | usingSMTLams# && usingLiteralTables# -> filterStr p xs
         _ -> filter' p xs
 -- 
 {-# NOINLINE [0] filterFB #-}
@@ -687,6 +688,7 @@ takeWhileStr p xs =
 takeWhile p xs =
     case typeIndex# xs `adjStr` xs of
         1# | usingSMTLams# && usingLiteralTables# -> takeWhileStr p xs
+        2# | usingSMTLams# && usingLiteralTables# -> takeWhileStr p xs
         _ -> takeWhile' p xs
 
 -- 
@@ -738,6 +740,7 @@ dropWhile                :: (a -> Bool) -> [a] -> [a]
 dropWhile p xs =
     case typeIndex# xs `adjStr` xs of
         1# | usingSMTLams# && usingLiteralTables# -> dropWhileStr p xs
+        2# | usingSMTLams# && usingLiteralTables# -> dropWhileStr p xs
         _ -> dropWhile' p xs
 -- 
 -- -- | 'take' @n@, applied to a list @xs@, returns the prefix of @xs@
@@ -1013,6 +1016,7 @@ any p ys                =
         anyStr p = not . all (not . p)
     in case typeIndex# ys `adjStr` ys of
            1# | usingSMTLams# && usingLiteralTables# -> anyStr p ys
+           2# | usingSMTLams# && usingLiteralTables# -> anyStr p ys
            _ -> any' p ys
 -- #else
 -- any _ []        = False
@@ -1039,9 +1043,8 @@ all p ys                =  let all' p = and . map p
                                                  !fold = smtFoldLeft# (\acc e -> acc &&# lt e) True xs
                                              in if success then fold else all' f xs
                            in case typeIndex# ys `adjStr` ys of
-                               -- Literal tables only support strings, currently
                                1# | usingSMTLams# && usingLiteralTables# -> strAll p ys
-                               -- 2# -> strAll p ys
+                               2# | usingSMTLams# && usingLiteralTables# -> strAll p ys
                                _ -> all' p ys
 -- #else
 -- all _ []        =  True
