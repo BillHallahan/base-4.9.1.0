@@ -306,11 +306,14 @@ map' f (x:xs) = f x : map' f xs
 
 mapStr :: (a -> b) -> [a] -> [b]
 mapStr f xs =
-    let !(# lt_, success_ #) = buildLitTable# f
+    let !(# (# lt_, success_ #), (# inLT_, partial_ #) #) = buildLitTable# f
         !lt = lt_
         !success = success_
+        !inLT = inLT_
+        !partial = partial_
         !mapped = smtMap# lt xs
-    in if success then mapped else map' f xs
+        !pt_a = if not partial then True else smtFoldLeft# (\acc e -> acc &&# inLT e) True xs
+    in assume pt_a $ if success then mapped else map' f xs
 
 {-# NOINLINE [0] map #-}
 map :: forall a b . (a -> b) -> [a] -> [b]
