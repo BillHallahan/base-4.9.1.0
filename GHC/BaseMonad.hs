@@ -306,7 +306,7 @@ map' f (x:xs) = f x : map' f xs
 
 mapStr :: (a -> b) -> [a] -> [b]
 mapStr f xs =
-    let !(# (# lt_, success_ #), (# inLT_, partial_ #) #) = buildLitTable# f
+    let !(# lt_, (# success_, (# inLT_, partial_ #) #) #) = buildLitTable# f
         !lt = lt_
         !success = success_
         !inLT = inLT_

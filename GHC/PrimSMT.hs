@@ -27,7 +27,7 @@ evalsToSMTRep# = evalsToSMTRep#
 -- The extra returned values are: Errored, Is part of table
 -- (for partial tables), Is a partial table
 {-# NOINLINE buildLitTable# #-}
-buildLitTable# :: forall a b . (a -> b) -> (# (# a -> b, Bool #), (# a -> Bool, Bool #) #)
+buildLitTable# :: forall a b . (a -> b) -> (# a -> b, (# Bool, (# a -> Bool, Bool #) #) #)
 buildLitTable# = buildLitTable#
 
 {-# NOINLINE ($==#) #-}

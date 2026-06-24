@@ -259,7 +259,7 @@ filter' pred (x:xs)
 
 filterStr :: (a -> Bool) -> [a] -> [a]
 filterStr p xs =
-    let !(# (# lt_, success_ #), (# inLT_, partial_ #) #) = buildLitTable# p
+    let !(# lt_, (# success_, (# inLT_, partial_ #) #) #) = buildLitTable# p
         !lt = lt_
         !success = success_
         !inLT = inLT_
@@ -679,7 +679,7 @@ takeWhile' p (x:xs)
 takeWhileStr p xs =
     -- Find the first index that doesn't fit the predicate, and take until there. If
     -- the predicate is never found, return the entire list.
-    let !(# (# lt_, success_ #), (# inLT_, partial_ #) #) = buildLitTable# (not . p)
+    let !(# lt_, (# success_, (# inLT_, partial_ #) #) #) = buildLitTable# (not . p)
         !lt = lt_
         !success = success_
         !inLT = inLT_
@@ -732,7 +732,7 @@ dropWhile' p xs@(x:xs')
 
 dropWhileStr             :: (a -> Bool) -> [a] -> [a]
 dropWhileStr p xs =
-    let !(# (# lt_, success_ #), (# inLT_, partial_ #) #) = buildLitTable# (not . p)
+    let !(# lt_, (# success_, (# inLT_, partial_ #) #) #) = buildLitTable# (not . p)
         !lt = lt_
         !success = success_
         !inLT = inLT_
@@ -1039,24 +1039,30 @@ any p ys                =
 --  #-}
 -- #endif
 -- 
+
+all' :: (a -> Bool) -> [a] -> Bool
+all' p = and . map p
+
+allStr :: (a -> Bool) -> [a] -> Bool
+allStr f xs =
+    let !(# lt_, (# success_, (# inLT_, partial_ #) #) #) = buildLitTable# f
+        !lt = lt_
+        !success = success_
+        !inLT = inLT_
+        !partial = partial_
+        !fold = smtFoldLeft# (\acc e -> acc &&# lt e) True xs
+        !pt_a = if not partial then True else smtFoldLeft# (\acc e -> acc &&# inLT e) True xs
+    in assume pt_a $ if success then fold else all' f xs
+
 -- -- | Applied to a predicate and a list, 'all' determines if all elements
 -- -- of the list satisfy the predicate. For the result to be
 -- -- 'True', the list must be finite; 'False', however, results from a 'False'
 -- -- value for the predicate applied to an element at a finite index of a finite or infinite list.
 all                     :: (a -> Bool) -> [a] -> Bool
 -- #ifdef USE_REPORT_PRELUDE
-all p ys                =  let all' p = and . map p
-                               strAll f xs = let !(# (# lt_, success_ #), (# inLT_, partial_ #) #) = buildLitTable# f
-                                                 !lt = lt_
-                                                 !success = success_
-                                                 !inLT = inLT_
-                                                 !partial = partial_
-                                                 !fold = smtFoldLeft# (\acc e -> acc &&# lt e) True xs
-                                                 !pt_a = if not partial then True else smtFoldLeft# (\acc e -> acc &&# inLT e) True xs
-                                             in assume pt_a $ if success then fold else all' f xs
-                           in case typeIndex# ys `adjStr` ys of
-                               1# | usingSMTLams# && usingLiteralTables# -> strAll p ys
-                               2# | usingSMTLams# && usingLiteralTables# -> strAll p ys
+all p ys                =  case typeIndex# ys `adjStr` ys of
+                               1# | usingSMTLams# && usingLiteralTables# -> allStr p ys
+                               2# | usingSMTLams# && usingLiteralTables# -> allStr p ys
                                _ -> all' p ys
 -- #else
 -- all _ []        =  True
