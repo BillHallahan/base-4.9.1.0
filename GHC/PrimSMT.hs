@@ -23,9 +23,11 @@ evalsToSMTRep# :: forall a . a -> Bool
 evalsToSMTRep# = evalsToSMTRep#
 
 -- Build a mapping of path conditions to literals, and return a
--- lambda function that approximates the function passed in
+-- lambda function that approximates the function passed in.
+-- The extra returned values are: Errored, Is part of table
+-- (for partial tables), Is a partial table
 {-# NOINLINE buildLitTable# #-}
-buildLitTable# :: forall a b . (a -> b) -> (# a -> b, Bool #)
+buildLitTable# :: forall a b . (a -> b) -> (# a -> b, (# Bool, (# a -> Bool, Bool #) #) #)
 buildLitTable# = buildLitTable#
 
 {-# NOINLINE ($==#) #-}
