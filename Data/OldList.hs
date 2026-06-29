@@ -1,4 +1,4 @@
-{-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE Trustworthy, UnboxedTuples #-}
 {-# LANGUAGE CPP, NoImplicitPrelude, ScopedTypeVariables, TypeApplications, MagicHash, BangPatterns #-}
 -- 
 -- -----------------------------------------------------------------------------
@@ -319,8 +319,29 @@ elemIndices x xs  =
 -- | The 'find' function takes a predicate and a list and returns the
 -- first element in the list matching the predicate, or 'Nothing' if
 -- there is no such element.
-find            :: (a -> Bool) -> [a] -> Maybe a
-find p          = listToMaybe . filter p
+find'           :: (a -> Bool) -> [a] -> Maybe a
+find' p         = listToMaybe . filter p
+
+findStr :: (a -> Bool) -> [a] -> Maybe a
+findStr p xs =
+    let !(# lt_, (# success_, (# inLT_, partial_ #) #) #) = buildLitTable# p
+        !lt = lt_
+        !success = success_
+        !inLT = inLT_
+        !partial = partial_
+        !len = strLen# xs
+        !idx = smtFoldLeftI# (\i acc e -> iteInt# ((acc $==# len) &&# lt e) i acc) 0# len xs
+        !pt_a = if not partial then True else smtFoldLeft# (\acc e -> acc &&# inLT e) True xs
+        total_idx i = case strAt# xs i of
+                          (h:_) -> Just h
+                          _ -> Nothing
+    in assume pt_a $ if success then total_idx idx else find' p xs
+
+find :: (a -> Bool) -> [a] -> Maybe a
+find p xs = case typeIndex# xs `adjStr` xs of
+                1# | usingSMTLams# && usingLiteralTables# -> findStr p xs
+                2# | usingSMTLams# && usingLiteralTables# -> findStr p xs
+                _ -> find' p xs
 
 -- | The 'findIndex' function takes a predicate and a list and returns
 -- the index of the first element in the list satisfying the predicate,
