@@ -48,7 +48,7 @@ module Data.Foldable (
     minimumBy,
 --     -- ** Searches
     notElem,
---     find
+    find
     ) where
 -- 
 -- import Data.Bool
@@ -606,8 +606,8 @@ notElem x = not . elem x
 -- -- | The 'find' function takes a predicate and a structure and returns
 -- -- the leftmost element of the structure matching the predicate, or
 -- -- 'Nothing' if there is no such element.
--- find :: Foldable t => (a -> Bool) -> t a -> Maybe a
--- find p = getFirst . foldMap (\ x -> First (if p x then Just x else Nothing))
+find :: Foldable t => (a -> Bool) -> t a -> Maybe a
+find p = getFirst . foldMap (\ x -> First (if p x then Just x else Nothing))
 -- 
 -- -- See Note [Function coercion]
 (#.) :: Coercible b c => (b -> c) -> (a -> b) -> (a -> c)
