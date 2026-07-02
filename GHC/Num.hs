@@ -133,7 +133,7 @@ absInt n = if n `geInt` (fromInteger zeroInteger) then n else negate n
 signumInt :: Int -> Int
 signumInt n | n `ltInt` (fromInteger zeroInteger) = negate (fromInteger oneInteger)
             | n `eqInt` (fromInteger zeroInteger) = fromInteger zeroInteger
-            | otherwise   = fromInteger oneInteger
+signumInt _ = fromInteger oneInteger
 
 {-# NOINLINE fromIntegerInt #-}
 fromIntegerInt :: Integer -> Int
