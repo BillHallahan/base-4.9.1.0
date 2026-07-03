@@ -30,6 +30,10 @@ evalsToSMTRep# = evalsToSMTRep#
 buildLitTable# :: forall a b . (a -> b) -> (# a -> b, (# Bool, (# a -> Bool, Bool #) #) #)
 buildLitTable# = buildLitTable#
 
+{-# NOINLINE notBool# #-}
+notBool# :: Bool -> Bool
+notBool# = notBool#
+
 {-# NOINLINE ($==#) #-}
 ($==#) :: Int# -> Int# -> Bool
 ($==#) = ($==#)
