@@ -264,7 +264,8 @@ filterStr p xs =
         !success = success_
         !inLT = inLT_
         !partial = partial_
-        !fold = smtFoldLeft# (\acc e -> ite (lt e) (acc `strAppend#` [e]) acc) [] xs
+        !fold = smtMapConcat# (\e -> ite (lt e) [e] []) xs
+        -- !fold = smtFoldLeft# (\acc e -> ite (lt e) (acc `strAppend#` [e]) acc) [] xs
         !pt_a = if not partial then True else smtFoldLeft# (\acc e -> acc &&# inLT e) True xs
     in assume pt_a $ if success then fold else filter' p xs
 

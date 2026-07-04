@@ -637,6 +637,14 @@ forAllBoundInt# _ _ _ = True
 smtMap# :: (a -> b) -> [a] -> [b]
 smtMap# = smtMap#
 
+{-# NOINLINE smtMapConcat#  #-}
+smtMapConcat# :: (a -> [b]) -> [a] -> [b]
+smtMapConcat# = smtMapConcat#
+
+{-# NOINLINE smtMapConcatI#  #-}
+smtMapConcatI# :: (Int# -> a -> [b]) -> [a] -> [b]
+smtMapConcatI# = smtMapConcatI#
+
 {-# NOINLINE smtFoldLeft#  #-}
 smtFoldLeft# :: (a -> b -> a)
              -> a
