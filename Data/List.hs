@@ -216,7 +216,7 @@ import Data.OldList hiding (
     concat,
     concatMap,
     elem,
-   --  find,
+    find,
     foldl,
     foldl1,
     foldl',

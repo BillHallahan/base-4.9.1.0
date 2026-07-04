@@ -1,4 +1,4 @@
-{-# LANGUAGE Trustworthy #-}
+{-# LANGUAGE Trustworthy, UnboxedTuples #-}
 {-# LANGUAGE CPP, NoImplicitPrelude, ScopedTypeVariables, TypeApplications, MagicHash, BangPatterns #-}
 -- 
 -- -----------------------------------------------------------------------------
@@ -319,20 +319,80 @@ elemIndices x xs  =
 -- | The 'find' function takes a predicate and a list and returns the
 -- first element in the list matching the predicate, or 'Nothing' if
 -- there is no such element.
-find            :: (a -> Bool) -> [a] -> Maybe a
-find p          = listToMaybe . filter p
+find'           :: (a -> Bool) -> [a] -> Maybe a
+find' p         = listToMaybe . filter p
+
+findStr :: (a -> Bool) -> [a] -> Maybe a
+findStr p xs =
+    let !(# lt_, (# success_, (# inLT_, partial_ #) #) #) = buildLitTable# p
+        !lt = lt_
+        !success = success_
+        !inLT = inLT_
+        !partial = partial_
+        !len = strLen# xs
+        !idx = smtFoldLeftI# (\i acc e -> iteInt# ((acc $==# len) &&# lt e) i acc) 0# len xs
+        !pt_a = if not partial then True else smtFoldLeft# (\acc e -> acc &&# inLT e) True xs
+        total_idx i = case strAt# xs i of
+                          (h:_) -> Just h
+                          _ -> Nothing
+    in assume pt_a $ if success then total_idx idx else find' p xs
+
+find :: (a -> Bool) -> [a] -> Maybe a
+find p xs = case typeIndex# xs `adjStr` xs of
+                1# | usingSMTLams# && usingLiteralTables# -> findStr p xs
+                2# | usingSMTLams# && usingLiteralTables# -> findStr p xs
+                _ -> find' p xs
 
 -- | The 'findIndex' function takes a predicate and a list and returns
 -- the index of the first element in the list satisfying the predicate,
 -- or 'Nothing' if there is no such element.
+findIndex'      :: (a -> Bool) -> [a] -> Maybe Int
+findIndex' p    = listToMaybe . findIndices p
+
+findIndexStr :: (a -> Bool) -> [a] -> Maybe Int
+findIndexStr p xs =
+    let !(# lt_, (# success_, (# inLT_, partial_ #) #) #) = buildLitTable# p
+        !lt = lt_
+        !success = success_
+        !inLT = inLT_
+        !partial = partial_
+        !len = strLen# xs
+        !idx = smtFoldLeftI# (\i acc e -> iteInt# ((acc $==# len) &&# lt e) i acc) 0# len xs
+        !pt_a = if not partial then True else smtFoldLeft# (\acc e -> acc &&# inLT e) True xs
+        is_real_idx i = case i $==# len of
+                            True -> Nothing
+                            False -> Just (I# i)
+    in assume pt_a $ if success then is_real_idx idx else findIndex' p xs
+
 findIndex       :: (a -> Bool) -> [a] -> Maybe Int
-findIndex p     = listToMaybe . findIndices p
+findIndex p xs = case typeIndex# xs `adjStr` xs of
+                     1# | usingSMTLams# && usingLiteralTables# -> findIndexStr p xs
+                     2# | usingSMTLams# && usingLiteralTables# -> findIndexStr p xs
+                     _ -> findIndex' p xs
 
 -- | The 'findIndices' function extends 'findIndex', by returning the
 -- indices of all elements satisfying the predicate, in ascending order.
+findIndices'      :: (a -> Bool) -> [a] -> [Int]
+findIndices' p xs = [ i | (x,i) <- zip xs [0..], p x]
+
+findIndicesStr :: (a -> Bool) -> [a] -> [Int]
+findIndicesStr p xs =
+    let !(# lt_, (# success_, (# inLT_, partial_ #) #) #) = buildLitTable# p
+        !lt = lt_
+        !success = success_
+        !inLT = inLT_
+        !partial = partial_
+        !fold = smtFoldLeftI# (\i acc e -> ite (lt e) (acc `strAppend#` [I# i]) acc) 0# [] xs
+        !pt_a = if not partial then True else smtFoldLeft# (\acc e -> acc &&# inLT e) True xs
+    in assume pt_a $ if success then fold else findIndices' p xs
+
 findIndices      :: (a -> Bool) -> [a] -> [Int]
+findIndices p xs = case typeIndex# xs `adjStr` xs of
+                       1# | usingSMTLams# && usingLiteralTables# -> findIndicesStr p xs
+                       2# | usingSMTLams# && usingLiteralTables# -> findIndicesStr p xs
+                       _ -> findIndices' p xs
 -- #ifdef USE_REPORT_PRELUDE
-findIndices p xs = [ i | (x,i) <- zip xs [0..], p x]
+-- findIndices p xs = [ i | (x,i) <- zip xs [0..], p x]
 -- #else
 -- Efficient definition, adapted from Data.Sequence
 -- {-# INLINE findIndices #-}
