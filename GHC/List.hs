@@ -264,10 +264,9 @@ filterStr p xs =
         !success = success_
         !inLT = inLT_
         !partial = partial_
-        !fold = smtMapConcat# (\e -> ite (lt e) [e] []) xs
-        -- !fold = smtFoldLeft# (\acc e -> ite (lt e) (acc `strAppend#` [e]) acc) [] xs
+        !res = smtMapConcat# (\e -> ite (lt e) [e] []) xs
         !pt_a = if not partial then True else smtFoldLeft# (\acc e -> acc &&# inLT e) True xs
-    in assume pt_a $ if success then fold else filter' p xs
+    in assume pt_a $ if success then res else filter' p xs
 
 {-# NOINLINE [1] filter #-}
 filter :: (a -> Bool) -> [a] -> [a]
@@ -1063,11 +1062,10 @@ allStr f xs =
         !success = success_
         !inLT = inLT_
         !partial = partial_
-        -- !fold = smtFoldLeft# (\acc e -> acc &&# lt e) True xs
         !mapped = smtMap# lt xs
-        !fold = not $ strContains# mapped [False]
+        !res = not $ strContains# mapped [False]
         !pt_a = if not partial then True else smtFoldLeft# (\acc e -> acc &&# inLT e) True xs
-    in assume pt_a $ if success then fold else all' f xs
+    in assume pt_a $ if success then res else all' f xs
 
 -- -- | Applied to a predicate and a list, 'all' determines if all elements
 -- -- of the list satisfy the predicate. For the result to be
@@ -1152,7 +1150,7 @@ lookup  key ((x,y):xys)
 -- -- | Map a function over a list and concatenate the results.
 concatMap               :: (a -> [b]) -> [a] -> [b]
 concatMap f             =  foldr ((++) . f) []
--- 
+--
 {-# NOINLINE [1] concatMap #-}
 -- 
 {-# RULES
