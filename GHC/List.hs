@@ -1062,8 +1062,9 @@ allStr f xs =
         !success = success_
         !inLT = inLT_
         !partial = partial_
-        !mapped = smtMap# lt xs
-        !res = not $ strContains# mapped [False]
+        -- !mapped = smtMap# lt xs
+        -- !res = not $ strContains# mapped [False]
+        !res = smtFoldLeft# (\acc e -> acc &&# lt e) True xs
         !pt_a = if not partial then True else smtFoldLeft# (\acc e -> acc &&# inLT e) True xs
     in assume pt_a $ if success then res else all' f xs
 
