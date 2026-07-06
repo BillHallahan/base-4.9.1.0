@@ -438,8 +438,9 @@ False || x              =  x
 -- 
 -- -- | Boolean \"not\"
 not                     :: Bool -> Bool
-not True                =  False
-not False               =  True
+not !x = not# x
+-- not True                =  False
+-- not False               =  True
 -- 
 -- 
 -- ------------------------------------------------------------------------

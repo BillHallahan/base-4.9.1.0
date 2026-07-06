@@ -298,6 +298,10 @@ decPartFloat# = decPartFloat#
 -- tanhFloat# :: Float# -> Float#
 -- tanhFloat# = tanhFloat#
 
+{-# NOINLINE not# #-}
+not# :: Bool -> Bool
+not# = not#
+
 -- Char#
 
 eqChar# :: Char# -> Char# -> Int#
