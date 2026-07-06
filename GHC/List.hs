@@ -690,7 +690,7 @@ takeWhileStr p xs =
         !zs_fst = strAt# zs 0#
         prop_append_eq = xs `strEq#` ys_zs
         prop_ys = smtFoldLeft# (\acc e -> acc &&# lt e) True ys
-        prop_zs = smtFoldLeft# (\acc e -> acc &&# notBool# (lt e)) True zs_fst
+        prop_zs = smtFoldLeft# (\acc e -> acc &&# not (lt e)) True zs_fst
 
         !pt_a = if not partial then True else smtFoldLeft# (\acc e -> acc &&# inLT e) True xs
 
@@ -751,7 +751,7 @@ dropWhileStr p xs =
         !zs_fst = strAt# zs 0#
         prop_append_eq = xs `strEq#` ys_zs
         prop_ys = smtFoldLeft# (\acc e -> acc &&# lt e) True ys
-        prop_zs = smtFoldLeft# (\acc e -> acc &&# notBool# (lt e)) True zs_fst
+        prop_zs = smtFoldLeft# (\acc e -> acc &&# not (lt e)) True zs_fst
 
         !pt_a = if not partial then True else smtFoldLeft# (\acc e -> acc &&# inLT e) True xs
 

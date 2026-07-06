@@ -336,7 +336,7 @@ findStr p xs =
         !zs_fst = strAt# zs 0#
         prop_append_eq = xs `strEq#` ys_zs
         prop_ys = smtFoldLeft# (\acc e -> acc &&# lt e) True ys
-        prop_zs = smtFoldLeft# (\acc e -> acc &&# notBool# (lt e)) True zs_fst
+        prop_zs = smtFoldLeft# (\acc e -> acc &&# not (lt e)) True zs_fst
         res = case zs of
             [] -> Nothing
             (h:_) -> if not $ lt h then Just h else Nothing
