@@ -264,9 +264,9 @@ filterStr p xs =
         !success = success_
         !inLT = inLT_
         !partial = partial_
-        !fold = smtFoldLeft# (\acc e -> ite (lt e) (acc `strAppend#` [e]) acc) [] xs
+        !res = smtMapConcat# (\e -> ite (lt e) [e] []) xs
         !pt_a = if not partial then True else smtFoldLeft# (\acc e -> acc &&# inLT e) True xs
-    in assume pt_a $ if success then fold else filter' p xs
+    in assume pt_a $ if success then res else filter' p xs
 
 {-# NOINLINE [1] filter #-}
 filter :: (a -> Bool) -> [a] -> [a]
@@ -670,27 +670,34 @@ cycle xs                = xs' where xs' = xs ++ xs'
 -- -- > takeWhile (< 0) [1,2,3] == []
 -- --
 -- 
-takeWhile'               :: (a -> Bool) -> [a] -> [a]
+takeWhile' :: (a -> Bool) -> [a] -> [a]
 takeWhile' _ []          =  []
 takeWhile' p (x:xs)
             | p x       =  x : takeWhile' p xs
             | otherwise =  []
 
+takeWhileStr :: forall a . (a -> Bool) -> [a] -> [a]
 takeWhileStr p xs =
-    -- Find the first index that doesn't fit the predicate, and take until there. If
-    -- the predicate is never found, return the entire list.
-    let !(# lt_, (# success_, (# inLT_, partial_ #) #) #) = buildLitTable# (not . p)
+    let !(# lt_, (# success_, (# inLT_, partial_ #) #) #) = buildLitTable# p
         !lt = lt_
         !success = success_
         !inLT = inLT_
         !partial = partial_
-        !len = strLen# xs
-        !idx = smtFoldLeftI# (\i acc e -> iteInt# ((acc $==# len) &&# lt e) i acc) 0# len xs
-        !sub = strSubstr# xs 0# idx
+
+        !ys = symgen @[a]
+        !zs = symgen @[a]
+        !ys_zs = ys `strAppend#` zs
+        !zs_fst = strAt# zs 0#
+        prop_append_eq = xs `strEq#` ys_zs
+        prop_ys = smtFoldLeft# (\acc e -> acc &&# lt e) True ys
+        prop_zs = smtFoldLeft# (\acc e -> acc &&# not (lt e)) True zs_fst
+
         !pt_a = if not partial then True else smtFoldLeft# (\acc e -> acc &&# inLT e) True xs
-    in assume pt_a $ if success then sub else takeWhile' p xs
+
+    in assume pt_a $ if success then (assume prop_append_eq . assume prop_ys . assume prop_zs) ys else takeWhile' p xs
 
 {-# NOINLINE [1] takeWhile #-}
+takeWhile :: (a -> Bool) -> [a] -> [a]
 takeWhile p xs =
     case typeIndex# xs `adjStr` xs of
         1# | usingSMTLams# && usingLiteralTables# -> takeWhileStr p xs
@@ -724,28 +731,33 @@ takeWhileFB p c n = \x r -> if p x then x `c` r else n
 -- -- > dropWhile (< 0) [1,2,3] == [1,2,3]
 -- --
 -- 
-dropWhile'               :: (a -> Bool) -> [a] -> [a]
+dropWhile'               :: forall a . (a -> Bool) -> [a] -> [a]
 dropWhile' _ []          =  []
 dropWhile' p xs@(x:xs')
             | p x       =  dropWhile' p xs'
             | otherwise =  xs
 
-dropWhileStr             :: (a -> Bool) -> [a] -> [a]
+dropWhileStr             :: forall a . (a -> Bool) -> [a] -> [a]
 dropWhileStr p xs =
-    let !(# lt_, (# success_, (# inLT_, partial_ #) #) #) = buildLitTable# (not . p)
+    let !(# lt_, (# success_, (# inLT_, partial_ #) #) #) = buildLitTable# p
         !lt = lt_
         !success = success_
         !inLT = inLT_
         !partial = partial_
-        !len = strLen# xs
-        -- seq.fold_lefti takes a starting offset, as well. We use the length (an invalid index)
-        -- to signify that the correct index has not been found yet.
-        !idx = smtFoldLeftI# (\i acc e -> iteInt# ((acc $==# len) &&# lt e) i acc) 0# len xs
-        !sub = strSubstr# xs idx len
-        !pt_a = if not partial then True else smtFoldLeft# (\acc e -> acc &&# inLT e) True xs
-    in assume pt_a $ if success then sub else dropWhile' p xs
 
-dropWhile                :: (a -> Bool) -> [a] -> [a]
+        !ys = symgen @[a]
+        !zs = symgen @[a]
+        !ys_zs = ys `strAppend#` zs
+        !zs_fst = strAt# zs 0#
+        prop_append_eq = xs `strEq#` ys_zs
+        prop_ys = smtFoldLeft# (\acc e -> acc &&# lt e) True ys
+        prop_zs = smtFoldLeft# (\acc e -> acc &&# not (lt e)) True zs_fst
+
+        !pt_a = if not partial then True else smtFoldLeft# (\acc e -> acc &&# inLT e) True xs
+
+    in assume pt_a $ if success then (assume prop_append_eq . assume prop_ys . assume prop_zs) zs else dropWhile' p xs
+
+dropWhile                :: forall a . (a -> Bool) -> [a] -> [a]
 dropWhile p xs =
     case typeIndex# xs `adjStr` xs of
         1# | usingSMTLams# && usingLiteralTables# -> dropWhileStr p xs
@@ -1050,9 +1062,11 @@ allStr f xs =
         !success = success_
         !inLT = inLT_
         !partial = partial_
-        !fold = smtFoldLeft# (\acc e -> acc &&# lt e) True xs
+        -- !mapped = smtMap# lt xs
+        -- !res = not $ strContains# mapped [False]
+        !res = smtFoldLeft# (\acc e -> acc &&# lt e) True xs
         !pt_a = if not partial then True else smtFoldLeft# (\acc e -> acc &&# inLT e) True xs
-    in assume pt_a $ if success then fold else all' f xs
+    in assume pt_a $ if success then res else all' f xs
 
 -- -- | Applied to a predicate and a list, 'all' determines if all elements
 -- -- of the list satisfy the predicate. For the result to be
@@ -1137,7 +1151,7 @@ lookup  key ((x,y):xys)
 -- -- | Map a function over a list and concatenate the results.
 concatMap               :: (a -> [b]) -> [a] -> [b]
 concatMap f             =  foldr ((++) . f) []
--- 
+--
 {-# NOINLINE [1] concatMap #-}
 -- 
 {-# RULES
