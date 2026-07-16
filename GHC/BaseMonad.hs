@@ -317,13 +317,13 @@ mapStr f xs =
 
 {-# NOINLINE [0] map #-}
 map :: forall a b . (a -> b) -> [a] -> [b]
-map f xs = case typeIndex# (undefined :: [b]) of
+map f xs = case typeIndex# xs of
                 1# | usingSMTLams# && usingLiteralTables# ->
-                    case typeIndex# xs `adjStr` xs of
+                    case typeIndex# (undefined :: [b]) `adjStr` xs of
                         1# -> mapStr f xs
                         _ -> map' f xs
                 2# | usingSMTLams# && usingLiteralTables# ->
-                    case typeIndex# xs `adjStr` xs of
+                    case typeIndex# (undefined :: [b]) `adjStr` xs of
                         2# -> mapStr f xs
                         _ -> map' f xs
                 _ -> map' f xs
