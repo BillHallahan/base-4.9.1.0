@@ -259,11 +259,7 @@ filter' pred (x:xs)
 
 filterStr :: (a -> Bool) -> [a] -> [a]
 filterStr p xs =
-    let !(# lt_, (# success_, (# inLT_, partial_ #) #) #) = buildLitTable# p
-        !lt = lt_
-        !success = success_
-        !inLT = inLT_
-        !partial = partial_
+    let !(LTI lt success inLT partial) = buildLitTable# p
         !res = smtMapConcat# (\e -> ite (lt e) [e] []) xs
         !pt_a = if not partial then True else smtFoldLeft# (\acc e -> acc &&# inLT e) True xs
     in assume pt_a $ if success then res else filter' p xs
@@ -678,11 +674,7 @@ takeWhile' p (x:xs)
 
 takeWhileStr :: forall a . (a -> Bool) -> [a] -> [a]
 takeWhileStr p xs =
-    let !(# lt_, (# success_, (# inLT_, partial_ #) #) #) = buildLitTable# p
-        !lt = lt_
-        !success = success_
-        !inLT = inLT_
-        !partial = partial_
+    let !(LTI lt success inLT partial) = buildLitTable# p
 
         !ys = symgen @[a]
         !zs = symgen @[a]
@@ -739,11 +731,7 @@ dropWhile' p xs@(x:xs')
 
 dropWhileStr             :: forall a . (a -> Bool) -> [a] -> [a]
 dropWhileStr p xs =
-    let !(# lt_, (# success_, (# inLT_, partial_ #) #) #) = buildLitTable# p
-        !lt = lt_
-        !success = success_
-        !inLT = inLT_
-        !partial = partial_
+    let !(LTI lt success inLT partial) = buildLitTable# p
 
         !ys = symgen @[a]
         !zs = symgen @[a]
@@ -1057,11 +1045,7 @@ all' p = and . map p
 
 allStr :: (a -> Bool) -> [a] -> Bool
 allStr f xs =
-    let !(# lt_, (# success_, (# inLT_, partial_ #) #) #) = buildLitTable# f
-        !lt = lt_
-        !success = success_
-        !inLT = inLT_
-        !partial = partial_
+    let !(LTI lt success inLT partial) = buildLitTable# f
         -- !mapped = smtMap# lt xs
         -- !res = not $ strContains# mapped [False]
         !res = smtFoldLeft# (\acc e -> acc &&# lt e) True xs

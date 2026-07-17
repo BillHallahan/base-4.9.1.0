@@ -324,11 +324,7 @@ find' p         = listToMaybe . filter p
 
 findStr :: forall a . (a -> Bool) -> [a] -> Maybe a
 findStr p xs =
-    let !(# lt_, (# success_, (# inLT_, partial_ #) #) #) = buildLitTable# (not . p)
-        !lt = lt_
-        !success = success_
-        !inLT = inLT_
-        !partial = partial_
+    let !(LTI lt success inLT partial) = buildLitTable# (not . p)
 
         !ys = symgen @[a]
         !zs = symgen @[a]
@@ -364,11 +360,7 @@ findIndices' p xs = [ i | (x,i) <- zip xs [0..], p x]
 
 findIndicesStr :: (a -> Bool) -> [a] -> [Int]
 findIndicesStr p xs =
-    let !(# lt_, (# success_, (# inLT_, partial_ #) #) #) = buildLitTable# p
-        !lt = lt_
-        !success = success_
-        !inLT = inLT_
-        !partial = partial_
+    let !(LTI lt success inLT partial) = buildLitTable# p
         !res = smtMapConcatI# (\i e -> ite (lt e) [I# i] []) xs
         !pt_a = if not partial then True else smtFoldLeft# (\acc e -> acc &&# inLT e) True xs
     in assume pt_a $ if success then res else findIndices' p xs
