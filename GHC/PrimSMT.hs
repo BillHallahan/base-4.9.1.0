@@ -22,12 +22,17 @@ isSMTRep# = isSMTRep#
 evalsToSMTRep# :: forall a . a -> Bool
 evalsToSMTRep# = evalsToSMTRep#
 
+
+data LitTableInfo a b = LTI { lit_table :: !(a -> b)
+                            , lt_success :: !Bool
+                            , lt_partial :: !(a -> Bool)
+                            , lt_is_partial :: !Bool }
 -- Build a mapping of path conditions to literals, and return a
 -- lambda function that approximates the function passed in.
 -- The extra returned values are: Errored, Is part of table
 -- (for partial tables), Is a partial table
 {-# NOINLINE buildLitTable# #-}
-buildLitTable# :: forall a b . (a -> b) -> (# a -> b, (# Bool, (# a -> Bool, Bool #) #) #)
+buildLitTable# :: forall a b . (a -> b) -> LitTableInfo a b
 buildLitTable# = buildLitTable#
 
 {-# NOINLINE ($==#) #-}
