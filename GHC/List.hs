@@ -982,9 +982,18 @@ reverse               xs  =
 -- -- | 'and' returns the conjunction of a Boolean list.  For the result to be
 -- -- 'True', the list must be finite; 'False', however, results from a 'False'
 -- -- value at a finite index of a finite or infinite list.
-and                     :: [Bool] -> Bool
+seqAnd :: [Bool] -> Bool
+seqAnd xs = smtFoldLeft# (\acc e -> acc &&# e) True xs
+
+and' :: [Bool] -> Bool
+and' =  foldr (&&) True
+
+and :: [Bool] -> Bool
 -- #ifdef USE_REPORT_PRELUDE
-and                     =  foldr (&&) True
+and xs = case typeIndex# xs `adjStr` xs of
+             1# | usingSMTLams# -> seqAnd xs
+             2# | usingSMTLams# -> seqAnd xs
+             _ -> and' xs
 -- #else
 -- and []          =  True
 -- and (x:xs)      =  x && and xs
@@ -999,9 +1008,20 @@ and                     =  foldr (&&) True
 -- -- | 'or' returns the disjunction of a Boolean list.  For the result to be
 -- -- 'False', the list must be finite; 'True', however, results from a 'True'
 -- -- value at a finite index of a finite or infinite list.
-or                      :: [Bool] -> Bool
+seqOr :: [Bool] -> Bool
+seqOr xs = smtFoldLeft# (\acc e -> acc ||# e) False xs
+
+or' :: [Bool] -> Bool
+or' = foldr (||) False
+
+or :: [Bool] -> Bool
 -- #ifdef USE_REPORT_PRELUDE
-or                      =  foldr (||) False
+or xs = case typeIndex# xs `adjStr` xs of
+            -- Note: probably won't ever return 1 since that corresponds to Char,
+            -- but for consistency, we have both
+            1# | usingSMTLams# -> seqOr xs
+            2# | usingSMTLams# -> seqOr xs
+            _ -> or' xs
 -- #else
 -- or []           =  False
 -- or (x:xs)       =  x || or xs
