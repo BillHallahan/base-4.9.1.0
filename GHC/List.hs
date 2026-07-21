@@ -923,8 +923,8 @@ splitAt n xs           =
 -- --
 -- -- 'span' @p xs@ is equivalent to @('takeWhile' p xs, 'dropWhile' p xs)@
 -- 
-seqSpan :: forall a . (a -> Bool) -> [a] -> ([a],[a])
-seqSpan p xs =
+spanSeq :: forall a . (a -> Bool) -> [a] -> ([a],[a])
+spanSeq p xs =
      let !(LTI lt success inLT partial) = buildLitTable# p
 
          !ys = symgen @[a]
@@ -947,8 +947,8 @@ span' p xs@(x:xs')
 
 span :: (a -> Bool) -> [a] -> ([a],[a])
 span p xs = case typeIndex# xs `adjStr` xs of
-                1# | usingSMTLams# && usingLiteralTables# -> seqSpan p xs
-                2# | usingSMTLams# && usingLiteralTables# -> seqSpan p xs
+                1# | usingSMTLams# && usingLiteralTables# -> spanSeq p xs
+                2# | usingSMTLams# && usingLiteralTables# -> spanSeq p xs
                 _ -> span' p xs
 
 -- 
@@ -1005,8 +1005,8 @@ reverse               xs  =
 -- -- | 'and' returns the conjunction of a Boolean list.  For the result to be
 -- -- 'True', the list must be finite; 'False', however, results from a 'False'
 -- -- value at a finite index of a finite or infinite list.
-seqAnd :: [Bool] -> Bool
-seqAnd xs = smtFoldLeft# (\acc e -> acc &&# e) True xs
+andSeq :: [Bool] -> Bool
+andSeq xs = smtFoldLeft# (\acc e -> acc &&# e) True xs
 
 and' :: [Bool] -> Bool
 and' =  foldr (&&) True
@@ -1014,8 +1014,8 @@ and' =  foldr (&&) True
 and :: [Bool] -> Bool
 -- #ifdef USE_REPORT_PRELUDE
 and xs = case typeIndex# xs `adjStr` xs of
-             1# | usingSMTLams# -> seqAnd xs
-             2# | usingSMTLams# -> seqAnd xs
+             1# | usingSMTLams# -> andSeq xs
+             2# | usingSMTLams# -> andSeq xs
              _ -> and' xs
 -- #else
 -- and []          =  True
@@ -1031,8 +1031,8 @@ and xs = case typeIndex# xs `adjStr` xs of
 -- -- | 'or' returns the disjunction of a Boolean list.  For the result to be
 -- -- 'False', the list must be finite; 'True', however, results from a 'True'
 -- -- value at a finite index of a finite or infinite list.
-seqOr :: [Bool] -> Bool
-seqOr xs = smtFoldLeft# (\acc e -> acc ||# e) False xs
+orSeq :: [Bool] -> Bool
+orSeq xs = smtFoldLeft# (\acc e -> acc ||# e) False xs
 
 or' :: [Bool] -> Bool
 or' = foldr (||) False
@@ -1042,8 +1042,8 @@ or :: [Bool] -> Bool
 or xs = case typeIndex# xs `adjStr` xs of
             -- Note: probably won't ever return 1 since that corresponds to Char,
             -- but for consistency, we have both
-            1# | usingSMTLams# -> seqOr xs
-            2# | usingSMTLams# -> seqOr xs
+            1# | usingSMTLams# -> orSeq xs
+            2# | usingSMTLams# -> orSeq xs
             _ -> or' xs
 -- #else
 -- or []           =  False
