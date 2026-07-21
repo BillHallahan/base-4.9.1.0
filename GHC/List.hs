@@ -923,11 +923,34 @@ splitAt n xs           =
 -- --
 -- -- 'span' @p xs@ is equivalent to @('takeWhile' p xs, 'dropWhile' p xs)@
 -- 
-span                    :: (a -> Bool) -> [a] -> ([a],[a])
-span _ xs@[]            =  (xs, xs)
-span p xs@(x:xs')
-         | p x          =  let (ys,zs) = span p xs' in (x:ys,zs)
-         | otherwise    =  ([],xs)
+seqSpan :: forall a . (a -> Bool) -> [a] -> ([a],[a])
+seqSpan p xs =
+     let !(LTI lt success inLT partial) = buildLitTable# p
+
+         !ys = symgen @[a]
+         !zs = symgen @[a]
+         !ys_zs = ys `strAppend#` zs
+         !zs_fst = strAt# zs 0#
+         prop_append_eq = xs `strEq#` ys_zs
+         prop_ys = smtFoldLeft# (\acc e -> acc &&# lt e) True ys
+         prop_zs = smtFoldLeft# (\acc e -> acc &&# not (lt e)) True zs_fst
+
+         !pt_a = if not partial then True else smtFoldLeft# (\acc e -> acc &&# inLT e) True xs
+
+     in assume pt_a $ if success then (assume prop_append_eq . assume prop_ys . assume prop_zs) (ys, zs) else span' p xs
+
+span' :: (a -> Bool) -> [a] -> ([a],[a])
+span' _ xs@[] = (xs, xs)
+span' p xs@(x:xs')
+         | p x =  let (ys,zs) = span' p xs' in (x:ys,zs)
+         | otherwise = ([],xs)
+
+span :: (a -> Bool) -> [a] -> ([a],[a])
+span p xs = case typeIndex# xs `adjStr` xs of
+                1# | usingSMTLams# && usingLiteralTables# -> seqSpan p xs
+                2# | usingSMTLams# && usingLiteralTables# -> seqSpan p xs
+                _ -> span' p xs
+
 -- 
 -- -- | 'break', applied to a predicate @p@ and a list @xs@, returns a tuple where
 -- -- first element is longest prefix (possibly empty) of @xs@ of elements that
