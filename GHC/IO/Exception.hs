@@ -390,10 +390,18 @@ untangle coded message
     coded_str = "" -- unpackCStringUtf8# coded
 
     (location, details)
-      = case (span not_bar coded_str) of { (loc, rest) ->
+      = case (span' not_bar coded_str) of { (loc, rest) ->
         case rest of
           ('|':det) -> (loc, ' ' : det)
           _         -> (loc, "")
         }
     not_bar c = c /= '|'
+
+    -- Note: we use this version instead of the GHC.List
+    -- version to avoid issues with symbolic variables
+    -- in verification tests
+    span' _ xs@[] = (xs, xs)
+    span' p xs@(x:xs')
+             | p x =  let (ys,zs) = span' p xs' in (x:ys,zs)
+             | otherwise = ([],xs)
 
