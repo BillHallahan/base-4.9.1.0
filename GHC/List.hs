@@ -923,11 +923,34 @@ splitAt n xs           =
 -- --
 -- -- 'span' @p xs@ is equivalent to @('takeWhile' p xs, 'dropWhile' p xs)@
 -- 
-span                    :: (a -> Bool) -> [a] -> ([a],[a])
-span _ xs@[]            =  (xs, xs)
-span p xs@(x:xs')
-         | p x          =  let (ys,zs) = span p xs' in (x:ys,zs)
-         | otherwise    =  ([],xs)
+spanSeq :: forall a . (a -> Bool) -> [a] -> ([a],[a])
+spanSeq p xs =
+     let !(LTI lt success inLT partial) = buildLitTable# p
+
+         !ys = symgen @[a]
+         !zs = symgen @[a]
+         !ys_zs = ys `strAppend#` zs
+         !zs_fst = strAt# zs 0#
+         prop_append_eq = xs `strEq#` ys_zs
+         prop_ys = smtFoldLeft# (\acc e -> acc &&# lt e) True ys
+         prop_zs = smtFoldLeft# (\acc e -> acc &&# not (lt e)) True zs_fst
+
+         !pt_a = if not partial then True else smtFoldLeft# (\acc e -> acc &&# inLT e) True xs
+
+     in assume pt_a $ if success then (assume prop_append_eq . assume prop_ys . assume prop_zs) (ys, zs) else span' p xs
+
+span' :: (a -> Bool) -> [a] -> ([a],[a])
+span' _ xs@[] = (xs, xs)
+span' p xs@(x:xs')
+         | p x =  let (ys,zs) = span' p xs' in (x:ys,zs)
+         | otherwise = ([],xs)
+
+span :: (a -> Bool) -> [a] -> ([a],[a])
+span p xs = case typeIndex# xs `adjStr` xs of
+                1# | usingSMTLams# && usingLiteralTables# -> spanSeq p xs
+                2# | usingSMTLams# && usingLiteralTables# -> spanSeq p xs
+                _ -> span' p xs
+
 -- 
 -- -- | 'break', applied to a predicate @p@ and a list @xs@, returns a tuple where
 -- -- first element is longest prefix (possibly empty) of @xs@ of elements that
@@ -982,9 +1005,18 @@ reverse               xs  =
 -- -- | 'and' returns the conjunction of a Boolean list.  For the result to be
 -- -- 'True', the list must be finite; 'False', however, results from a 'False'
 -- -- value at a finite index of a finite or infinite list.
-and                     :: [Bool] -> Bool
+andSeq :: [Bool] -> Bool
+andSeq xs = smtFoldLeft# (\acc e -> acc &&# e) True xs
+
+and' :: [Bool] -> Bool
+and' =  foldr (&&) True
+
+and :: [Bool] -> Bool
 -- #ifdef USE_REPORT_PRELUDE
-and                     =  foldr (&&) True
+and xs = case typeIndex# xs `adjStr` xs of
+             1# | usingSMTLams# -> andSeq xs
+             2# | usingSMTLams# -> andSeq xs
+             _ -> and' xs
 -- #else
 -- and []          =  True
 -- and (x:xs)      =  x && and xs
@@ -999,9 +1031,20 @@ and                     =  foldr (&&) True
 -- -- | 'or' returns the disjunction of a Boolean list.  For the result to be
 -- -- 'False', the list must be finite; 'True', however, results from a 'True'
 -- -- value at a finite index of a finite or infinite list.
-or                      :: [Bool] -> Bool
+orSeq :: [Bool] -> Bool
+orSeq xs = smtFoldLeft# (\acc e -> acc ||# e) False xs
+
+or' :: [Bool] -> Bool
+or' = foldr (||) False
+
+or :: [Bool] -> Bool
 -- #ifdef USE_REPORT_PRELUDE
-or                      =  foldr (||) False
+or xs = case typeIndex# xs `adjStr` xs of
+            -- Note: probably won't ever return 1 since that corresponds to Char,
+            -- but for consistency, we have both
+            1# | usingSMTLams# -> orSeq xs
+            2# | usingSMTLams# -> orSeq xs
+            _ -> or' xs
 -- #else
 -- or []           =  False
 -- or (x:xs)       =  x || or xs
