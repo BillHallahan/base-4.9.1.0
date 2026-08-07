@@ -565,6 +565,10 @@ strReplaceReAll# = strReplaceReAll#
 strReverse# :: [a] -> [a]
 strReverse# = strReverse#
 
+{-# NOINLINE strUpdate# #-}
+strUpdate# :: [a] -> [a]
+strUpdate# = strUpdate#
+
 {-# NOINLINE inRe# #-}
 inRe# :: [a] -> [a] -> Bool
 inRe# = inRe#
