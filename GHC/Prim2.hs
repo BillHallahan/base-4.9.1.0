@@ -720,7 +720,11 @@ adjStr' x xs = case x of 0# -> x; _ -> go xs
     go xs | isSMTRep# xs = x
     go !xs | isSMTRep# xs = x
     go [] = x
-    go ((!x):xs) = go xs
+    go (x:xs) = force# x (go xs)
+
+{-# NOINLINE force# #-}
+force# :: a -> Int# -> Int#
+force# _ x = x
 
 -- Check if a string can be used in the SMT solver, but do not force its evaluation
 {-# NOINLINE checkStrLazy #-}
