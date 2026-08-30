@@ -726,6 +726,10 @@ adjStr' x xs = case x of 0# -> x; _ -> go xs
 force# :: a -> Int# -> Int#
 force# _ x = x
 
+{-# NOINLINE force## #-}
+force## :: a -> b -> b
+force## _ x = x
+
 -- Check if a string can be used in the SMT solver, but do not force its evaluation
 {-# NOINLINE checkStrLazy #-}
 checkStrLazy :: forall a . Int# -> [a] -> Int#
