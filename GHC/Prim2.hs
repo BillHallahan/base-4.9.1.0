@@ -634,6 +634,10 @@ _ ==> _ = True
 
 infix 1 ==>
 
+{-# NOINLINE exists# #-}
+exists# :: (a -> Bool) -> Bool
+exists# _ = True
+
 {-# NOINLINE forAllBoundInt#  #-}
 forAllBoundInt# :: Int# -- ^ Lower bound
                 -> Int# -- ^ Upper bound
@@ -725,6 +729,10 @@ adjStr' x xs = case x of 0# -> x; _ -> go xs
 {-# NOINLINE force# #-}
 force# :: a -> Int# -> Int#
 force# _ x = x
+
+{-# NOINLINE force## #-}
+force## :: a -> b -> b
+force## _ x = x
 
 -- Check if a string can be used in the SMT solver, but do not force its evaluation
 {-# NOINLINE checkStrLazy #-}
