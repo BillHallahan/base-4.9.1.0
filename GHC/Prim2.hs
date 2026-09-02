@@ -634,6 +634,10 @@ _ ==> _ = True
 
 infix 1 ==>
 
+{-# NOINLINE exists# #-}
+exists# :: (a -> Bool) -> Bool
+exists# _ = True
+
 {-# NOINLINE forAllBoundInt#  #-}
 forAllBoundInt# :: Int# -- ^ Lower bound
                 -> Int# -- ^ Upper bound
