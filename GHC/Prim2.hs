@@ -746,3 +746,6 @@ usingStrReverse# = False
 {-# NOINLINE usingLiteralTables# #-}
 usingLiteralTables# :: Bool
 usingLiteralTables# = False
+
+true# :: Bool
+true# = True
