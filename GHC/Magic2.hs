@@ -4,6 +4,7 @@
 {-# LANGUAGE MagicHash #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE UnboxedTuples #-}
+{-# LANGUAGE KindSignatures #-}
 
 module GHC.Magic2
   ( module GHC.Magic2
